@@ -15,8 +15,11 @@ class CreateAcceleratorsTable extends Migration
     {
         Schema::create('accelerators', function (Blueprint $table) {
             $table->increments('id');
-			$table->integer('nest_id')->unsigned();
-			$table->boolean('is_revoked')->default(false);
+            $table->integer('contract_id')->unsigned();
+            $table->enum('type', ['invite', 'community_B', 'community_C']);
+			$table->integer('eggs')->unsigned();
+			$table->integer('productor_id')->unsigned();
+            $table->date('effective_date')->nullable();
             $table->timestamps();
         });
     }

@@ -13,11 +13,11 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('api', function() {
-	Route::post('/login', 'Api\AuthenticateController@login');
-	Route::get('/logout', 'Api\AuthenticateController@logout');
 
-	Route::middleware('jwt.auth', function() {
+Route::get('/nest', 'Api\NestsController@nest');
+Route::post('/login', 'Api\AuthenticateController@login');
+Route::get('/logout', 'Api\AuthenticateController@logout');
 
-	});
+Route::group(['middleware' => 'jwt.auth'], function () {
+	Route::get('/user', 'Api\UsersController@user');
 });

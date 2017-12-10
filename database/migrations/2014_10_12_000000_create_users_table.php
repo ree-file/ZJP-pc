@@ -21,7 +21,7 @@ class CreateUsersTable extends Migration
 			$table->decimal('money_active', 10, 2)->default(0);
 			$table->decimal('money_limit', 10, 2)->default(0);
 			$table->decimal('money_market', 10, 2)->default(0);
-			$table->boolean('is_admin')->default(false);
+			$table->boolean('is_freezed')->default(true);
             $table->rememberToken();
             $table->timestamps();
         });

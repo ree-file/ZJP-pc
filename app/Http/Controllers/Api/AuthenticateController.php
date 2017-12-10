@@ -12,22 +12,22 @@ class AuthenticateController extends ApiController
 		$credentials = request()->only('email', 'password');
 
 		try {
-			if (! $token = JWTAuth::attempts($credentials)) {
+			if (! $token = JWTAuth::attempt($credentials)) {
 				return $this->failed('Unauthroized', 401);
 			}
 		} catch (JWTException $e) {
 			return $this->failed('Could not create token.', 500);
 		}
 
-		$cookie = new Cookie('jwt_token', $token, config('jwt.ttl'));
+		$cookie = cookie('jwt_token', $token, config('jwt.ttl'));
 
 		return $this->created()->withCookie($cookie);
 	}
 
 	public function logout()
 	{
-		$cookie = Cookie::forget('jwt_cookie');
+		$cookie = Cookie::forget('jwt_token');
 
-		return response()->withCookie($cookie);
+		return $this->message('Log out.')->withCookie($cookie);
 	}
 }

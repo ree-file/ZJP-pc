@@ -14,4 +14,14 @@ class Accelerator extends Model
 	{
 		return $this->belongsTo('App\Nest');
 	}
+
+	public function contract()
+	{
+		return $this->belongsTo('App\Contract');
+	}
+
+	public function productor()
+	{
+		return $this->belongsTo('App\Contract', 'productor_id');
+	}
 }
