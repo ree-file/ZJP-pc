@@ -2,15 +2,18 @@
 
 namespace App\Http\Middleware;
 
+
 use Closure;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Token;
+use App\Traits\ApiResponse;
 
 class ApiAuthenticate
 {
+	use ApiResponse;
     /**
      * Handle an incoming request.
      *
@@ -25,13 +28,13 @@ class ApiAuthenticate
 			$token = new Token($jwt_token);
 			$payload = JWTAuth::decode($token);
 			Auth::loginUsingId($payload['sub']);
-		} catch(\Exceptiontion $e) {
+		} catch(\Exception $e) {
     		$cookie = Cookie::forget('jwt_token');
 
 			if ($e instanceof TokenExpiredException) {
-				return response('Token expired.', 401)->withCookie($cookie);
+				return $this->failed('Token expired.', 401)->withCookie($cookie);
 			}
-			return response('Invalid token.', 401)->withCookie($cookie);
+			return $this->failed('Invalid token.', 401)->withCookie($cookie);
 		}
 
         return $next($request);

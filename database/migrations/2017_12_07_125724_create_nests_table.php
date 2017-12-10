@@ -15,11 +15,11 @@ class CreateNestsTable extends Migration
     {
         Schema::create('nests', function (Blueprint $table) {
             $table->increments('id');
+			$table->string('name');
 			$table->integer('user_id')->unsigned();
 			$table->integer('parent_id')->unsigned()->default(0);
-			$table->enum('type', ['basic', 'started', 'advanced', 'excellent']);
+			$table->integer('inviter_id')->unsigned()->default(0);
 			$table->enum('community', ['A', 'B', 'C']);
-			$table->integer('eggs_hatched')->default(0);
             $table->timestamps();
         });
     }
