@@ -25,7 +25,7 @@ class Nest extends Model
 		return $this->hasMany('App\Nest', 'inviter_id');
 	}
 
-	public function childrens()
+	public function children()
 	{
 		return $this->hasMany('App\Nest', 'parent_id');
 	}
@@ -38,5 +38,10 @@ class Nest extends Model
 	public function parent()
 	{
 		return $this->belongsTo('App\Nest', 'parent_id');
+	}
+
+	public function contract()
+	{
+		return $this->hasOne('App\Contract');
 	}
 }

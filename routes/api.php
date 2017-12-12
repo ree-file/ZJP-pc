@@ -21,3 +21,8 @@ Route::get('/logout', 'Api\AuthenticateController@logout');
 Route::group(['middleware' => 'jwt.auth'], function () {
 	Route::get('/user', 'Api\UsersController@user');
 });
+
+Route::group(['middleware' => 'login'], function () {
+	Route::get('/nests/{id}', 'Api\NestsController@getNests');
+});
+

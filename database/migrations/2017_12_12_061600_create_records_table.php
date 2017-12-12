@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateAcceleratorsTable extends Migration
+class CreateRecordsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,13 @@ class CreateAcceleratorsTable extends Migration
      */
     public function up()
     {
-        Schema::create('accelerators', function (Blueprint $table) {
+        Schema::create('records', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('contract_id')->unsigned();
-            $table->enum('type', ['invite', 'community_B', 'community_C']);
-			$table->integer('eggs')->unsigned();
-			$table->integer('productor_id')->unsigned();
-            $table->date('effective_date')->nullable();
+            $table->string('model')->nullable();
+            $table->string('tag')->nullable();
+            $table->string('message');
+            $table->string('affected_id')->nullable();
+            $table->string('creator_id')->nullable();
             $table->timestamps();
         });
     }
@@ -31,6 +31,6 @@ class CreateAcceleratorsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('accelerators');
+        Schema::dropIfExists('records');
     }
 }

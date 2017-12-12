@@ -11,5 +11,14 @@ Route::group([
 ], function (Router $router) {
 
     $router->get('/', 'HomeController@index');
-	$router->resource('users', UsersController::class);
+
+	$router->resources([
+		'users' => UsersController::class,
+		'cards' => CardsController::class,
+		'nests' => NestsController::class,
+		'contracts' => ContractsController::class
+	]);
+
+	$router->get('/api/users', 'CardsController@users');
+	$router->get('/api/nests', 'NestsController@nests');
 });

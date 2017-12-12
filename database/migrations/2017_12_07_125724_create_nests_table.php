@@ -15,7 +15,7 @@ class CreateNestsTable extends Migration
     {
         Schema::create('nests', function (Blueprint $table) {
             $table->increments('id');
-			$table->string('name');
+			$table->string('name')->unique();
 			$table->integer('user_id')->unsigned();
 			$table->integer('parent_id')->unsigned()->default(0);
 			$table->integer('inviter_id')->unsigned()->default(0);
