@@ -4,6 +4,10 @@
 		'rate' => [
 			'invite' => 0.06,
 			'communtyB' => 0.06,
-			'communtyC' => 0.06
+			'communtyC' => 0.06,
+			'limit' => 0.2
+		],
+		'card' => [
+			'max' => 3
 		]
 	];
