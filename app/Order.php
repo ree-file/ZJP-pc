@@ -15,14 +15,14 @@ class Order extends Model
 		return $this->belongsTo('App\User');
 	}
 
-	public function accelerators()
+	public function nest()
 	{
-		return $this->hasMany('App\Accelerator');
+		return $this->belongsTo('App\Nest');
 	}
 
-	public function scopeProcessing($query)
+	public function scopeSelling($query)
 	{
-		return $query->where('status', 'processing');
+		return $query->where('status', 'selling');
 	}
 
 	public function scopeFinished($query)

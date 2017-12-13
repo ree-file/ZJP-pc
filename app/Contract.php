@@ -12,4 +12,9 @@ class Contract extends Model
 	{
 		return $this->belongsTo('App\Nest');
 	}
+
+	public function scopeLatest($query)
+	{
+		return $query->orderBy('id', 'desc')->take(1);
+	}
 }

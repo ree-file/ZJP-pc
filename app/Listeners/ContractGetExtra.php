@@ -32,7 +32,7 @@ class ContractGetExtra
 
 		if ($contract->nest->inviter != null) {
 			$inviter_id = $contract->nest->inviter->id;
-			$cont = Contract::where('nest_id', $inviter_id)->orderBy('id', 'desc')->take(1)->first();
+			$cont = Contract::where('nest_id', $inviter_id)->latest()->first();
 			if (!$cont->is_finished) {
 				$cont->from_receivers = $cont->from_receivers + $eggs * config('zjp.rate.invite');
 				if ($cont->from_receivers + $cont->from_community + $cont->from_weeks >= $cont->eggs) {
@@ -44,7 +44,7 @@ class ContractGetExtra
 
 		if ($contract->nest->parent != null) {
 			$parent_id = $contract->nest->parent->id;
-			$cont = Contract::where('nest_id', $parent_id)->orderBy('id', 'desc')->take(1)->first();
+			$cont = Contract::where('nest_id', $parent_id)->latest()->first();
 
 			if (!$cont->is_finished) {
 				if ($contract->nest->community == 'B') {
@@ -59,7 +59,7 @@ class ContractGetExtra
 
 			if ($contract->nest->parent->parent != null) {
 				$grandparent_id = $contract->nest->parent->parent->id;
-				$cont = Contract::where('nest_id', $grandparent_id)->orderBy('id', 'desc')->take(1)->first();
+				$cont = Contract::where('nest_id', $grandparent_id)->latest()->first();
 
 				if (!$cont->is_finished) {
 					if ($contract->nest->parent->community == 'B') {

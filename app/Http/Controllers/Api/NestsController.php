@@ -9,26 +9,30 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use App\Http\Resources\Nest as NestResource;
 
 class NestsController extends ApiController
 {
 	public function store(Request $request)
 	{
 		$user = Auth::user();
-		$nest_attr = $request->only(['name', 'inviter_id', 'parent_id', 'community']);
-		$payment = $request->only(['pay_active', 'pay_limit', 'eggs']);
+		$payment = array_merge($request->only(['name', 'inviter_id', 'parent_id', 'community', 'pay_active', 'pay_limit', 'eggs']), [
+			'user_id' => $user->id,
+			'price' => $request->eggs * config('zjp.egg.val')
+		]);
 
 		$this->beforePayment($payment, $user);
 
 		try {
-			DB::transaction(function () use ($payment, $user, $nest_attr){
+			DB::transaction(function () use ($payment){
 				$nest = new Nest();
-				$nest->fill($nest_attr);
-				$nest->user_id = $user->id;
+				$nest->name = $payment->name;
+				$nest->inviter_id = $payment->inviter_id;
+				$nest->parent_id = $payment->parent_id;
+				$nest->community = $payment->community;
+				$nest->user_id = $payment->user_id;
 				$nest->save();
 
-				$user = User::where('id', $user->id)->lockForUpdate()->first();
+				$user = User::where('id', $payment->user_id)->lockForUpdate()->first();
 				$user->money_active = $user->money_active - $payment->pay_active;
 				$user->money_limit = $user->money_limit - $payment->pay_limit;
 				$user->save();
@@ -44,5 +48,11 @@ class NestsController extends ApiController
 		}
 
 		return $this->created();
+	}
+
+	public function nest(Request $request)
+	{
+		$nest = Nest::where('name', $request->nest_name)->with('children')->first();
+		return $this->success($nest->toArray());
 	}
 }

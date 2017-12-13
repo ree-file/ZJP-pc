@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Contract;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class ContractRequest extends FormRequest
 {
@@ -13,7 +15,6 @@ class ContractRequest extends FormRequest
      */
     public function authorize()
     {
-
         return true;
     }
 
