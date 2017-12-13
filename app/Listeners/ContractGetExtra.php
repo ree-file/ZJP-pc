@@ -1,20 +1,40 @@
 <?php
 
-namespace App\Observers;
+namespace App\Listeners;
 
-use App\Accelerator;
 use App\Contract;
-use Carbon\Carbon;
+use App\Events\ContractUpgraded;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
-class ContractObserver
+class ContractGetExtra
 {
-	public function created(Contract $contract)
-	{
+    /**
+     * Create the event listener.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        //
+    }
+
+    /**
+     * Handle the event.
+     *
+     * @param  ContractUpgraded  $event
+     * @return void
+     */
+    public function handle(ContractUpgraded $event)
+    {
+        $contract = $event->contract;
+        $eggs = $event->eggs;
+
 		if ($contract->nest->inviter != null) {
 			$inviter_id = $contract->nest->inviter->id;
 			$cont = Contract::where('nest_id', $inviter_id)->orderBy('id', 'desc')->take(1)->first();
 			if (!$cont->is_finished) {
-				$cont->from_receivers = $cont->from_receivers + $contract->eggs * config('zjp.rate.invite');
+				$cont->from_receivers = $cont->from_receivers + $eggs * config('zjp.rate.invite');
 				if ($cont->from_receivers + $cont->from_community + $cont->from_weeks >= $cont->eggs) {
 					$cont->finished = true;
 				}
@@ -28,11 +48,11 @@ class ContractObserver
 
 			if (!$cont->is_finished) {
 				if ($contract->nest->community == 'B') {
-					$cont->frostB = $cont->frostB + $contract->eggs * config('zjp.rate.communityB');
+					$cont->frostB = $cont->frostB + $eggs * config('zjp.rate.communityB');
 					$cont->save();
 				}
 				if ($contract->nest->community == 'C') {
-					$cont->frostC = $cont->frostC + $contract->eggs * config('zjp.rate.communityC');
+					$cont->frostC = $cont->frostC + $eggs * config('zjp.rate.communityC');
 					$cont->save();
 				}
 			}
@@ -43,15 +63,15 @@ class ContractObserver
 
 				if (!$cont->is_finished) {
 					if ($contract->nest->parent->community == 'B') {
-						$cont->frostB = $cont->frostB + $contract->eggs * config('zjp.rate.communityB');
+						$cont->frostB = $cont->frostB + $eggs * config('zjp.rate.communityB');
 						$cont->save();
 					}
 					if ($contract->nest->parent->community == 'C') {
-						$cont->frostC = $cont->frostC + $contract->eggs * config('zjp.rate.communityC');
+						$cont->frostC = $cont->frostC + $eggs * config('zjp.rate.communityC');
 						$cont->save();
 					}
 				}
 			}
 		}
-	}
+    }
 }

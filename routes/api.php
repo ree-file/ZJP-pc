@@ -13,16 +13,24 @@ use Illuminate\Http\Request;
 |
 */
 
+/*Route::post('/login', 'Api\AuthenticateController@login');
+Route::get('/logout', 'Api\AuthenticateController@logout');*/
 
-Route::get('/nest', 'Api\NestsController@nest');
-Route::post('/login', 'Api\AuthenticateController@login');
-Route::get('/logout', 'Api\AuthenticateController@logout');
-
-Route::group(['middleware' => 'jwt.auth'], function () {
+Route::group(['middleware' => 'login', 'prefix' => 'v1'], function () {
+	Route::get('/order', 'Api\OrdersController@order');
+	Route::get('/orders', 'Api\OrdersController@orders');
 	Route::get('/user', 'Api\UsersController@user');
-});
-
-Route::group(['middleware' => 'login'], function () {
-	Route::get('/nests/{id}', 'Api\NestsController@getNests');
+	Route::get('/user/cards', 'Api\UsersController@cards');
+	Route::get('/user/nests', 'Api\UsersController@nests');
+	Route::get('/user/nest', 'Api\UsersController@nest');
+	Route::get('/user/orders', 'Api\UsersController@orders');
+	Route::post('/cards', 'Api\CardsController@store');
+	Route::post('/nests', 'Api\NestsController@store');
+	Route::post('/contracts', 'Api\ContractsController@store');
+	Route::post('/contracts/upgrade', 'Api\ContractsController@upgrade');
+	Route::post('/contracts/extract', 'Api\ContractsController@extract');
+	Route::post('/orders', 'Api\OrdersController@store');
+	Route::post('/orders/update', 'Api\OrdersController@update');
+	Route::post('/orders/abandon', 'Api\OrdersController@update');
 });
 

@@ -4,7 +4,8 @@ namespace App\Traits;
 use Symfony\Component\HttpFoundation\Response as FoundationResponse;
 use Response;
 
-trait ApiResponse {
+trait ApiResponse
+{
 
 	protected $statusCode = FoundationResponse::HTTP_OK;
 
@@ -56,7 +57,7 @@ trait ApiResponse {
 		return $this->setStatusCode($code)->message($message,$status);
 	}
 
-	public function created($message = "Created")
+	public function created($message = "Created.")
 	{
 		return $this->setStatusCode(FoundationResponse::HTTP_CREATED)
 			->message($message);

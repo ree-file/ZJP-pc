@@ -19,6 +19,7 @@ class NestsTableSeeder extends Seeder
 
 		$contract = new \App\Contract();
 		$contract->nest_id = $nest->id;
+		$contract->cycle_date = \Carbon\Carbon::today();
 		$contract->eggs = 50;
 		$contract->save();
     }
