@@ -24,4 +24,13 @@ class CardsController extends ApiController
 
 		return $this->created();
 	}
+
+	public function delete(Request $request)
+	{
+		$card = Card::find($request->card_id);
+		$this->authorize('update', $card);
+		$card->delete();
+
+		return $this->message('Deleted.');
+	}
 }

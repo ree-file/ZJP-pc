@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use App\Contract;
 use Illuminate\Http\Resources\Json\Resource;
 
-class Nest extends Resource
+class NestResource extends Resource
 {
 	/**
 	 * Transform the resource into an array.
@@ -16,7 +16,6 @@ class Nest extends Resource
 	public function toArray($request)
 	{
 		$grandchildren = count($this->children) == 0 ? null : $this->children->pluck('children')->flatten();
-
 		return [
 			'id'   => $this->id,
 			'name' => $this->name,
