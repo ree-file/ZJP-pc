@@ -6,7 +6,6 @@ use Response;
 
 trait ApiResponse
 {
-
 	protected $statusCode = FoundationResponse::HTTP_OK;
 
 	public function getStatusCode()

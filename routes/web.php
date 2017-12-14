@@ -12,6 +12,5 @@
 */
 
 Route::get('/', function () {
-	dd(\App\User::find(1));
-    return view('welcome');
+	dd(request()->all());
 });
