@@ -29,11 +29,17 @@ class ContractsController extends ApiController
 			'price' => $request->eggs * config('zjp.egg.val')
 		]);
 
-		$this->beforePayment($payment, $user);
-
 		try {
 			DB::transaction(function () use ($payment) {
-				$user = User::where('id', $payment->user_id)->lockForUpdate()->first();
+				$user = User::where('id', $payment['user_id'])->lockForUpdate()->first();
+				if ($payment['pay_active'] + $payment['pay_limit'] < $payment['price']) {
+					DB::rollBack();
+					return $this->failed('Not enough money.');
+				}
+				if ($payment['pay_active'] > $user->money_limit || $payment['pay_limit'] > $user->money_active) {
+					DB::rollBack();
+					return $this->failed('Wallet no enough money.');
+				}
 				$user->money_active = $user->money_active - $payment->pay_active;
 				$user->money_limit = $user->money_limit - $payment->pay_limit;
 				$user->save();
@@ -53,7 +59,7 @@ class ContractsController extends ApiController
 
 	public function upgrade(Request $request)
 	{
-		$contract = Contract::find($request->contract_id);
+		$contract = Contract::where('id', $request->contract_id)->with('nest')->first();
 		$this->authorize('update', $contract);
 
 		$user = Auth::user();
@@ -66,24 +72,30 @@ class ContractsController extends ApiController
 			return $this->failed('The contract is finished.');
 		}
 
-		$this->beforePayment($payment, $user);
-
 		try {
 			DB::transaction(function () use ($payment) {
-				$user = User::where('id', $payment->user_id)->lockForUpdate()->first();
+				$user = User::where('id', $payment['user_id'])->lockForUpdate()->first();
+				if ($payment['pay_active'] + $payment['pay_limit'] < $payment['price']) {
+					DB::rollBack();
+					return $this->failed('Not enough money.');
+				}
+				if ($payment['pay_active'] > $user->money_limit || $payment['pay_limit'] > $user->money_active) {
+					DB::rollBack();
+					return $this->failed('Wallet no enough money.');
+				}
 				$user->money_active = $user->money_active - $user->pay_active;
 				$user->money_limit = $user->money_limit - $user->pay_limit;
 				$user->save();
 
-				$contract = Contract::where('id', $payment->contract_id)->lockForUpdate()->first();
-				$contract->eggs = $contract->eggs + $payment->eggs;
+				$contract = Contract::where('id', $payment['contract_id'])->lockForUpdate()->first();
+				$contract->eggs = $contract->eggs + $payment['eggs'];
 				$contract->save();
 			}, 3);
 		} catch (\Exception $e) {
 			return $this->failed('Payment failed.');
 		}
 
-		event(new ContractUpgraded($contract, $payment->eggs));
+		event(new ContractUpgraded($contract, $payment['eggs']));
 
 		return $this->success('Payment successful.');
 	}
@@ -94,27 +106,28 @@ class ContractsController extends ApiController
 		$this->authorize('update', $contract);
 
 		$payment = $request->only(['extract_active', 'extract_limit', 'contract_id']);
-		$contract = Contract::find($request->contract_id);
-
-		$eggs_hatched = min($contract->eggs, $contract->from_weeks + $contract->from_receivers + $contract->from_community);
-		$remaining_active = floor($eggs_hatched * (1 - config('rate.limit'))) - $contract->extracted_active;
-		$remaining_limit = floor($eggs_hatched * config('rate.limit')) - $contract->extracted_limit;
-
-		if ($payment->extract_active > $remaining_active || $payment->extract_limit > $remaining_limit) {
-			return $this->failed('Beyond the rest.');
-		}
 
 		try {
 			DB::transaction(function () use ($payment) {
-				$user = User::where('id', $payment->user_id)->lockForUpdate()->first();
-				$user->money_active = $user->money_active + $payment->extract_active * config('egg.val');
-				$user->money_limit = $user->money_limit + $payment->extract_limit * config('egg.val');
-				$user->save();
+				$contract = Contract::where('id', $payment['contract_id'])->lockForUpdate()->first();
 
-				$contract = Contract::where('id', $payment->contract_id)->lockForUpdate()->first();
-				$contract->extracted_active = $contract->extracted_active - $payment->extract_active;
-				$contract->extracted_limit = $contract->extracted_limit - $payment->extract_limit;
+				$eggs_hatched = min($contract->eggs, $contract->from_weeks + $contract->from_receivers + $contract->from_community);
+				$remaining_active = floor($eggs_hatched * (1 - config('rate.limit'))) - $contract->extracted_active;
+				$remaining_limit = floor($eggs_hatched * config('rate.limit')) - $contract->extracted_limit;
+
+				if ($payment['extract_active'] > $remaining_active || $payment['extract_limit'] > $remaining_limit) {
+					DB::rollBack();
+					return $this->failed('Beyond the rest.');
+				}
+
+				$contract->extracted_active = $contract->extracted_active - $payment['extract_active'];
+				$contract->extracted_limit = $contract->extracted_limit - $payment['extract_limit'];
 				$contract->save();
+
+				$user = User::where('id', $payment['user_id'])->lockForUpdate()->first();
+				$user->money_active = $user->money_active + $payment['extract_active'] * config('egg.val');
+				$user->money_limit = $user->money_limit + $payment['extract_limit'] * config('egg.val');
+				$user->save();
 			}, 3);
 		} catch (\Exception $e) {
 			return $this->failed('Extract failed.');
