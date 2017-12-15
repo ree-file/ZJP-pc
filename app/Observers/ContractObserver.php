@@ -14,7 +14,7 @@ class ContractObserver
 			$inviter_id = $contract->nest->inviter->id;
 			$cont = Contract::where('nest_id', $inviter_id)->latest()->first();
 			if (!$cont->is_finished) {
-				$cont->from_receivers = $cont->from_receivers + $contract->eggs * config('zjp.rate.invite');
+				$cont->from_receivers = $cont->from_receivers + $contract->eggs * config('zjp.contract.profit.invite');
 				if ($cont->from_receivers + $cont->from_community + $cont->from_weeks >= $cont->eggs) {
 					$cont->finished = true;
 				}
@@ -28,11 +28,11 @@ class ContractObserver
 
 			if (!$cont->is_finished) {
 				if ($contract->nest->community == 'B') {
-					$cont->frostB = $cont->frostB + $contract->eggs * config('zjp.rate.communityB');
+					$cont->frostB = $cont->frostB + $contract->eggs * config('zjp.contract.profit.community-B');
 					$cont->save();
 				}
 				if ($contract->nest->community == 'C') {
-					$cont->frostC = $cont->frostC + $contract->eggs * config('zjp.rate.communityC');
+					$cont->frostC = $cont->frostC + $contract->eggs * config('zjp.contract.profit.community-C');
 					$cont->save();
 				}
 			}
@@ -43,11 +43,11 @@ class ContractObserver
 
 				if (!$cont->is_finished) {
 					if ($contract->nest->parent->community == 'B') {
-						$cont->frostB = $cont->frostB + $contract->eggs * config('zjp.rate.communityB');
+						$cont->frostB = $cont->frostB + $contract->eggs * config('zjp.contract.profit.community-B');
 						$cont->save();
 					}
 					if ($contract->nest->parent->community == 'C') {
-						$cont->frostC = $cont->frostC + $contract->eggs * config('zjp.rate.communityC');
+						$cont->frostC = $cont->frostC + $contract->eggs * config('zjp.contract.profit.community-C');
 						$cont->save();
 					}
 				}

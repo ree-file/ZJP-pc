@@ -28,15 +28,15 @@ class ContractGetExtra
     public function handle(ContractUpgraded $event)
     {
         $contract = $event->contract;
-        $eggs = $event->eggs;
+        $eggs = (int) $event->eggs;
 
 		if ($contract->nest->inviter != null) {
 			$inviter_id = $contract->nest->inviter->id;
 			$cont = Contract::where('nest_id', $inviter_id)->latest()->first();
 			if (!$cont->is_finished) {
-				$cont->from_receivers = $cont->from_receivers + $eggs * config('zjp.rate.invite');
+				$cont->from_receivers = $cont->from_receivers + $eggs * config('zjp.contract.profit.invite');
 				if ($cont->from_receivers + $cont->from_community + $cont->from_weeks >= $cont->eggs) {
-					$cont->finished = true;
+					$cont->is_finished = true;
 				}
 				$cont->save();
 			}
@@ -45,14 +45,13 @@ class ContractGetExtra
 		if ($contract->nest->parent != null) {
 			$parent_id = $contract->nest->parent->id;
 			$cont = Contract::where('nest_id', $parent_id)->latest()->first();
-
 			if (!$cont->is_finished) {
 				if ($contract->nest->community == 'B') {
-					$cont->frostB = $cont->frostB + $eggs * config('zjp.rate.communityB');
+					$cont->frostB = $cont->frostB + $eggs * config('zjp.contract.profit.community-B');
 					$cont->save();
 				}
 				if ($contract->nest->community == 'C') {
-					$cont->frostC = $cont->frostC + $eggs * config('zjp.rate.communityC');
+					$cont->frostC = $cont->frostC + $eggs * config('zjp.contract.profit.community-C');
 					$cont->save();
 				}
 			}
@@ -63,11 +62,11 @@ class ContractGetExtra
 
 				if (!$cont->is_finished) {
 					if ($contract->nest->parent->community == 'B') {
-						$cont->frostB = $cont->frostB + $eggs * config('zjp.rate.communityB');
+						$cont->frostB = $cont->frostB + $eggs * config('zjp.contract.profit.community-B');
 						$cont->save();
 					}
 					if ($contract->nest->parent->community == 'C') {
-						$cont->frostC = $cont->frostC + $eggs * config('zjp.rate.communityC');
+						$cont->frostC = $cont->frostC + $eggs * config('zjp.contract.profit.community-C');
 						$cont->save();
 					}
 				}

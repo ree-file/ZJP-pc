@@ -12,5 +12,5 @@
 */
 
 Route::get('/', function () {
-	dd(request()->all());
+	echo '...';
 });
