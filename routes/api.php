@@ -13,9 +13,6 @@ use Illuminate\Http\Request;
 |
 */
 
-/*Route::post('/login', 'Api\AuthenticateController@login');
-Route::get('/logout', 'Api\AuthenticateController@logout');*/
-
 Route::group(['middleware' => 'login', 'prefix' => 'v1'], function () {
 	Route::get('/nest', 'Api\NestsController@nest');
 	Route::get('/order', 'Api\OrdersController@order');
@@ -26,9 +23,11 @@ Route::group(['middleware' => 'login', 'prefix' => 'v1'], function () {
 	Route::get('/user/nest', 'Api\UsersController@nest');
 	Route::get('/user/orders', 'Api\UsersController@orders');
 	Route::get('/user/supplies', 'Api\UsersController@supplies');
-	Route::post('/user', 'Api\UsersController@changePassword');
+	Route::post('/password', 'Api\LoginController@changePassword');
 	Route::post('/users', 'Api\UsersController@store');
 	Route::post('/supplies', 'Api\SuppliesController@store');
+	Route::post('/supplies/market', 'Api\SuppliesController@activeToMarket');
+	Route::post('/supplies/active', 'Api\SuppliesController@marketToActive');
 	Route::post('/cards', 'Api\CardsController@store');
 	Route::post('/cards/delete', 'Api\CardsController@delete');
 	Route::post('/nests', 'Api\NestsController@store');
@@ -41,8 +40,9 @@ Route::group(['middleware' => 'login', 'prefix' => 'v1'], function () {
 });
 
 Route::group(['prefix' => 'v1'], function () {
-	Route::post('/forget', 'Api\UsersController@resetPassword');
-	Route::post('/check', 'Api\UsersController@checkVerifyCode');
-	Route::post('/reset', 'Api\UsersController@resetPassword');
+	Route::get('/common', 'Api\CommonController@common');
+	Route::post('/forget', 'Api\LoginController@resetPassword');
+	Route::post('/check', 'Api\LoginController@checkCode');
+	Route::post('/reset', 'Api\LoginController@resetPassword');
 });
 

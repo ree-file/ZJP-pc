@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Card;
 use App\Contract;
+use App\Mail\ResetPasswordMail;
+use App\Mail\UserCreatedMail;
 use App\Nest;
 use App\Order;
 use App\Supply;
@@ -13,10 +15,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\NestResource;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rule;
 
 class UsersController extends ApiController
 {
-    public function user(Request $request)
+	/*
+	 * 查询用户拥有资源信息
+	 * */
+
+	public function user(Request $request)
 	{
 		$user = $request->user();
 		return $this->success($user);
@@ -38,17 +46,10 @@ class UsersController extends ApiController
 		return $this->success($nests);
 	}
 
-	public function nest(Request $request)
-	{
-		$nest = Nest::where('id', $request->id)->with('inviter', 'receivers', 'parent', 'children.children')->first();
-		$this->authorize('update', $nest);
-		return $this->success(new NestResource($nest));
-	}
-
 	public function orders()
 	{
 		$user = Auth::user();
-		$orders = Order::where('seller_id', $user->id)->orWhere('buyer', $user->id)->with('nest')->get();
+		$orders = Order::where('seller_id', $user->id)->orWhere('buyer_id', $user->id)->with('nest')->get();
 		return $this->success($orders);
 	}
 
@@ -59,93 +60,90 @@ class UsersController extends ApiController
 		return $this->success($supplies);
 	}
 
-	public function store(Request $request)
-	{
-		$user = Auth::user();
+	/*
+	 * 提交表单查询信息
+	 */
 
-		$new_user = User::where('email', $request->user_email)->first();
-		if (! $new_user) {
-			$new_user = new User();
-			$new_user->email = $request->user_email;
-			$new_user->password = bcrypt(str_random(6));
-			$new_user->save();
+	public function nest(Request $request)
+	{
+		$nest = Nest::where('id', $request->id)->with('inviter', 'receivers', 'parent', 'children.children')->first();
+
+		if (! $nest) {
+			return $this->notFound();
 		}
 
+		$this->authorize('update', $nest);
+		return $this->success(new NestResource($nest));
+	}
 
-		$payment = array_merge($request->only(['name', 'inviter_id', 'parent_id', 'community', 'pay_active', 'pay_limit', 'eggs']), [
-			'user_id' => $user->id,
-			'price' => $request->eggs * config('zjp.egg.val'),
-			'new_user' => $new_user->id
+	/*
+	 * 提交表单操作信息
+	 * */
+
+	public function store(Request $request)
+	{
+		$this->validate($request, [
+			'name' => 'required|unique:nests|max:100',
+			'inviter_id' => 'required',
+			'parent_id' => 'required',
+			'community' => ['required', Rule::in(['A', 'B', 'C'])],
+			'pay_active' => 'required|numeric|min:0',
+			'pay_limit' => 'required|numeric|min:0',
+			'eggs' => ['required', Rule::in(config('zjp.contracts.type'))],
+			'email' => 'required|email',
 		]);
 
-		$this->beforePayment($payment, $user);
+		$user = Auth::user();
+		$payment = array_merge($request->only(['name', 'inviter_id', 'parent_id', 'community', 'pay_active', 'pay_limit', 'eggs', 'email']), [
+			'price' => $request->eggs * config('zjp.contract.egg.val')
+		]);
+		$password = null;
 
+		DB::beginTransaction();
 		try {
-			DB::transaction(function () use ($payment){
-				$nest = new Nest();
-				$nest->name = $payment->name;
-				$nest->inviter_id = $payment->inviter_id;
-				$nest->parent_id = $payment->parent_id;
-				$nest->community = $payment->community;
-				$nest->user_id = $payment->new_user;
-				$nest->save();
+			$user = User::where('id', $user->id)->lockForUpdate()->first();
+			$getter = User::where('email', $payment['user_email'])->first();
+			if (count($getter) == 0) {
+				$getter = new User();
+				$getter->email = $payment['email'];
+				$password = rand(0,9).rand(0,9).rand(0,9).rand(0,9).rand(0,9).rand(0,9);
+				$getter->password = bcrypt($password);
+				$getter->save();
+			}
 
-				$user = User::where('id', $payment->user_id)->lockForUpdate()->first();
-				$user->money_active = $user->money_active - $payment->pay_active;
-				$user->money_limit = $user->money_limit - $payment->pay_limit;
-				$user->save();
+			if ($payment['pay_active'] + $payment['pay_limit'] < $payment['price']) {
+				throw new \Exception('Not enough money.');
+			}
+			if ($payment['pay_active'] > $user->money_active || $payment['pay_limit'] > $user->money_limit) {
+				throw new \Exception('Wallet no enough money.');
+			}
 
-				$contract = new Contract();
-				$contract->eggs = $payment->eggs;
-				$contract->nest_id = $nest->id;
-				$contract->cycle_date = Carbon::today();
-				$contract->save();
-			}, 3);
+			$user->money_active = $user->money_active - $payment['pay_active'];
+			$user->money_limit = $user->money_limit - $payment['pay_limit'];
+			$user->save();
+
+			$nest = new Nest();
+			$nest->name = $payment['name'];
+			$nest->inviter_id = $payment['inviter_id'];
+			$nest->parent_id = $payment['parent_id'];
+			$nest->community = $payment['community'];
+			$nest->user_id = $getter->id;
+			$nest->save();
+
+			$contract = new Contract();
+			$contract->eggs = $payment['eggs'];
+			$contract->nest_id = $nest->id;
+			$contract->cycle_date = Carbon::today();
+			$contract->save();
+			DB::commit();
 		} catch (\Exception $e) {
-			return $this->failed('Create failed.');
+			DB::rollBack();
+			return $this->failed($e->getMessage());
+		}
+		if ($password != null) {
+			Mail::to($getter->email)->queue(new UserCreatedMail($password));
 		}
 
 		return $this->created();
-	}
-
-	public function changePassword(Request $request)
-	{
-		$user = Auth::user();
-		$user->password = bcrypt($request->password);
-		$user->save();
-	}
-
-	public function forgetPassword(Request $request)
-	{
-		$user = User::where('email', $request->email)->first();
-		if (!$user) {
-			$this->notFound();
-		}
-
-		$verify_code = str_random(6);
-		$user->verify_code = $verify_code;
-		$user->save();
-	}
-
-	public function checkVerifyCode(Request $request)
-	{
-		$user = User::where('email', $request->email)->where('verify_code', $request->verify_code)->first();
-		if (!$user) {
-			return $this->notFound();
-		}
-		return $this->message('Right code.');
-	}
-
-	public function resetPassword(Request $request)
-	{
-		$user = User::where('email', $request->email)->where('verify_code', $request->verify_code)->first();
-		if (!$user) {
-			return $this->notFound();
-		}
-
-		$user->password = bcrypt($request->password);
-		$user->verify_code = str_random(10);
-		$user->save();
-		return $this->message('Password reseted.');
 	}
 }

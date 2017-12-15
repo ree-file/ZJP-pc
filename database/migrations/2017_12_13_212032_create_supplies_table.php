@@ -15,6 +15,7 @@ class CreateSuppliesTable extends Migration
     {
         Schema::create('supplies', function (Blueprint $table) {
             $table->increments('id');
+			$table->enum('type', ['save', 'get']);
 			$table->integer('user_id')->unsigned();
 			$table->decimal('money', 10,2)->unsigned();
 			$table->string('message');

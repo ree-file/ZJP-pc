@@ -19,8 +19,8 @@ class CreateContractsTable extends Migration
             $table->integer('eggs')->unsigned();
             $table->boolean('is_finished')->default(false);
 			$table->date('cycle_date');
-			$table->integer('frostB')->default(0);
-			$table->integer('frostC')->default(0);
+			$table->integer('frostB')->unsigned()->default(0);
+			$table->integer('frostC')->unsigned()->default(0);
 			$table->integer('from_weeks')->unsigned()->default(0);
 			$table->integer('from_receivers')->unsigned()->default(0);
 			$table->integer('from_community')->unsigned()->default(0);
