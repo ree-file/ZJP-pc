@@ -31,7 +31,7 @@ class NestsController extends Controller
     {
         return Admin::content(function (Content $content) {
 
-            $content->header('天使猫');
+            $content->header('巢');
             $content->description('列表');
 
             $content->body($this->grid());
@@ -83,10 +83,28 @@ class NestsController extends Controller
 
             $grid->id('ID')->sortable();
 			$grid->name('名字');
-			$grid->community('社区');
-			$grid->column('user.email', '用户');
+			$grid->community('社区')->sortable();
+			$grid->column('user.email', '用户邮箱');
 
-            $grid->created_at('创建于');
+            $grid->created_at('创建于')->sortable();
+
+			$grid->disableCreation();
+			$grid->disableRowSelector();
+			$grid->actions(function ($actions) {
+				$actions->disableDelete();
+				$actions->disableEdit();
+				$actions->append('<a href="/'.config('admin.route.prefix').'/nests/'.$actions->getKey().'"><i class="fa fa-eye"></i></a>');
+			});
+			$grid->filter(function($filter){
+				// 在这里添加字段过滤器
+				$filter->like('name', '名字');
+				$filter->like('community', '社区');
+				$filter->where(function ($query) {
+					$query->whereHas('user', function ($query) {
+						$query->where('email', 'like', "%{$this->input}%");
+					});
+				}, '用户邮箱');
+			});
         });
     }
 
@@ -146,16 +164,11 @@ class NestsController extends Controller
 		});
 	}
 
-	public function store()
-	{
-		return $this->form_create()->store();
-	}
-
 	public function form_edit()
 	{
 		return Admin::form(Nest::class, function (Form $form) {
 
-			$form->text('name', '名字');
+			$form->display('name', '名字');
 			$form->select('user_id', '用户')->options(function ($id) {
 				$user = User::find($id);
 
@@ -189,25 +202,32 @@ class NestsController extends Controller
 	{
 		return Admin::content(function (Content $content) use ($id) {
 
-			$content->header('天使猫');
+			$content->header('巢');
 			$content->description('详情');
 
 			$nest = Nest::where('id', $id)->with('children', 'receivers', 'children.children', 'contracts')->first();
 			$contracts = $nest->contracts->sortByDesc('id')->map(function ($item, $key) {
-				return $item->only(['id', 'eggs', 'is_finished', 'created_at']);
+				if ($item->is_finished == 0) {
+					$item->is_finished = '未完成';
+				} else {
+					$item->is_finished = '已完成';
+				}
+				return $item->only(['id', 'eggs', 'is_finished', 'from_weeks', 'from_receivers', 'from_community', 'extracted_active', 'extracted_limit', 'created_at']);
 			});
 			$grandchildren = $nest->children->pluck('children')->flatten();
+
 			$tab = new Tab();
+			$tab->add('基本信息', view('admin.nests.basic', compact('nest')));
 			$table = new Table([], [
 				['总合约数', count($nest->contracts)],
-				['总币数', $nest->contracts->sum('eggs')],
+				['合约累计蛋数', $nest->contracts->sum('eggs')],
 				['邀请人数', count($nest->receivers)],
-				['下级人数', count($nest->children)],
-				['下下级人数', count($grandchildren)]
+				['一级人数', count($nest->children)],
+				['二级人数', count($grandchildren)]
 			]);
-			$tab->add('关联信息', $table);
+			$tab->add('统计信息', $table);
 			$table = new Table([
-				'id', '币数', '是否完成', '创建于'],
+				'ID', '蛋数', '状态', '周增加', '邀请增加', '社区增加', '已提取（可换为活动资金）', '已提取（可换为限制资金）', '创建于'],
 				$contracts->toArray()
 			);
 			$tab->add('合约信息', $table);

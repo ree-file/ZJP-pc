@@ -10,6 +10,8 @@ use Encore\Admin\Facades\Admin;
 use Encore\Admin\Layout\Content;
 use App\Http\Controllers\Controller;
 use Encore\Admin\Controllers\ModelForm;
+use Encore\Admin\Widgets\Box;
+use Encore\Admin\Widgets\Tab;
 
 class UsersController extends Controller
 {
@@ -24,7 +26,7 @@ class UsersController extends Controller
     {
         return Admin::content(function (Content $content) {
 
-            $content->header('会员');
+            $content->header('用户');
 			$content->description('列表');
 
             $content->body($this->grid());
@@ -41,26 +43,10 @@ class UsersController extends Controller
     {
         return Admin::content(function (Content $content) use ($id) {
 
-            $content->header('会员');
+            $content->header('用户');
             $content->description('编辑');
 
-            $content->body($this->form_edit()->edit($id));
-        });
-    }
-
-    /**
-     * Create interface.
-     *
-     * @return Content
-     */
-    public function create()
-    {
-        return Admin::content(function (Content $content) {
-
-            $content->header('会员');
-            $content->description('创建');
-
-            $content->body($this->form_create());
+            $content->body($this->form()->edit($id));
         });
     }
 
@@ -75,17 +61,22 @@ class UsersController extends Controller
 
             $grid->id('ID')->sortable();
 			$grid->email('邮箱');
-			$grid->is_freezed('冻结状态')->display(function ($is_freezed) {
-				return $is_freezed ? '<span class="text-danger">是</span>' : '<span class="text-info">否</span>';
+			$grid->is_freezed('是否冻结')->switch();
+			$grid->money_active('交易资金')->sortable();
+			$grid->money_limit('激活资金')->sortable();
+			$grid->money_market('市场资金')->sortable();
+
+            $grid->created_at('创建于')->sortable();
+
+			$grid->disableCreation();
+			$grid->disableRowSelector();
+			$grid->actions(function ($actions) {
+				$actions->disableDelete();
 			});
-			$grid->money_active('交易资金');
-			$grid->money_limit('激活资金');
-			$grid->money_market('市场资金');
-			$grid->nests('合约数')->display(function ($nests) {
-				$count = count($nests);
-				return $count;
+			$grid->filter(function($filter){
+				// 在这里添加字段过滤器
+				$filter->like('email', '邮箱');
 			});
-            $grid->created_at('创建于');
         });
     }
 
@@ -94,40 +85,7 @@ class UsersController extends Controller
      *
      * @return Form
      */
-    protected function form()
-    {
-        return Admin::form(User::class, function (Form $form) {
-
-            $form->display('id', 'ID');
-
-            $form->text('email', '邮箱');
-
-			$form->number('money_active', '交易资金')->attribute('min', 0);
-			$form->number('money_limit', '激活资金')->attribute('min', 0);
-			$form->number('money_market', '市场资金')->attribute('min', 0);
-
-			$form->switch('is_freezed', '是否冻结');
-
-            $form->display('created_at', '创建于');
-            $form->display('updated_at', '更新于');
-        });
-    }
-
-    public function form_create()
-	{
-		return Admin::form(User::class, function (Form $form) {
-			$form->text('email', '邮箱');
-			$form->password('password', '密码')->rules('required|min:6');
-			$form->switch('is_freezed', '是否冻结')->default(true);
-		});
-	}
-
-    public function store()
-	{
-		return $this->form_create()->store();
-	}
-
-	public function form_edit()
+	protected function form()
 	{
 		return Admin::form(User::class, function (Form $form) {
 
@@ -138,9 +96,7 @@ class UsersController extends Controller
 				$form->number('money_active', '交易资金')->attribute('min', 0);
 				$form->number('money_limit', '激活资金')->attribute('min', 0);
 				$form->number('money_market', '市场资金')->attribute('min', 0);
-
 				$form->switch('is_freezed', '是否冻结');
-
 				$form->display('created_at', '创建于');
 				$form->display('updated_at', '更新于');
 			})->tab('银行卡', function (Form $form) {
@@ -148,14 +104,8 @@ class UsersController extends Controller
 					$form->text('number', '卡号');
 					$form->text('username', '账户名');
 					$form->text('bankname', '银行名');
-					$form->switch('is_passed', '是否过审')->default(false);
 				});
 			});
 		});
-	}
-
-	public function update($id)
-	{
-		return $this->form_edit()->update($id);
 	}
 }
