@@ -19,7 +19,6 @@ class CreateCardsTable extends Migration
             $table->string('username');
 			$table->string('bankname');
 			$table->string('number');
-            $table->boolean('is_passed')->default(false);
             $table->timestamps();
         });
     }
