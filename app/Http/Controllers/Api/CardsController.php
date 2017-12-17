@@ -27,6 +27,7 @@ class CardsController extends ApiController
 		$card = new Card();
 		$card->fill($attributes);
 		$card->user_id = $user->id;
+		$card->save();
 
 		return $this->created();
 	}
