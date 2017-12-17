@@ -203,35 +203,13 @@ class NestsController extends Controller
 		return Admin::content(function (Content $content) use ($id) {
 
 			$content->header('巢');
-			$content->description('详情');
+			$content->description('查看');
 
 			$nest = Nest::where('id', $id)->with('children', 'receivers', 'children.children', 'contracts')->first();
-			$contracts = $nest->contracts->sortByDesc('id')->map(function ($item, $key) {
-				if ($item->is_finished == 0) {
-					$item->is_finished = '未完成';
-				} else {
-					$item->is_finished = '已完成';
-				}
-				return $item->only(['id', 'eggs', 'is_finished', 'from_weeks', 'from_receivers', 'from_community', 'extracted_active', 'extracted_limit', 'created_at']);
-			});
+			$contracts = $nest->contracts->sortByDesc('id');
 			$grandchildren = $nest->children->pluck('children')->flatten();
 
-			$tab = new Tab();
-			$tab->add('基本信息', view('admin.nests.basic', compact('nest')));
-			$table = new Table([], [
-				['总合约数', count($nest->contracts)],
-				['合约累计蛋数', $nest->contracts->sum('eggs')],
-				['邀请人数', count($nest->receivers)],
-				['一级人数', count($nest->children)],
-				['二级人数', count($grandchildren)]
-			]);
-			$tab->add('统计信息', $table);
-			$table = new Table([
-				'ID', '蛋数', '状态', '周增加', '邀请增加', '社区增加', '已提取（可换为活动资金）', '已提取（可换为限制资金）', '创建于'],
-				$contracts->toArray()
-			);
-			$tab->add('合约信息', $table);
-			$content->body(new Box('详情', $tab));
+			$content->body(view('admin.nests.show', compact('nest', 'contracts', 'grandchildren')));
 		});
 	}
 

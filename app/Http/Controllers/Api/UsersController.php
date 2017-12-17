@@ -33,7 +33,7 @@ class UsersController extends ApiController
 	public function cards()
 	{
 		$user = Auth::user();
-		$cards = Card::where('id', $user->id)->get();
+		$cards = Card::where('user_id', $user->id)->get();
 
 		return $this->success($cards->toArray());
 	}
