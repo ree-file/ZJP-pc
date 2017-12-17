@@ -6,6 +6,7 @@ use App\Mail\ResetPasswordMail;
 use App\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
 class LoginController extends ApiController

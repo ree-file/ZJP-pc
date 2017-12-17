@@ -40,9 +40,17 @@ Route::group(['middleware' => 'login', 'prefix' => 'v1'], function () {
 });
 
 Route::group(['prefix' => 'v1'], function () {
+	Route::post('/login', 'Api\AuthenticateController@login');
+	Route::post('/logout', 'Api\AuthenticateController@logout');
 	Route::get('/common', 'Api\CommonController@common');
 	Route::post('/forget', 'Api\LoginController@resetPassword');
 	Route::post('/check', 'Api\LoginController@checkCode');
 	Route::post('/reset', 'Api\LoginController@resetPassword');
+});
+
+Route::group(['middleware' => 'jwt.auth', 'prefix' => 'v1'], function () {
+	Route::get('/abb', function () {
+		return '55';
+	});
 });
 

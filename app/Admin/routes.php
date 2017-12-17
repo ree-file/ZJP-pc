@@ -15,12 +15,6 @@ Route::group([
 	$router->resources([
 		'users' => UsersController::class,
 		'supplies' => SuppliesController::class,
-		'nests' => NestsController::class,
-		'contracts' => ContractsController::class
+		'nests' => NestsController::class
 	]);
-
-	$router->get('/api/supplies/handle', 'SuppliesController@handleSupply');
-
-	$router->get('/api/users', 'CardsController@users');
-	$router->get('/api/nests', 'NestsController@nests');
 });

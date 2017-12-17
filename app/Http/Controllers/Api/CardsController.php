@@ -14,9 +14,14 @@ class CardsController extends ApiController
 			'username' => 'required|max:40',
 			'bankname' => 'required|max:255',
 			'number' => 'required|max:255',
+			'security_code' => 'required'
 		]);
 
 		$user = Auth::user();
+
+		if ($user->security_code != $request->security_code) {
+			return $this->failed('Security code wrong.');
+		}
 
 		$cards_count = Card::where('id', $user->id)->count();
 		if ($cards_count >= config('zjp.user.card-max')) {
