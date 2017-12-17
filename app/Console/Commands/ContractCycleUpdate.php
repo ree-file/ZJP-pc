@@ -42,7 +42,7 @@ class ContractCycleUpdate extends Command
     {
 		DB::transaction(function () {
 			$contracts = Contract::where('is_finished', false)
-				->where('cycle_date', Carbon::today()->subDays(config('zjp.contract.cycle.date')))
+				->where('cycle_date', '<=', Carbon::today()->subDays(config('zjp.contract.cycle.date')))
 				->lockForUpdate()
 				->with('nest.contracts')->get();
 			foreach ($contracts as $contract) {

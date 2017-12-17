@@ -41,8 +41,8 @@ class AuthenticateController extends ApiController
 	public function refresh(Request $request)
 	{
 		$newToken = $request->header('Authorization');
-		$newToken = $newToken-
+		$newToken = substr($newToken, 7);
 
-		return $this->success(['jwt_token' => ]);
+		return $this->success(['jwt_token' => $newToken]);
 	}
 }
