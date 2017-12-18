@@ -39,13 +39,18 @@ Route::group(['middleware' => 'login', 'prefix' => 'v1'], function () {
 	Route::post('/orders/buy', 'Api\OrdersController@buy');
 });
 
-Route::group(['prefix' => 'v1'], function () {
+Route::group(['prefix' => 'v2'], function () {
 	Route::post('/login', 'Api\AuthenticateController@login');
 	Route::post('/logout', 'Api\AuthenticateController@logout');
 	Route::get('/common', 'Api\CommonController@common');
 	Route::post('/forget', 'Api\LoginController@resetPassword');
 	Route::post('/check', 'Api\LoginController@checkCode');
 	Route::post('/reset', 'Api\LoginController@resetPassword');
+});
+
+// 刷新令牌
+Route::group(['middleware' => 'jwt.refresh', 'prefix' => 'v2'], function () {
+	Route::get('/refresh', 'Api\AuthenticateController@refresh');
 });
 
 // 访问
@@ -73,10 +78,5 @@ Route::group(['middleware' => 'jwt.auth', 'prefix' => 'v2'], function () {
 	Route::post('/orders', 'Api\OrdersController@store');
 	Route::post('/orders/abandon', 'Api\OrdersController@abandon');
 	Route::post('/orders/buy', 'Api\OrdersController@buy');
-});
-
-// 刷新令牌
-Route::group(['middleware' => 'jwt.refresh', 'prefix' => 'v2'], function () {
-	Route::get('/refresh', 'Api\AuthenticateController@refresh');
 });
 
