@@ -16,97 +16,53 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\NestResource;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
 class UsersController extends ApiController
 {
-	/*
-	 * 查询用户拥有资源信息
-	 * */
-
-	public function user(Request $request)
-	{
-		$user = $request->user();
-		return $this->success($user);
-	}
-
-	public function cards()
-	{
-		$user = Auth::user();
-		$cards = Card::where('user_id', $user->id)->get();
-
-		return $this->success($cards->toArray());
-	}
-
-	public function nests()
-	{
-		$user = Auth::user();
-		$nests = Nest::where('user_id', $user->id)->get();
-
-		return $this->success($nests);
-	}
-
-	public function orders()
-	{
-		$user = Auth::user();
-		$orders = Order::where('seller_id', $user->id)->orWhere('buyer_id', $user->id)->with('nest')->get();
-		return $this->success($orders);
-	}
-
-	public function supplies()
-	{
-		$user = Auth::user();
-		$supplies = Supply::where('user_id', $user->id)->get();
-		return $this->success($supplies);
-	}
-
-	/*
-	 * 提交表单查询信息
-	 */
-
-	public function nest(Request $request)
-	{
-		$nest = Nest::where('id', $request->id)->with('inviter', 'receivers', 'parent', 'children.children')->first();
-
-		if (! $nest) {
-			return $this->notFound();
-		}
-
-		$this->authorize('update', $nest);
-		return $this->success(new NestResource($nest));
-	}
-
-	/*
-	 * 提交表单操作信息
-	 * */
-
 	public function store(Request $request)
 	{
-		$this->validate($request, [
-			'name' => 'required|unique:nests|max:100',
-			'inviter_id' => 'required',
-			'parent_id' => 'required',
+		$validator = Validator::make($request->all(), [
+			'inviter_name' => 'required',
+			'parent_name' => 'required',
 			'community' => ['required', Rule::in(['A', 'B', 'C'])],
 			'pay_active' => 'required|numeric|min:0',
 			'pay_limit' => 'required|numeric|min:0',
-			'eggs' => ['required', Rule::in(config('zjp.contracts.type'))],
+			'eggs' => ['required', Rule::in([
+				(int) config('zjp.CONTRACT_LEVEL_ONE'),
+				(int) config('zjp.CONTRACT_LEVEL_TWO'),
+				(int) config('zjp.CONTRACT_LEVEL_THREE'),
+				(int) config('zjp.CONTRACT_LEVEL_FOUR')])],
 			'email' => 'required|email',
 		]);
+		if ($validator->fails()) {
+			return $this->failed($validator->errors()->first());
+		}
+
+		$inviter = Nest::where('name', $request->inviter_name)->first();
+		$parent = Nest::where('name', $request->parent_name)->first();
+
+		if (! $inviter || ! $parent) {
+			return $this->failed('The inviter or parent is not existed.');
+		}
 
 		$user = Auth::user();
-		$payment = array_merge($request->only(['name', 'inviter_id', 'parent_id', 'community', 'pay_active', 'pay_limit', 'eggs', 'email']), [
-			'price' => $request->eggs * config('zjp.contract.egg.val')
+		$payment = array_merge($request->only(['community', 'pay_active', 'pay_limit', 'eggs', 'email']), [
+			'price' => $request->eggs * (int) config('zjp.EGG_VAL'),
+			'inviter_id' => $inviter->id,
+			'parent_id' => $parent->id
 		]);
 		$password = null;
 
 		DB::beginTransaction();
 		try {
 			$user = User::where('id', $user->id)->lockForUpdate()->first();
-			$getter = User::where('email', $payment['user_email'])->first();
-			if (count($getter) == 0) {
+			$getter = User::where('email', $payment['email'])->first();
+			if (! $getter) {
 				$getter = new User();
 				$getter->email = $payment['email'];
-				$password = rand(0,9).rand(0,9).rand(0,9).rand(0,9).rand(0,9).rand(0,9);
+				$password = rand_password();
 				$getter->password = bcrypt($password);
 				$getter->save();
 			}
@@ -123,7 +79,7 @@ class UsersController extends ApiController
 			$user->save();
 
 			$nest = new Nest();
-			$nest->name = $payment['name'];
+			$nest->name = rand_name();
 			$nest->inviter_id = $payment['inviter_id'];
 			$nest->parent_id = $payment['parent_id'];
 			$nest->community = $payment['community'];
@@ -140,6 +96,8 @@ class UsersController extends ApiController
 			DB::rollBack();
 			return $this->failed($e->getMessage());
 		}
+
+		// 如果为新建用户，则发送邮件
 		if ($password != null) {
 			Mail::to($getter->email)->queue(new UserCreatedMail($password));
 		}

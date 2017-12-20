@@ -52,7 +52,7 @@ class NestsController extends Controller
             $content->description('description');
 
 
-            $content->body($this->form_edit()->edit($id));
+            $content->body($this->form()->edit($id));
         });
     }
 

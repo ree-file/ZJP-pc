@@ -5,26 +5,26 @@ namespace App\Http\Controllers\Api;
 use App\Card;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class CardsController extends ApiController
 {
     public function store(Request $request)
 	{
-		$this->validate($request, [
+		$validator = Validator::make($request->all(), [
 			'username' => 'required|max:40',
 			'bankname' => 'required|max:255',
 			'number' => 'required|max:255',
-			'security_code' => 'required'
 		]);
+		if ($validator->fails()) {
+			return $this->failed($validator->errors()->first());
+		}
 
 		$user = Auth::user();
 
-		if ($user->security_code != $request->security_code) {
-			return $this->failed('Security code wrong.');
-		}
-
+		// 判别用户的银行卡数量是否超过限制
 		$cards_count = Card::where('id', $user->id)->count();
-		if ($cards_count >= config('zjp.user.card-max')) {
+		if ($cards_count >= (int) config('zjp.USER_MAXIMUM_CARDS')) {
 			return $this->failed('Cards number has reached the limit.');
 		}
 
@@ -37,17 +37,15 @@ class CardsController extends ApiController
 		return $this->created();
 	}
 
-	public function delete(Request $request)
+	public function destroy(Request $request, Card $card)
 	{
-		$card = Card::find($request->card_id);
-
 		if (! $card) {
-			$this->notFound();
+			return $this->notFound();
 		}
 
 		$this->authorize('update', $card);
 		$card->delete();
 
-		return $this->message('Deleted.');
+		return $this->deleted();
 	}
 }

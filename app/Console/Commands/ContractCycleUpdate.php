@@ -42,21 +42,21 @@ class ContractCycleUpdate extends Command
     {
 		DB::transaction(function () {
 			$contracts = Contract::where('is_finished', false)
-				->where('cycle_date', '<=', Carbon::today()->subDays(config('zjp.contract.cycle.date')))
+				->where('cycle_date', '<=', Carbon::today()->subDays((int) config('zjp.CONTRACT_CYCLE_DAYS')))
 				->lockForUpdate()
 				->with('nest.contracts')->get();
 			foreach ($contracts as $contract) {
-				$maxB = $contract->eggs * config('zjp.contract.cycle.community-limit');
+				$maxB = $contract->eggs * floor(config('zjp.CONTRACT_CYCLE_COMMUNITY_ADD_LIMIT_RATE'));
 				$from_B = $contract->frostB > $maxB ? $maxB : $contract->frostB;
 				$contract->from_community = $contract->from_community + $from_B;
 
-				$maxC = $contract->nest->contracts->sum('eggs') * config('zjp.contract.cycle.community-limit');
+				$maxC = $contract->nest->contracts->sum('eggs') * floor(config('zjp.CONTRACT_CYCLE_COMMUNITY_ADD_LIMIT_RATE'));
 				$from_C = $contract->frostC > $maxC ? $maxC : $contract->frostC;
 				$contract->from_community = $contract->from_community + $from_C;
-				$contract->from_weeks = $contract->from_week + $contract->eggs * config('zjp.contract.profit.week');
+				$contract->from_weeks = $contract->from_week + $contract->eggs * floor(config('zjp.CONTRACT_CYCLE_PROFIT_RATE'));
 
 				$contract->cycle_date = Carbon::today();
-				if ($contract->from_community + $contract->from_weeks + $contract->from_inviter >= $contract->eggs) {
+				if ($contract->from_community + $contract->from_weeks + $contract->from_inviter >= $contract->eggs * floor(config('zjp.CONTRACT_PROFITE_RATE'))) {
 					$contract->is_finished = true;
 				}
 			}

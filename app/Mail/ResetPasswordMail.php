@@ -30,7 +30,7 @@ class ResetPasswordMail extends Mailable
      */
     public function build()
     {
-        return $this->from(env('MAIL_USERNAME'), config('app.name'))->view('mails.users.resetPwd')->with([
+        return $this->from(config('mail.username'), config('app.name'))->markdown('mails.users.resetPwd')->with([
         	'code' => $this->code
 		]);
     }

@@ -32,4 +32,9 @@ class ContractRequest extends FormRequest
 			'eggs' => 'required|numeric'
         ];
     }
+
+    public function message()
+	{
+
+	}
 }

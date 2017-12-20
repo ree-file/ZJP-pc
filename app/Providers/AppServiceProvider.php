@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Contract;
 use App\Observers\ContractObserver;
+use Encore\Admin\Config\Config;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -16,6 +17,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Contract::observe(ContractObserver::class);
+		//Config::load();
     }
 
     /**

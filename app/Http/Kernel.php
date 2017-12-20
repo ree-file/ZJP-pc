@@ -2,7 +2,6 @@
 
 namespace App\Http;
 
-use App\Http\Middleware\PretendLogin;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -59,6 +58,8 @@ class Kernel extends HttpKernel
         'can' => \Illuminate\Auth\Middleware\Authorize::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
+		'auth.pay' => \App\Http\Middleware\PaySecurity::class,
+		'auth.freezed' => \App\Http\Middleware\UserFreezed::class,
 		'jwt.cookie' => \App\Http\Middleware\ApiAuthenticate::class,
 		'jwt.auth' => 'Tymon\JWTAuth\Middleware\GetUserFromToken',
 		'jwt.refresh' => 'Tymon\JWTAuth\Middleware\RefreshToken',

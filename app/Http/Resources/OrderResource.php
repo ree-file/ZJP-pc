@@ -19,10 +19,11 @@ class OrderResource extends Resource
         return [
 			'id'   => $this->id,
 			'seller' => $this->seller,
+			'buyer' => $this->buyer,
 			'status' => $this->status,
 			'price' => $this->price,
 			'nest' => $this->nest,
-			'highest_price' => $highest_price
+			'nest_highest_price' => $highest_price
 		];
     }
 }

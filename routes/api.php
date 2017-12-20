@@ -13,70 +13,51 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::group(['middleware' => 'login', 'prefix' => 'v1'], function () {
-	Route::get('/nest', 'Api\NestsController@nest');
-	Route::get('/order', 'Api\OrdersController@order');
-	Route::get('/orders', 'Api\OrdersController@orders');
-	Route::get('/user', 'Api\UsersController@user');
-	Route::get('/user/cards', 'Api\UsersController@cards');
-	Route::get('/user/nests', 'Api\UsersController@nests');
-	Route::get('/user/nest', 'Api\UsersController@nest');
-	Route::get('/user/orders', 'Api\UsersController@orders');
-	Route::get('/user/supplies', 'Api\UsersController@supplies');
-	Route::post('/password', 'Api\LoginController@changePassword');
-	Route::post('/users', 'Api\UsersController@store');
-	Route::post('/supplies', 'Api\SuppliesController@store');
-	Route::post('/supplies/market', 'Api\SuppliesController@activeToMarket');
-	Route::post('/supplies/active', 'Api\SuppliesController@marketToActive');
-	Route::post('/cards', 'Api\CardsController@store');
-	Route::post('/cards/delete', 'Api\CardsController@delete');
-	Route::post('/nests', 'Api\NestsController@store');
-	Route::post('/contracts', 'Api\ContractsController@store');
-	Route::post('/contracts/upgrade', 'Api\ContractsController@upgrade');
-	Route::post('/contracts/extract', 'Api\ContractsController@extract');
-	Route::post('/orders', 'Api\OrdersController@store');
-	Route::post('/orders/abandon', 'Api\OrdersController@abandon');
-	Route::post('/orders/buy', 'Api\OrdersController@buy');
-});
-
-Route::group(['prefix' => 'v2'], function () {
+// 公共路由，不需登录
+Route::group(['prefix' => 'v1'], function () {
 	Route::post('/login', 'Api\AuthenticateController@login');
-	Route::post('/logout', 'Api\AuthenticateController@logout');
-	Route::get('/common', 'Api\CommonController@common');
-	Route::post('/forget', 'Api\LoginController@resetPassword');
-	Route::post('/check', 'Api\LoginController@checkCode');
-	Route::post('/reset', 'Api\LoginController@resetPassword');
+	Route::get('/logout', 'Api\AuthenticateController@logout');
+	Route::get('/common', 'Api\CommonController@index');
+	Route::post('/forget-password', 'Api\CommonController@forgetPassword');
+	Route::post('/reset-password', 'Api\CommonController@resetPassword');
 });
 
 // 刷新令牌
-Route::group(['middleware' => 'jwt.refresh', 'prefix' => 'v2'], function () {
+Route::group(['middleware' => 'jwt.refresh', 'prefix' => 'v1'], function () {
 	Route::get('/refresh', 'Api\AuthenticateController@refresh');
 });
 
 // 访问
-Route::group(['middleware' => 'jwt.auth', 'prefix' => 'v2'], function () {
-	Route::get('/nest', 'Api\NestsController@nest');
-	Route::get('/order', 'Api\OrdersController@order');
-	Route::get('/orders', 'Api\OrdersController@orders');
-	Route::get('/user', 'Api\UsersController@user');
-	Route::get('/user/cards', 'Api\UsersController@cards');
-	Route::get('/user/nests', 'Api\UsersController@nests');
-	Route::get('/user/nest', 'Api\UsersController@nest');
-	Route::get('/user/orders', 'Api\UsersController@orders');
-	Route::get('/user/supplies', 'Api\UsersController@supplies');
-	Route::post('/password', 'Api\LoginController@changePassword');
-	Route::post('/users', 'Api\UsersController@store');
-	Route::post('/supplies', 'Api\SuppliesController@store');
-	Route::post('/supplies/market', 'Api\SuppliesController@activeToMarket');
-	Route::post('/supplies/active', 'Api\SuppliesController@marketToActive');
+Route::group(['middleware' => ['jwt.auth', 'auth.freezed'], 'prefix' => 'v1'], function () {
+	Route::get('/orders', 'Api\OrdersController@index');
+	Route::get('/orders/{order}', 'Api\OrdersController@show');
+	Route::patch('/orders/{order}/abandon', 'Api\OrdersController@abandon');
+	Route::get('/nests', 'Api\NestsController@index');
+	Route::get('/nests/{nest}', 'Api\NestsController@show');
 	Route::post('/cards', 'Api\CardsController@store');
-	Route::post('/cards/delete', 'Api\CardsController@delete');
+	Route::delete('/cards/{card}', 'Api\CardsController@destroy');
+	Route::post('/supplies', 'Api\SuppliesController@store');
+	Route::post('/private/change-password', 'Api\PrivateController@changePassword');
+	Route::post('/private/store-security-code', 'Api\PrivateController@storeSecurityCode');
+	Route::post('/private/forget-security-code', 'Api\PrivateController@forgetSecurityCode');
+	Route::post('/private/reset-security-code', 'Api\PrivateController@resetSecurityCode');
+	// 私有资源登录可查看到个人的信息
+	Route::get('/private', 'Api\PrivateController@user');
+	Route::get('/private/cards', 'Api\PrivateController@cards');
+	Route::get('/private/nests', 'Api\PrivateController@nests');
+	Route::get('/private/orders', 'Api\PrivateController@nests');
+	Route::get('/private/supplies', 'Api\PrivateController@nests');
+});
+
+// 需要安全密码支付的路由
+Route::group(['middleware' => ['jwt.auth', 'auth.freezed', 'auth.pay'], 'prefix' => 'v1'], function () {
+	Route::post('/users', 'Api\UsersController@store');
 	Route::post('/nests', 'Api\NestsController@store');
-	Route::post('/contracts', 'Api\ContractsController@store');
-	Route::post('/contracts/upgrade', 'Api\ContractsController@upgrade');
-	Route::post('/contracts/extract', 'Api\ContractsController@extract');
 	Route::post('/orders', 'Api\OrdersController@store');
-	Route::post('/orders/abandon', 'Api\OrdersController@abandon');
-	Route::post('/orders/buy', 'Api\OrdersController@buy');
+	Route::post('/private/transfer-money', 'Api\PrivateController@transferMoney');
+	Route::patch('/nests/{nest}/reinvest', 'Api\NestsController@reinvest');
+	Route::patch('/nests/{nest}/upgrade', 'Api\NestsController@upgrade');
+	Route::patch('/contracts/{contract}/extract', 'Api\ContractsController@extract');
+	Route::patch('/orders/{order}/buy', 'Api\OrdersController@buy');
 });
 

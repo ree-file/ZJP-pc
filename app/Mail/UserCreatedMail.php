@@ -29,7 +29,7 @@ class UserCreatedMail extends Mailable
      */
     public function build()
     {
-        return $this->from(env('MAIL_USERNAME'), config('app.name'))->markdown('mails.users.created')->with([
+        return $this->from(config('mail.username'), config('app.name'))->markdown('mails.users.created')->with([
         	'password' => $this->password
 		]);
     }

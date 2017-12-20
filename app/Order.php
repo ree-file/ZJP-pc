@@ -10,9 +10,14 @@ class Order extends Model
 		'status', 'user_id', 'parent_id', 'type', 'community'
 	];
 
-	public function user()
+	public function seller()
 	{
-		return $this->belongsTo('App\User');
+		return $this->belongsTo('App\User', 'seller_id');
+	}
+
+	public function buyer()
+	{
+		return $this->belongsTo('App\User', 'buyer_id');
 	}
 
 	public function nest()

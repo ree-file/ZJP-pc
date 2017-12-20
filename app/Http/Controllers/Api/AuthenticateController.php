@@ -18,28 +18,28 @@ class AuthenticateController extends ApiController
 				return $this->failed('Unauthroized', 401);
 			}
 
+			// 用户账号已被冻结
 			if (User::where('email', $credentials['email'])->first()->is_freezed) {
-				return $this->failed('Freezed.', 401);
+				return $this->failed('Freezed.', 403);
 			}
 		} catch (JWTException $e) {
 			return $this->failed('Could not create token.', 500);
 		}
 
-		//$cookie = cookie('jwt_token', $token, config('jwt.ttl'));
-
+		// 返回 jwt_token 给客户端
 		return $this->success(['jwt_token' => $token]);
 	}
 
 	public function logout()
 	{
-		//$cookie = Cookie::forget('jwt_token');
+		// 将jwt_token 加入黑名单
 		JWTAuth::setToken(JWTAuth::getToken())->invalidate();
-
-		return $this->message('Log out.');
+		return $this->message('');
 	}
 
 	public function refresh(Request $request)
 	{
+		// 取出刷新好的 jwt_token ,，返回到 response 的 payload
 		$newToken = $request->header('Authorization');
 		$newToken = substr($newToken, 7);
 

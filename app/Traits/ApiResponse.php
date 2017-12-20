@@ -62,6 +62,12 @@ trait ApiResponse
 			->message($message);
 	}
 
+	public function deleted($message = "Deleted.")
+	{
+		return $this->setStatusCode(FoundationResponse::HTTP_OK)
+			->message($message);
+	}
+
 	public function notFound($message = 'Not found.')
 	{
 		return $this->failed($message,Foundationresponse::HTTP_NOT_FOUND);

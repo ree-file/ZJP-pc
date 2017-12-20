@@ -24,7 +24,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token', 'security_code'
+        'password', 'remember_token', 'security_code', 'money_active', 'money_limit', 'money_market', 'updated_at', 'is_freezed'
     ];
 
     public function cards()
