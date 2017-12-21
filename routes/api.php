@@ -24,7 +24,7 @@ Route::group(['prefix' => 'v1'], function () {
 
 // 刷新令牌
 Route::group(['middleware' => 'jwt.refresh', 'prefix' => 'v1'], function () {
-	Route::get('/refresh', 'Api\AuthenticateController@refresh');
+	Route::post('/refresh', 'Api\AuthenticateController@refresh');
 });
 
 // 访问

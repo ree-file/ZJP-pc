@@ -62,7 +62,7 @@ class Kernel extends HttpKernel
 		'auth.freezed' => \App\Http\Middleware\UserFreezed::class,
 		'jwt.cookie' => \App\Http\Middleware\ApiAuthenticate::class,
 		'jwt.auth' => 'Tymon\JWTAuth\Middleware\GetUserFromToken',
-		'jwt.refresh' => 'Tymon\JWTAuth\Middleware\RefreshToken',
+		'jwt.refresh' => \App\Http\Middleware\TokenRefresh::class,
 		'login' => \App\Http\Middleware\PretendLogin::class
     ];
 }
