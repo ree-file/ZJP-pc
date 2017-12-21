@@ -34,6 +34,7 @@ Route::group(['middleware' => ['jwt.auth', 'auth.freezed'], 'prefix' => 'v1'], f
 	Route::patch('/orders/{order}/abandon', 'Api\OrdersController@abandon');
 	Route::get('/nests', 'Api\NestsController@index');
 	Route::get('/nests/{nest}', 'Api\NestsController@show');
+	Route::get('/nests/{nest}/records', 'Api\NestsController@records');
 	Route::post('/cards', 'Api\CardsController@store');
 	Route::delete('/cards/{card}', 'Api\CardsController@destroy');
 	Route::post('/supplies', 'Api\SuppliesController@store');

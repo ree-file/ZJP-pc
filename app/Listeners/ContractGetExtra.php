@@ -4,6 +4,7 @@ namespace App\Listeners;
 
 use App\Contract;
 use App\Events\ContractUpgraded;
+use App\NestRecord;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
@@ -39,6 +40,13 @@ class ContractGetExtra
 					$cont->is_finished = true;
 				}
 				$cont->save();
+
+				$nest_record = new NestRecord();
+				$nest_record->nest_id = $cont->nest_id;
+				$nest_record->contract_id = $cont->id;
+				$nest_record->type = 'invite_got';
+				$nest_record->eggs = $eggs * (float) config('zjp.NEST_INVITE_PROFIT_RATE');
+				$nest_record->save();
 			}
 		}
 

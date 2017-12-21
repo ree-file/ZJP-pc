@@ -12,5 +12,11 @@
 */
 
 Route::get('/', function () {
+	$users = \App\User::where('id', 1)->get();
 
+	$a = $users->filter(function ($value, $key) {
+		return $value->email == "user@ZJP.com";
+	});
+
+	dd($a);
 });

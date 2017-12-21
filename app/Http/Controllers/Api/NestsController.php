@@ -6,6 +6,7 @@ use App\Contract;
 use App\Events\ContractUpgraded;
 use App\Http\Resources\NestResource;
 use App\Nest;
+use App\NestRecord;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -98,10 +99,7 @@ class NestsController extends ApiController
 			DB::commit();
 		} catch (\Exception $e) {
 			DB::rollBack();
-			if ($e->getCode() == 101) {
-				return $this->failed($e->getMessage());
-			}
-			return $this->failed('Payment failed.');
+			return $this->failed($e->getMessage());
 		}
 
 		return $this->created();
@@ -156,6 +154,15 @@ class NestsController extends ApiController
 			$contract->cycle_date = Carbon::today();
 			$contract->nest_id = $payment['nest_id'];
 			$contract->save();
+
+			$nest_record = new NestRecord();
+			$nest_record->nest_id = $contract->nest_id;
+			$nest_record->contract_id = $contract->id;
+			$nest_record->user_id = $user->id;
+			$nest_record->type = 'reinvest';
+			$nest_record->eggs = $payment['eggs'];
+			$nest_record->save();
+
 			DB::commit();
 		} catch (\Exception $e) {
 			DB::rollBack();
@@ -215,6 +222,15 @@ class NestsController extends ApiController
 
 			$contract->eggs = $contract->eggs + $payment['eggs'];
 			$contract->save();
+
+			$nest_record = new NestRecord();
+			$nest_record->nest_id = $contract->nest_id;
+			$nest_record->contract_id = $contract->id;
+			$nest_record->user_id = $user->id;
+			$nest_record->type = 'upgrade';
+			$nest_record->eggs = $payment['eggs'];
+			$nest_record->save();
+
 			DB::commit();
 		} catch (\Exception $e) {
 			DB::rollBack();
@@ -224,5 +240,31 @@ class NestsController extends ApiController
 		event(new ContractUpgraded($contract, $payment['eggs']));
 
 		return $this->created();
+	}
+
+	public function records(Request $request, Nest $nest) {
+		if (! $nest) {
+			return $this->notFound();
+		}
+		$user = Auth::user();
+
+		$records = $nest->records;
+		$got_records = $records->filter(function ($value, $key) {
+			return in_array($value->type, ['week_got', 'invite_got', 'community_got']);
+		});
+		$extract_records = $records->filter(function ($value, $key) use ($user) {
+			return $value->type == 'extract' && $value->user_id == $user->id;
+		});
+		$contract_records = $records->filter(function ($value, $key) use ($user) {
+			return in_array($value->type, ['reinvest', 'upgrade']) && $value->user_id == $user->id;
+		});
+
+		$data = [
+			'got_records' => $got_records,
+			'extract_records' => $extract_records,
+			'contract_records' => $contract_records,
+		];
+
+		return $this->success($data);
 	}
 }

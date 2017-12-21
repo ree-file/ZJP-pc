@@ -17,7 +17,7 @@ if (! function_exists('rand_password')) {
 
 if (! function_exists('rand_code')) {
 	function rand_code() {
-		$code = mt_rand(0, 9).mt_rand(0, 9).mt_rand(0, 9).mt_rand(0, 9);
+		$code = strtoupper(str_random(6));
 		return $code;
 	}
 }

@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Accelerator;
 use App\Contract;
+use App\NestRecord;
 use Carbon\Carbon;
 
 class ContractObserver
@@ -19,6 +20,13 @@ class ContractObserver
 					$cont->finished = true;
 				}
 				$cont->save();
+
+				$nest_record = new NestRecord();
+				$nest_record->nest_id = $cont->nest_id;
+				$nest_record->contract_id = $cont->id;
+				$nest_record->type = 'invite_got';
+				$nest_record->eggs = $contract->eggs * (float) config('zjp.NEST_INVITE_PROFIT_RATE');
+				$nest_record->save();
 			}
 		}
 

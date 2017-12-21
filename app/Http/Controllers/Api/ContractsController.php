@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Contract;
 use App\Events\ContractUpgraded;
 use App\Nest;
+use App\NestRecord;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -59,6 +60,16 @@ class ContractsController extends ApiController
 			$user->money_active = $user->money_active + $payment['extract_active'] * (int) config('zjp.EGG_VAL');
 			$user->money_limit = $user->money_limit + $payment['extract_limit'] * (int) config('zjp.EGG_VAL');
 			$user->save();
+
+
+			$nest_record = new NestRecord();
+			$nest_record->nest_id = $contract->nest_id;
+			$nest_record->contract_id = $contract->id;
+			$nest_record->user_id = $user->id;
+			$nest_record->type = 'extract';
+			$nest_record->eggs = $payment['extract_active'] + $payment['extract_limit'];
+			$nest_record->save();
+
 			DB::commit();
 		} catch (\Exception $e) {
 			DB::rollBack();

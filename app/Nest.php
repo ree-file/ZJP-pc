@@ -44,4 +44,9 @@ class Nest extends Model
 	{
 		return $this->hasOne('App\Contract');
 	}
+
+	public function records()
+	{
+		return $this->hasMany('App\NestRecord');
+	}
 }

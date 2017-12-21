@@ -12,7 +12,7 @@ class NestsTableSeeder extends Seeder
     public function run()
     {
         $nest = new \App\Nest();
-        $nest->name = '1';
+        $nest->name = 'AAA666';
 		$nest->user_id = 1;
 		$nest->community = 'A';
 		$nest->save();
@@ -20,7 +20,7 @@ class NestsTableSeeder extends Seeder
 		$contract = new \App\Contract();
 		$contract->nest_id = $nest->id;
 		$contract->cycle_date = \Carbon\Carbon::today();
-		$contract->eggs = 50;
+		$contract->eggs = 600;
 		$contract->save();
     }
 }
