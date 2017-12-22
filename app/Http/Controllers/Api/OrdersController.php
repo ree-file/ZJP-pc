@@ -19,7 +19,7 @@ class OrdersController extends ApiController
 		return $this->success($orders);
 	}
 
-	public function show(Request $request, Order $order)
+	public function show(Order $order)
 	{
 		if (! $order) {
 			return $this->notFound();

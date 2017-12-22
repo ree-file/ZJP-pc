@@ -46,8 +46,8 @@ Route::group(['middleware' => ['jwt.auth', 'auth.freezed'], 'prefix' => 'v1'], f
 	Route::get('/private', 'Api\PrivateController@user');
 	Route::get('/private/cards', 'Api\PrivateController@cards');
 	Route::get('/private/nests', 'Api\PrivateController@nests');
-	Route::get('/private/orders', 'Api\PrivateController@nests');
-	Route::get('/private/supplies', 'Api\PrivateController@nests');
+	Route::get('/private/orders', 'Api\PrivateController@orders');
+	Route::get('/private/supplies', 'Api\PrivateController@supplies');
 });
 
 // 需要安全密码支付的路由

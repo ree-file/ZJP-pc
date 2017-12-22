@@ -6,10 +6,11 @@ return [
 	'EGG_VAL' => '1', // 一个蛋对应的美元额度
 	'CONTRACT_PROFITE_RATE' => '3', // 合约获利倍率
 	'CONTRACT_EXTRACT_LIMTE_RATE' => '0.2', // 合约提取时，只能提取到用户限制资金的蛋提取率
-	'CONTRACT_LEVEL_ONE' => '600', // 一级合约蛋数
-	'CONTRACT_LEVEL_TWO' => '1800', // 二级合约蛋数
-	'CONTRACT_LEVEL_THREE' => '6000', // 三级合约蛋数
-	'CONTRACT_LEVEL_FOUR' => '18000', // 四级合约蛋数
+	'CONTRACT_LEVEL_ONE' => '70', // 一级合约蛋数
+	'CONTRACT_LEVEL_TWO' => '140', // 二级合约蛋数
+	'CONTRACT_LEVEL_THREE' => '700', // 三级合约蛋数
+	'CONTRACT_LEVEL_FOUR' => '1400', // 四级合约蛋数
+	'CONTRACT_LEVEL_FIVE' => '2800', // 四级合约蛋数
 	'CONTRACT_CYCLE_DAYS' => '6', // 合约周期天数
 	'CONTRACT_CYCLE_COMMUNITY_ADD_LIMIT_RATE' => '0.3', // 合约周期社区获取限制率
 	'CONTRACT_CYCLE_PROFIT_RATE' => '0.06', // 合约周期获利率

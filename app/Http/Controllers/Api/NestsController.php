@@ -48,7 +48,8 @@ class NestsController extends ApiController
 				(int) config('zjp.CONTRACT_LEVEL_ONE'),
 				(int) config('zjp.CONTRACT_LEVEL_TWO'),
 				(int) config('zjp.CONTRACT_LEVEL_THREE'),
-				(int) config('zjp.CONTRACT_LEVEL_FOUR')])]
+				(int) config('zjp.CONTRACT_LEVEL_FOUR'),
+				(int) config('zjp.CONTRACT_LEVEL_FIVE')])]
 		]);
 		if ($validator->fails()) {
 			return $this->failed($validator->errors()->first());
@@ -113,7 +114,8 @@ class NestsController extends ApiController
 				(int) config('zjp.CONTRACT_LEVEL_ONE'),
 				(int) config('zjp.CONTRACT_LEVEL_TWO'),
 				(int) config('zjp.CONTRACT_LEVEL_THREE'),
-				(int) config('zjp.CONTRACT_LEVEL_FOUR')])]
+				(int) config('zjp.CONTRACT_LEVEL_FOUR'),
+				(int) config('zjp.CONTRACT_LEVEL_FIVE')])]
 		]);
 		if ($validator->fails()) {
 			return $this->failed($validator->errors()->first());
@@ -193,7 +195,8 @@ class NestsController extends ApiController
 			(int) config('zjp.CONTRACT_LEVEL_ONE'),
 			(int) config('zjp.CONTRACT_LEVEL_TWO'),
 			(int) config('zjp.CONTRACT_LEVEL_THREE'),
-			(int) config('zjp.CONTRACT_LEVEL_FOUR')])) {
+			(int) config('zjp.CONTRACT_LEVEL_FOUR'),
+			(int) config('zjp.CONTRACT_LEVEL_FIVE')])) {
 			return $this->message('Eggs count wrong.');
 		}
 
