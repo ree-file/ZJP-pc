@@ -112,6 +112,7 @@ class PrivateController extends ApiController
 
 		$user = Auth::user();
 
+		
 		if (Hash::check($request->password, $user->password)) {
 			return $this->failed('Wrong password.');
 		}
