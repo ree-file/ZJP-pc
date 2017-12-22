@@ -17,7 +17,7 @@ class ContractObserver
 			if (!$cont->is_finished) {
 				$cont->from_receivers = $cont->from_receivers + $contract->eggs * (float) config('zjp.NEST_INVITE_PROFIT_RATE');
 				if ($cont->from_receivers + $cont->from_community + $cont->from_weeks >= $cont->eggs * (float) config('zjp.CONTRACT_PROFITE_RATE')) {
-					$cont->finished = true;
+					$cont->is_finished = true;
 				}
 				$cont->save();
 

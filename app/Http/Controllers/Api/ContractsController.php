@@ -63,8 +63,8 @@ class ContractsController extends ApiController
 			$contract->save();
 
 			$user = User::where('id', $user->id)->lockForUpdate()->first();
-			$user->money_active = $user->money_active + $payment['extract'] * (int)config('zjp.EGG_VAL') * (1 - (float)config('zjp.CONTRACT_EXTRACT_LIMTE_RATE'));
-			$user->money_limit = $user->money_limit + $payment['extract_limit'] * (int)config('zjp.EGG_VAL') * (float)config('zjp.CONTRACT_EXTRACT_LIMTE_RATE');
+			$user->money_active = $user->money_active + $payment['extract'] * config('zjp.EGG_VAL') * (1 - (float)config('zjp.CONTRACT_EXTRACT_LIMTE_RATE'));
+			$user->money_limit = $user->money_limit + $payment['extract_limit'] * config('zjp.EGG_VAL') * (float)config('zjp.CONTRACT_EXTRACT_LIMTE_RATE');
 			$user->save();
 
 

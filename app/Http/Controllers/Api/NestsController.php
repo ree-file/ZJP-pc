@@ -65,7 +65,7 @@ class NestsController extends ApiController
 
 		$user = Auth::user();
 		$payment = array_merge($request->only(['community', 'pay_active', 'pay_limit', 'eggs']), [
-			'price' => $request->eggs * (int) config('zjp.EGG_VAL'),
+			'price' => $request->eggs * config('zjp.EGG_VAL'),
 			'inviter_id' => $inviter->id,
 			'parent_id' => $parent->id
 		]);
@@ -134,7 +134,7 @@ class NestsController extends ApiController
 
 		$user = Auth::user();
 		$payment = array_merge($request->only(['pay_active', 'pay_limit', 'eggs']), [
-			'price' => $request->eggs * (int) config('zjp.EGG_VAL'),
+			'price' => $request->eggs * config('zjp.EGG_VAL'),
 			'nest_id' => $nest->id
 		]);
 
@@ -202,7 +202,7 @@ class NestsController extends ApiController
 
 		$user = Auth::user();
 		$payment = array_merge($request->only(['pay_active', 'pay_limit', 'eggs']), [
-			'price' => $request->eggs * (int) config('zjp.EGG_VAL'),
+			'price' => $request->eggs * config('zjp.EGG_VAL'),
 			'contract_id' => $contract->id
 		]);
 

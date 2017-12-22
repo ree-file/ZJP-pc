@@ -49,7 +49,7 @@ class UsersController extends ApiController
 
 		$user = Auth::user();
 		$payment = array_merge($request->only(['community', 'pay_active', 'pay_limit', 'eggs', 'email']), [
-			'price' => $request->eggs * (int) config('zjp.EGG_VAL'),
+			'price' => $request->eggs * config('zjp.EGG_VAL'),
 			'inviter_id' => $inviter->id,
 			'parent_id' => $parent->id
 		]);
