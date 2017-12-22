@@ -98,7 +98,7 @@ class ConfigTableSeeder extends Seeder
 				'description' => '巢在社区C为上级贡献的获利率'
 			],
 			[
-				'name' => 'zjp.USER_MAXIMUM_CARDS',
+				'name' => 'zjp.USER_WITHDRAW_TAX_RATE',
 				'value' => '0.055',
 				'description' => '用户提现时收取的税率'
 			]
