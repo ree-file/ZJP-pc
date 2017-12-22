@@ -15,7 +15,7 @@ class CreateNestRecordsTable extends Migration
     {
         Schema::create('nest_records', function (Blueprint $table) {
             $table->increments('id');
-            $table->enum('tpye', ['week_got', 'community_got', 'invite_got', 'extracte', 'reinvest', 'upgrade']);
+            $table->enum('type', ['week_got', 'community_got', 'invite_got', 'extracte', 'reinvest', 'upgrade']);
             $table->integer('nest_id')->unsigned();
             $table->integer('user_id')->unsigned()->nullable();
             $table->integer('contract_id')->unsigned();
