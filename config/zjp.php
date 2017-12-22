@@ -12,6 +12,7 @@ return [
 	'CONTRACT_LEVEL_FOUR' => '1400', // 四级合约蛋数
 	'CONTRACT_LEVEL_FIVE' => '2800', // 四级合约蛋数
 	'CONTRACT_CYCLE_DAYS' => '6', // 合约周期天数
+	'CONTRACT_DAILY_EXTRACT_RATE' => '0.06', // 合约每日最多提取已孵化的比例
 	'CONTRACT_CYCLE_COMMUNITY_ADD_LIMIT_RATE' => '0.3', // 合约周期社区获取限制率
 	'CONTRACT_CYCLE_PROFIT_RATE' => '0.06', // 合约周期获利率
 	'NEST_INVITE_PROFIT_RATE' => '0.06', // 巢给邀请者贡献的获利率
