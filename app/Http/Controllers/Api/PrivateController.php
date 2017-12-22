@@ -13,6 +13,7 @@ use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -103,13 +104,19 @@ class PrivateController extends ApiController
 	{
 		$validator = Validator::make($request->all(), [
 			'password' => 'required|max:255',
+			'new_password' => 'required|max:255'
 		]);
 		if ($validator->fails()) {
 			return $this->failed($validator->errors()->first());
 		}
 
 		$user = Auth::user();
-		$user->password = bcrypt($request->password);
+
+		if (Hash::check($request->password, $user->password)) {
+			return $this->failed('Wrong password.');
+		}
+
+		$user->password = bcrypt($request->new_password);
 		$user->save();
 
 		return $this->message('Changed.');

@@ -17,7 +17,7 @@ class CreateSuppliesTable extends Migration
             $table->increments('id');
 			$table->enum('type', ['save', 'get']);
 			$table->integer('user_id')->unsigned();
-			$table->integer('card_number');
+			$table->string('card_number');
 			$table->decimal('money', 10,2)->unsigned();
 			$table->string('message');
 			$table->enum('status', ['processing', 'accepted', 'rejected'])->default('processing');

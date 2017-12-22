@@ -19,7 +19,9 @@ class AppServiceProvider extends ServiceProvider
     {
 		Schema::defaultStringLength(191);
         Contract::observe(ContractObserver::class);
-		//Config::load();
+        if (env('LOAD_CONFIG' == 'TRUE')) {
+			Config::load();
+		}
     }
 
     /**
