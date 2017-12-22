@@ -15,7 +15,7 @@ class OrdersController extends ApiController
 {
 	public function index(Request $request)
 	{
-		$orders = Order::selling()->with('seller')->paginate(10);
+		$orders = Order::selling()->with('seller', 'nest.contracts', 'nest.children', 'nest.children.children')->paginate(10);
 		return $this->success($orders);
 	}
 
