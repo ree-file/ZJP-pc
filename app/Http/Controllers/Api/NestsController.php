@@ -254,13 +254,13 @@ class NestsController extends ApiController
 		$records = $nest->records;
 		$got_records = $records->filter(function ($value, $key) {
 			return in_array($value->type, ['week_got', 'invite_got', 'community_got']);
-		})->toArray();
+		})->flatten();
 		$extract_records = $records->filter(function ($value, $key) use ($user) {
 			return $value->type == 'extract' && $value->user_id == $user->id;
-		})->toArray();
+		})->flatten();
 		$contract_records = $records->filter(function ($value, $key) use ($user) {
 			return in_array($value->type, ['reinvest', 'upgrade']) && $value->user_id == $user->id;
-		})->toArray();
+		})->flatten();
 
 		$data = [
 			'got_records' => $got_records,
