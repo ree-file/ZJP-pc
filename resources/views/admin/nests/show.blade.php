@@ -106,23 +106,23 @@
 							<th>周增加</th>
 							<th>邀请增加</th>
 							<th>社区增加</th>
-							<th>已提取（可换为活动资金）</th>
-							<th>已提取（可换为限制资金）</th>
+							<th>已提取</th>
 							<th>创建于</th>
 						</tr></thead>
-						<tbody><tr>
+						<tbody>
 							@foreach($contracts as $contract)
+								<tr>
 								<td>{{ $contract->id }}</td>
 								<td>{{ $contract->eggs }}</td>
 								<td>{{ $contract->is_finished == true ? '已完成' : '未完成' }}</td>
 								<td>{{ $contract->from_weeks }}</td>
 								<td>{{ $contract->from_receivers }}</td>
 								<td>{{ $contract->from_community }}</td>
-								<td>{{ $contract->extracted_active }}</td>
-								<td>{{ $contract->extracted_limit }}</td>
+								<td>{{ $contract->extracted }}</td>
 								<td>{{ $contract->created_at }}</td>
+								</tr>
 							@endforeach
-						</tr></tbody>
+						</tbody>
 					</table>
 				</div>
 				<div class="tab-pane" id="tab_4">
@@ -133,8 +133,9 @@
 							<th>社区</th>
 							<th>创建于</th>
 						</tr></thead>
-						<tbody><tr>
+						<tbody>
 							@foreach($nest->receivers as $receiver)
+							<tr>
 								<td>{{ $receiver->id }}</td>
 								<td>
 									<a href="/{{ config('admin.route.prefix') }}/nests/{{ $receiver->id }}">
@@ -143,8 +144,10 @@
 								</td>
 								<td>{{ $receiver->community }}</td>
 								<td>{{ $receiver->created_at }}</td>
+							</tr>
 							@endforeach
-						</tr></tbody>
+
+						</tbody>
 					</table>
 				</div>
 				<div class="tab-pane" id="tab_5">
@@ -155,8 +158,9 @@
 							<th>社区</th>
 							<th>创建于</th>
 						</tr></thead>
-						<tbody><tr>
+						<tbody>
 							@foreach($nest->children as $child)
+							<tr>
 								<td>{{ $child->id }}</td>
 								<td>
 									<a href="/{{ config('admin.route.prefix') }}/nests/{{ $child->id }}">
@@ -165,8 +169,9 @@
 								</td>
 								<td>{{ $child->community }}</td>
 								<td>{{ $child->created_at }}</td>
+							</tr>
 							@endforeach
-						</tr></tbody>
+						</tbody>
 					</table>
 				</div>
 				<div class="tab-pane" id="tab_6">
@@ -177,8 +182,9 @@
 							<th>社区</th>
 							<th>创建于</th>
 						</tr></thead>
-						<tbody><tr>
+						<tbody>
 							@foreach($grandchildren as $grandchild)
+							<tr>
 								<td>{{ $grandchild->id }}</td>
 								<td>
 									<a href="/{{ config('admin.route.prefix') }}/nests/{{ $grandchild->id }}">
@@ -187,8 +193,9 @@
 								</td>
 								<td>{{ $grandchild->community }}</td>
 								<td>{{ $grandchild->created_at }}</td>
+							</tr>
 							@endforeach
-						</tr></tbody>
+						</tbody>
 					</table>
 				</div>
 			</div>
