@@ -46,6 +46,11 @@ class ContractCycleUpdate extends Command
 				->lockForUpdate()
 				->with('nest.contracts')->get();
 
+			if (count($contracts) == 0) {
+				print 'nothing to update';
+				exit();
+			}
+
 			$nest_records = [];
 
 			foreach ($contracts as $contract) {
