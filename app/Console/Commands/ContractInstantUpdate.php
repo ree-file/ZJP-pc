@@ -7,42 +7,41 @@ use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
-class ContractCycleUpdate extends Command
+class ContractInstantUpdate extends Command
 {
-	/**
-	 * The name and signature of the console command.
-	 *
-	 * @var string
-	 */
-	protected $signature = 'contracts:cycle';
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'contracts:instant';
 
-	/**
-	 * The console command description.
-	 *
-	 * @var string
-	 */
-	protected $description = 'Update contracts by `cycle_date`.';
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = '立刻更新合约获利';
 
-	/**
-	 * Create a new command instance.
-	 *
-	 * @return void
-	 */
-	public function __construct()
-	{
-		parent::__construct();
-	}
+    /**
+     * Create a new command instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        parent::__construct();
+    }
 
-	/**
-	 * Execute the console command.
-	 *
-	 * @return mixed
-	 */
-	public function handle()
-	{
+    /**
+     * Execute the console command.
+     *
+     * @return mixed
+     */
+    public function handle()
+    {
 		DB::transaction(function () {
-			$contracts = Contract::where('is_finished', false)
-				->where('cycle_date', '<=', Carbon::today()->subDays((int)config('zjp.CONTRACT_CYCLE_DAYS')))
+			$contracts = \App\Contract::where('is_finished', false)
 				->lockForUpdate()
 				->with('nest.contracts')->get();
 
@@ -102,8 +101,8 @@ class ContractCycleUpdate extends Command
 			DB::table('nest_records')->insert($nest_records);
 		}, 5);
 
-		print 'Contracts cycle finished.';
-	}
+		print 'Contracts instant finished.';
+    }
 
 	public function updateBatch($tableName = "", $multipleData = [])
 	{
