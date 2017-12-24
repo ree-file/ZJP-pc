@@ -25,7 +25,7 @@ class NestResource extends Resource
 			'receivers' => $this->receivers,
 			'parent' => $this->parent,
 			'children' => $this->children,
-			'contracts' => $this->contracts->sortByDesc('created_at'),
+			'contracts' => $this->contracts->sortByDesc('id')->flatten(),
 			'grandchildren' => $grandchildren
 		];
 	}

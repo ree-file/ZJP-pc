@@ -32,7 +32,7 @@ class NestsController extends ApiController
 			return $this->notFound();
 		}
 
-		$nest = Nest::where('id', $nest->id)->with('inviter', 'receivers', 'parent', 'children.children')->first();
+		$nest = Nest::where('id', $nest->id)->with('inviter', 'receivers', 'parent', 'children.children', 'contracts')->first();
 		return $this->success(new NestResource($nest));
 	}
 	// 有支付操作
