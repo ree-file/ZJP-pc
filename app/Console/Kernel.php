@@ -24,8 +24,10 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-         $schedule->command('contracts:cycle')
-                  ->daily();
+		$schedule->command('contracts:cycle')
+			->daily();
+		$schedule->command('contracts:instant')
+					->monthly();
     }
 
     /**
