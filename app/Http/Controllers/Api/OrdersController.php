@@ -15,7 +15,23 @@ class OrdersController extends ApiController
 {
 	public function index(Request $request)
 	{
-		$orders = Order::selling()->with('seller', 'nest.contracts', 'nest.children', 'nest.children.children')->paginate(10);
+		$ordeyBy = 'asc';
+		$min = 0;
+		$max = 999999;
+		if ($request->has('orderBy') && $request->orderBy == 'desc') {
+			$ordeyBy = 'desc';
+		}
+		if ($request->has('min')) {
+			$min = $request->min;
+		}
+		if ($request->has('max')) {
+			$min = $request->max;
+		}
+		$orders = Order::selling()
+			->where('price', '>=', (float) $min)
+			->where('price', '<=', (float) $max)
+			->ordeyBy('id', $ordeyBy)
+			->with('seller', 'nest.contracts', 'nest.children', 'nest.children.children')->paginate(10);
 		return $this->success($orders);
 	}
 
