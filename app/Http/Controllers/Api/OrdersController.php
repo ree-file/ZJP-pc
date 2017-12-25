@@ -30,7 +30,7 @@ class OrdersController extends ApiController
 		$orders = Order::selling()
 			->where('price', '>=', (float) $min)
 			->where('price', '<=', (float) $max)
-			->ordeyBy('id', $ordeyBy)
+			->orderBy('id', $ordeyBy)
 			->with('seller', 'nest.contracts', 'nest.children', 'nest.children.children')->paginate(10);
 		return $this->success($orders);
 	}
