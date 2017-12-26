@@ -162,6 +162,7 @@ class PrivateController extends ApiController
 			'security_code' => 'required',
 			'code' => 'required'
 		]);
+
 		if ($validator->fails()) {
 			return $this->failed($validator->errors()->first());
 		}
