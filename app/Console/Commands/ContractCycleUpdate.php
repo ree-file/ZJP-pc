@@ -54,13 +54,13 @@ class ContractCycleUpdate extends Command
 			$nest_records = [];
 
 			foreach ($contracts as $contract) {
-				$maxB = $contract->eggs * (float)config('zjp.CONTRACT_CYCLE_COMMUNITY_ADD_LIMIT_RATE') * (float) config('zjp.CONTRACT_PROFITE_RATE');
+				$maxB = $contract->eggs * (float)config('zjp.CONTRACT_CYCLE_COMMUNITY_ADD_LIMIT_RATE');
 				$from_B = $contract->frostB;
 				if ($contract->frostB > $maxB) $from_B = $maxB;
 				$from_B = floor($from_B);
 				$contract->from_community = $contract->from_community + $from_B;
 
-				$maxC = $contract->nest->contracts->sum('eggs') * (float)config('zjp.CONTRACT_CYCLE_COMMUNITY_ADD_LIMIT_RATE') * (float)config('zjp.CONTRACT_PROFITE_RATE');
+				$maxC = $contract->nest->contracts->sum('eggs') * (float)config('zjp.CONTRACT_CYCLE_COMMUNITY_ADD_LIMIT_RATE');
 				$from_C = $contract->frostC;
 				if ($contract->frostC > $maxC) $from_C = $maxC;
 				$from_C = floor($from_C);
@@ -68,7 +68,7 @@ class ContractCycleUpdate extends Command
 				$contract->frostB = 0;
 				$contract->frostC = 0;
 
-				$contract->from_weeks = $contract->from_weeks + floor($contract->eggs * (float)config('zjp.CONTRACT_CYCLE_PROFIT_RATE')* (float) config('zjp.CONTRACT_PROFITE_RATE'));
+				$contract->from_weeks = $contract->from_weeks + floor($contract->eggs * (float)config('zjp.CONTRACT_CYCLE_PROFIT_RATE'));
 				$contract->cycle_date = \Carbon\Carbon::today();
 				if ($contract->from_community + $contract->from_weeks + $contract->from_inviter >= $contract->eggs * (float)config('zjp.CONTRACT_PROFITE_RATE')) {
 					$contract->is_finished = true;
