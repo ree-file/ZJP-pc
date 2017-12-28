@@ -5,7 +5,7 @@ return [
 	'MONEY_MARKET_TO_ACTIVE_TAX_RATE' => '0.05', // 用户钱包中市场金额转为活动金额税率
 	'EGG_VAL' => '10', // 一个蛋对应的美元额度
 	'CONTRACT_PROFITE_RATE' => '3', // 合约获利倍率
-	'CONTRACT_EXTRACT_LIMTE_RATE' => '0.2', // 合约提取时，只能提取到用户限制资金的蛋提取率
+	'CONTRACT_EXTRACT_LIMIT_RATE' => '0.2', // 合约提取时，只能提取到用户限制资金的蛋提取率
 	'CONTRACT_LEVEL_ONE' => '70', // 一级合约蛋数
 	'CONTRACT_LEVEL_TWO' => '140', // 二级合约蛋数
 	'CONTRACT_LEVEL_THREE' => '700', // 三级合约蛋数

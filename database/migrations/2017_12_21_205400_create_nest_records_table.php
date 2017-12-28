@@ -19,7 +19,8 @@ class CreateNestRecordsTable extends Migration
             $table->integer('nest_id')->unsigned();
             $table->integer('user_id')->unsigned()->nullable();
             $table->integer('contract_id')->unsigned();
-            $table->integer('eggs')->unsigned();
+            $table->integer('eggs')->unsigned()->nullable();
+            $table->decimal('money')->unsigned()->nullable();
             $table->timestamps();
         });
     }

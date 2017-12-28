@@ -24,7 +24,7 @@ class CreateContractsTable extends Migration
 			$table->integer('from_weeks')->unsigned()->default(0);
 			$table->integer('from_receivers')->unsigned()->default(0);
 			$table->integer('from_community')->unsigned()->default(0);
-			$table->integer('extracted')->unsigned()->default(0);
+			$table->decimal('extracted', 10, 2)->unsigned()->default(0);
             $table->timestamps();
         });
     }

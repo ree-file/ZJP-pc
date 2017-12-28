@@ -38,7 +38,7 @@ class ConfigTableSeeder extends Seeder
 				'description' => '合约获利倍率'
 			],
 			[
-				'name' => 'zjp.CONTRACT_EXTRACT_LIMTE_RATE',
+				'name' => 'zjp.CONTRACT_EXTRACT_LIMIT_RATE',
 				'value' => '0.2',
 				'description' => '合约提取时，只能提取到用户限制资金的蛋提取率'
 			],
