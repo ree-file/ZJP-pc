@@ -10,6 +10,7 @@ use App\Order;
 use App\Supply;
 use App\Traits\CodeCacheHelper;
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -39,9 +40,18 @@ class PrivateController extends ApiController
 	public function nests()
 	{
 		$user = Auth::user();
-		$nests = Nest::where('user_id', $user->id)->with('contracts', 'records')->get();
+		$nests = Nest::where('user_id', $user->id)->with(['contracts', 'records' => function ($query) {
+			$query->where('created_at', '>=', Carbon::today());
+		}])->get();
 
-		return $this->success($nests);
+		$receiversEggs = Nest::where('user_id', $user->id)->with('receivers.contracts')->get()->pluck('receivers')->flatten()->pluck('contracts')->flatten()->sum('eggs');
+
+		$data = [
+			'nests' => $nests,
+			'receivers-eggs' => $receiversEggs
+		];
+
+		return $this->success($data);
 	}
 
 	public function orders()
