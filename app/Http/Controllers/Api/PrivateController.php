@@ -39,7 +39,7 @@ class PrivateController extends ApiController
 	public function nests()
 	{
 		$user = Auth::user();
-		$nests = Nest::where('user_id', $user->id)->with('contracts')->get();
+		$nests = Nest::where('user_id', $user->id)->with('contracts', 'records')->get();
 
 		return $this->success($nests);
 	}
