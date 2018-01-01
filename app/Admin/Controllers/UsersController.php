@@ -93,9 +93,9 @@ class UsersController extends Controller
 				$form->display('id', 'ID');
 				$form->display('email', '邮箱');
 
-				$form->number('money_active', '交易资金')->attribute('min', 0);
-				$form->number('money_limit', '激活资金')->attribute('min', 0);
-				$form->number('money_market', '市场资金')->attribute('min', 0);
+				$form->display('money_active', '交易资金');
+				$form->display('money_limit', '激活资金');
+				$form->display('money_market', '市场资金');
 				$form->switch('is_freezed', '是否冻结');
 				$form->display('created_at', '创建于');
 				$form->display('updated_at', '更新于');
