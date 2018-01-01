@@ -64,7 +64,7 @@ class PrivateController extends ApiController
 	public function supplies()
 	{
 		$user = Auth::user();
-		$supplies = Supply::where('user_id', $user->id)->get();
+		$supplies = Supply::where('user_id', $user->id)->orderBy('id', 'desc')->get();
 		return $this->success($supplies);
 	}
 	// 个人钱包操作
