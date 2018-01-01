@@ -25,13 +25,13 @@ class NestResource extends Resource
 		$childrenC_count = count($this->children->filter(function ($value, $key) {
 			return $value->community == 'C';
 		}));
-		$grandchildrenA_count = count($grandchildren->filter(function ($value, $key) {
+		$grandchildrenA_count = count(collect($grandchildren)->filter(function ($value, $key) {
 			return $value->community == 'A';
 		}));
-		$grandchildrenB_count = count($grandchildren->filter(function ($value, $key) {
+		$grandchildrenB_count = count(collect($grandchildren)->filter(function ($value, $key) {
 			return $value->community == 'B';
 		}));
-		$grandchildrenC_count = count($grandchildren->filter(function ($value, $key) {
+		$grandchildrenC_count = count(collect($grandchildren)->filter(function ($value, $key) {
 			return $value->community == 'C';
 		}));
 		$receivers_count = count($this->receivers);
