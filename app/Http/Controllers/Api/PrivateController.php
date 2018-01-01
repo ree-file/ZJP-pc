@@ -48,7 +48,7 @@ class PrivateController extends ApiController
 
 		$data = [
 			'nests' => $nests,
-			'receivers-eggs' => $receiversEggs
+			'receivers_eggs' => $receiversEggs
 		];
 
 		return $this->success($data);
@@ -188,5 +188,12 @@ class PrivateController extends ApiController
 		$user->save();
 
 		return $this->message('Reseted.');
+	}
+	// 查询拥有的巢 id name 键值对
+	public function simpleNests()
+	{
+		$user = Auth::user();
+		$nests = Nest::where('user_id', $user->id)->select('id', 'name')->get();
+		return $this->success($nests);
 	}
 }

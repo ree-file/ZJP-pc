@@ -130,7 +130,7 @@ class SuppliesController extends Controller
 			$form->display('card_number', '银行卡号');
 			$form->display('money', '金额');
 			$form->display('message', '附加信息');
-
+			$form->image('image', '上传图片内容');
             $form->display('created_at', '创建于');
             $form->display('updated_at', '更新于');
             $form->divider();
@@ -141,6 +141,7 @@ class SuppliesController extends Controller
 			$form->number('doMoney', '操作金额')
 				->attribute(['min' => 0])
 				->help('只能操作处理中的请求，将根据类型和操作金额操作用户相应活动资金。充值类型充入操作金额，提现类型将减去操作金额。若用户活动资金不足或订单已操作，此次操作将失效。');
+			$form->ignore(['image']);
         });
     }
 

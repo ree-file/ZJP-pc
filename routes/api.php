@@ -37,7 +37,6 @@ Route::group(['middleware' => ['jwt.auth', 'auth.freezed'], 'prefix' => 'v1'], f
 	Route::get('/nests/{nest}/records', 'Api\NestsController@records');
 	Route::post('/cards', 'Api\CardsController@store');
 	Route::delete('/cards/{card}', 'Api\CardsController@destroy');
-	Route::post('/supplies', 'Api\SuppliesController@store');
 	Route::post('/private/change-password', 'Api\PrivateController@changePassword');
 	Route::post('/private/store-security-code', 'Api\PrivateController@storeSecurityCode');
 	Route::post('/private/forget-security-code', 'Api\PrivateController@forgetSecurityCode');
@@ -46,6 +45,7 @@ Route::group(['middleware' => ['jwt.auth', 'auth.freezed'], 'prefix' => 'v1'], f
 	Route::get('/private', 'Api\PrivateController@user');
 	Route::get('/private/cards', 'Api\PrivateController@cards');
 	Route::get('/private/nests', 'Api\PrivateController@nests');
+	Route::get('/private/simple-nests', 'Api\PrivateController@simpleNests');
 	Route::get('/private/orders', 'Api\PrivateController@orders');
 	Route::get('/private/supplies', 'Api\PrivateController@supplies');
 });
@@ -55,6 +55,7 @@ Route::group(['middleware' => ['jwt.auth', 'auth.freezed', 'auth.pay'], 'prefix'
 	Route::post('/users', 'Api\UsersController@store');
 	Route::post('/nests', 'Api\NestsController@store');
 	Route::post('/orders', 'Api\OrdersController@store');
+	Route::post('/supplies', 'Api\SuppliesController@store');
 	Route::post('/private/transfer-money', 'Api\PrivateController@transferMoney');
 	Route::patch('/nests/{nest}/reinvest', 'Api\NestsController@reinvest');
 	Route::patch('/nests/{nest}/upgrade', 'Api\NestsController@upgrade');

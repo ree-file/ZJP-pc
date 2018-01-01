@@ -19,7 +19,8 @@ class CreateSuppliesTable extends Migration
 			$table->integer('user_id')->unsigned();
 			$table->string('card_number');
 			$table->decimal('money', 10,2)->unsigned();
-			$table->string('message');
+			$table->string('message')->default('');
+			$table->string('image')->nullable();
 			$table->enum('status', ['processing', 'accepted', 'rejected'])->default('processing');
             $table->timestamps();
         });

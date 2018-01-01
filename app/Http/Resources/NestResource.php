@@ -15,7 +15,9 @@ class NestResource extends Resource
 	 */
 	public function toArray($request)
 	{
-		$grandchildren = count($this->children) == 0 ? null : $this->children->pluck('children')->flatten();
+		$grandchildren = count($this->children) == 0 ? [] : $this->children->pluck('children')->flatten();
+		$children_count = count($this->children);
+		$grandchildren_count = count($grandchildren);
 		$receiversEggs = $this->receivers->pluck('contracts')->flatten()->sum('eggs');
 		return [
 			'id'   => $this->id,
@@ -27,10 +29,10 @@ class NestResource extends Resource
 				return collect($item)->except(['contracts']);
 			}),
 			'parent' => $this->parent,
-			'children' => $this->children,
 			'contracts' => $this->contracts->sortByDesc('id')->flatten(),
-			'grandchildren' => $grandchildren,
-			'receivers-eggs' => $receiversEggs
+			'children_count' => $children_count,
+			'grandchildren_count' => $grandchildren_count,
+			'receivers_eggs' => $receiversEggs
 		];
 	}
 }
