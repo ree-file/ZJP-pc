@@ -19,7 +19,7 @@ class SuppliesController extends ApiController
 			'type' => ['required', Rule::in(['save', 'get'])],
 			'card_number' => 'required',
 			'money' => 'required|numeric|min:0',
-			'message' => 'required|max:255',
+			'message' => 'max:255',
 			'image' => 'mimes:jpeg,bmp,png,gif|dimensions:min_width=200,min_height=200'
 		]);
 
