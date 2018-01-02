@@ -29,7 +29,7 @@ class ConfigTableSeeder extends Seeder
 			],
 			[
 				'name' => 'zjp.EGG_VAL',
-				'value' => '10',
+				'value' => '7',
 				'description' => '一个蛋对应的美元额度'
 			],
 			[
@@ -44,27 +44,27 @@ class ConfigTableSeeder extends Seeder
 			],
 			[
 				'name' => 'zjp.CONTRACT_LEVEL_ONE',
-				'value' => '70',
+				'value' => '100',
 				'description' => '一级合约蛋数'
 			],
 			[
 				'name' => 'zjp.CONTRACT_LEVEL_TWO',
-				'value' => '140',
+				'value' => '200',
 				'description' => '二级合约蛋数'
 			],
 			[
 				'name' => 'zjp.CONTRACT_LEVEL_THREE',
-				'value' => '700',
+				'value' => '1000',
 				'description' => '三级合约蛋数'
 			],
 			[
 				'name' => 'zjp.CONTRACT_LEVEL_FOUR',
-				'value' => '1400',
+				'value' => '2000',
 				'description' => '四级合约蛋数'
 			],
 			[
 				'name' => 'zjp.CONTRACT_LEVEL_FIVE',
-				'value' => '2800',
+				'value' => '4000',
 				'description' => '五级合约蛋数'
 			],
 			[
@@ -99,8 +99,18 @@ class ConfigTableSeeder extends Seeder
 			],
 			[
 				'name' => 'zjp.USER_WITHDRAW_TAX_RATE',
-				'value' => '0.055',
+				'value' => '0.2',
 				'description' => '用户提现时收取的税率'
+			],
+			[
+				'name' => 'zjp.USER_TOTAL_CASH_LIMIT',
+				'value' => '1000',
+				'description' => '用户总提现限制'
+			],
+			[
+				'name' => 'zjp.USER_DAILY_CASH_LIMIT',
+				'value' => '1000',
+				'description' => '用户日常提现限制'
 			]
 		]);
     }

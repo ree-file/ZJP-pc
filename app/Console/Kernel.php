@@ -25,9 +25,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
 		$schedule->command('contracts:cycle')
-			->daily();
-		$schedule->command('contracts:instant')
-					->monthly();
+			->daily()->description('每日刷新到达	周期的合约');
     }
 
     /**

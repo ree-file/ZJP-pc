@@ -15,6 +15,9 @@ Route::group([
 	$router->resources([
 		'users' => UsersController::class,
 		'supplies' => SuppliesController::class,
-		'nests' => NestsController::class
+		'nests' => NestsController::class,
+		'orders' => OrdersController::class
 	]);
+	$router->get('/orders/{order}/abandon', 'OrdersController@abandon');
+	$router->get('/analyse', 'HomeController@analyse');
 });

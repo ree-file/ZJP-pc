@@ -19,4 +19,6 @@ return [
 	'NEST_COMMUNITY_B_PROFIT_RATE' => '0.06', // 巢在社区B为上级贡献的获利率
 	'NEST_COMMUNITY_C_PROFIT_RATE' => '0.06', // 巢在社区C为上级贡献的获利率
 	'USER_WITHDRAW_TAX_RATE' => '0.2', // 用户提现时收取的税率
+	'USER_TOTAL_CASH_LIMIT' => '1000', // 用户总提现限制
+	'USER_DAILY_CASH_LIMIT' => '100' // 用户日常提现限制
 ];

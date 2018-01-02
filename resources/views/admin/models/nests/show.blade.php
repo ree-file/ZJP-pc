@@ -3,9 +3,7 @@
 		<h3 class="box-title">查看</h3>
 
 		<div class="box-tools">
-			<div class="btn-group pull-right" style="margin-right: 10px">
-				<a class="btn btn-sm btn-default form-history-back"><i class="fa fa-arrow-left"></i>&nbsp;返回</a>
-			</div>
+
 		</div>
 	</div>
 	<div class="box-body">

@@ -19,3 +19,5 @@
  */
 
 Encore\Admin\Form::forget(['map', 'editor']);
+app('view')->prependNamespace('admin', resource_path('views/admin'));
+\Encore\Admin\Facades\Admin::js('/vendor/echarts/dist/echarts.simple.min.js');

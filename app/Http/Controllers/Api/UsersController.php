@@ -64,6 +64,7 @@ class UsersController extends ApiController
 				$getter->email = $payment['email'];
 				$password = rand_password();
 				$getter->password = bcrypt($password);
+				$getter->cash_limit = config('zjp.USER_TOTAL_CASH_LIMIT');
 				$getter->save();
 			}
 

@@ -5,17 +5,17 @@ return [
     /*
      * Laravel-admin name.
      */
-    'name'      => 'ZJP admin',
+    'name'      => 'AngelCat 后台管理',
 
     /*
      * Logo in admin panel header.
      */
-    'logo'      => '<b>ZJP</b> admin',
+    'logo'      => '<b>后台管理</b> ',
 
     /*
      * Mini-logo in admin panel header.
      */
-    'logo-mini' => '<b>ZJP</b>',
+    'logo-mini' => '<b></b>',
 
     /*
      * Route configration.
