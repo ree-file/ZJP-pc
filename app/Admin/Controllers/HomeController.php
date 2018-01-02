@@ -48,7 +48,7 @@ class HomeController extends Controller
                 });
 
 				$row->column(4, function (Column $column) {
-					$supplies = Supply::where('type', 'save')->where('status', 'processing')->get();
+					$supplies = Supply::where('type', 'get')->where('status', 'processing')->get();
 					$infoBox = new InfoBox('（待处理）提现申请数量', 'money', 'yellow', '/'.config('admin.route.prefix').'/supplies?type=get&status=processing', count($supplies));
 					$column->append($infoBox);
 				});
