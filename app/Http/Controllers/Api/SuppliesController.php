@@ -40,8 +40,7 @@ class SuppliesController extends ApiController
 		$supply->user_id = Auth::id();
 		$supply->type = $request->type;
 		$supply->card_number = $request->card_number;
-		$supply->money = $request->money;
-		$supply->message = $request->message;
+		$supply->money = $request->money;	
 		$supply->save();
 
 		return $this->created();
