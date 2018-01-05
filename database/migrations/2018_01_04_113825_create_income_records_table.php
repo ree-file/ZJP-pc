@@ -18,9 +18,7 @@ class CreateIncomeRecordsTable extends Migration
             $table->integer('user_id')->unsiged();
             $table->enum('type', ['daily', 'bonus']);
             $table->integer('nest_id')->unsigned();
-            $table->decimal('money_active', 10, 2)->unsigned()->nullable();
-            $table->decimal('money_limit', 10, 2)->unsigned()->nullable();
-            $table->decimal('coins', 10, 2)->unsigned()->nullable();
+            $table->decimal('money', 10, 2)->unsigned()->nullable();
             $table->timestamps();
         });
     }

@@ -46,31 +46,17 @@ class PrivateController extends ApiController
 	public function incomeRecordsAnalyse()
 	{
 		// 今日收益
-		$incomeRecords = IncomeRecord::where('user_id', Auth::id())
+		$incomeRecordsToday = IncomeRecord::where('user_id', Auth::id())
 			->where('created_at', '>=', Carbon::today())
 			->get();
-
-		// 今日统计收益信息
-		$analyseToday = [
-			'money_active_sum' => $incomeRecords->sum('money_active'),
-			'money_limit_sum' => $incomeRecords->sum('money_limit'),
-			'coins' => $incomeRecords->sum('coins')
-		];
 
 		// 所有收益
 		$incomeRecords = IncomeRecord::where('user_id', Auth::id())
 			->get();
 
-		// 统计总收益信息
-		$analyse = [
-			'money_active_sum' => $incomeRecords->sum('money_active'),
-			'money_limit_sum' => $incomeRecords->sum('money_limit'),
-			'coins' => $incomeRecords->sum('coins')
-		];
-
 		$data = [
-			'analyse_today' => $analyseToday,
-			'analyse' => $analyse
+			'analyse_today' => $incomeRecordsToday->sum('money_active'),
+			'analyse' => $incomeRecords->sum('money_active')
 		];
 
 		return $this->success($data);

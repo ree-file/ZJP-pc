@@ -15,6 +15,7 @@ use Encore\Admin\Layout\Content;
 use App\Http\Controllers\Controller;
 use Encore\Admin\Controllers\ModelForm;
 use Encore\Admin\Widgets\Box;
+use Encore\Admin\Widgets\InfoBox;
 use Encore\Admin\Widgets\Tab;
 use Encore\Admin\Widgets\Table;
 use Illuminate\Support\Facades\DB;
@@ -90,15 +91,18 @@ class UsersController extends Controller
 			$tab->add('银行卡', $this->form2()->edit($id));
             $tab->add('巢', view('admin.models.users._nests', compact('nests')));
 			$tab->add('项款请求', view('admin.models.users._supplies', compact('supplies')));*/
-			// 找到用户
-			$user = User::with('cards')->find($id);
+/*			// 找到用户
+			$user = User::with('cards', 'nests')->find($id);
 			// 用户银行卡
 			$cards = $user->cards;
+			// 用户猫窝
+			$nests = $user->nests;
 
 			$tab = new Tab();
 
 			$form = new \Encore\Admin\Widgets\Form();
-			$form->method('put');
+			$form->method();
+			$form->hidden('_method')->default('PUT');
 			$form->display('id', 'ID')->default($user->id);
 			$form->display('email', '邮箱')->default($user->email);
 			$form->display('money_active', '交易资金')->default($user->money_active);
@@ -110,22 +114,42 @@ class UsersController extends Controller
 
 			$tab->add('基本信息', $form);
 
+			// 创建银行卡页面
+
 			$headers = ['ID', '银行', '账户名', '卡号', '创建于'];
 
 			$rows = [];
 
 			foreach ($cards as $card) {
-				array_push($row, [$card->id, $card->bankname, $card->username, $card->number, $card->created_at]);
+				$row = [$card->id, $card->bankname, $card->username, $card->number, $card->created_at];
+				array_push($rows, $row);
 			}
 
 			$table = new Table($headers, $rows);
 
-			$box = new Box('银行卡', $table);
+			$box = new Box('银行卡列表', $table);
+
+			$tab->add('银行卡', $box->solid()->style('success'));
+			$url = "/".config('admin.route.prefix')."/";
+			$tab->add('<span onclick="javascript:window.location.href='.$url.'">猫窝</span>', "");
+			$tab->add('<span onclick="javascript:window.location.href='.$url.'">充值记录</span>', "");
+			$tab->add('<span onclick="javascript:window.location.href='.$url.'">提现记录</span>', "");
+			$tab->add('<span onclick="javascript:window.location.href='.$url.'">市场单</span>', "");*/
+
+			// 创建猫窝页面
+
 
 			$content->header('用户');
 			$content->description('编辑');
 
-            $content->body($tab);
+			$content->row(function ($row) {
+				$row->column(3, new InfoBox('猫窝', 'users', 'aqua', '/demo/users', '1024'));
+				$row->column(3, new InfoBox('', 'shopping-cart', 'green', '/demo/orders', '150%'));
+				$row->column(3, new InfoBox('Articles', 'book', 'yellow', '/demo/articles', '2786'));
+				$row->column(3, new InfoBox('市场单	', 'file', 'red', '/demo/files', '698726'));
+			});
+
+            $content->body($this->form($id)->edit($id));
         });
     }
     /**
@@ -137,6 +161,24 @@ class UsersController extends Controller
 	{
 		return Admin::form(User::class, function (Form $form) use ($id) {
 			if ($id) {
+
+				$user = User::with('cards', 'nests')->find($id);
+				// 用户银行卡
+				$cards = $user->cards;
+
+				$headers = ['ID', '银行', '账户名', '卡号', '创建于'];
+
+				$rows = [];
+
+				foreach ($cards as $card) {
+					$row = [$card->id, $card->bankname, $card->username, $card->number, $card->created_at];
+					array_push($rows, $row);
+				}
+
+				$table = new Table($headers, $rows);
+
+				$box = new Box('银行卡列表', $table);
+
 				$form->tab('基本信息', function ($form) {
 					$form->display('id', 'ID');
 					$form->display('email', '邮箱');
@@ -146,15 +188,10 @@ class UsersController extends Controller
 					$form->switch('is_freezed', '是否冻结');
 					$form->display('created_at', '创建于');
 					$form->display('updated_at', '更新于');
-				})->tab('银行卡', function ($form) {
-					$form->hasMany('cards', function (Form\NestedForm $form) {
-						$form->text('number', '卡号');
-						$form->text('username', '账户名');
-						$form->text('bankname', '银行名');
-					});
-				})->tab('wwww', function ($form) {
-					$form->add('nimasi');
+				})->tab('银行卡', function ($form) use ($box) {
+					$form->html($box);
 				});
+
 			} else {
 				$form->email('email', '邮箱')->rules('required|unique:users');
 				$form->password('password', '密码')->rules('required');
