@@ -54,7 +54,7 @@ class User extends Authenticatable
 
 	public function withdrawalApplications()
 	{
-		return $this->hasMany('App\WithdrawlApplication');
+		return $this->hasMany('App\WithdrawalApplication');
 	}
 
 	public function transferRecordsOfPaying()

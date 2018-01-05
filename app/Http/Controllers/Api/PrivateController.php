@@ -55,8 +55,8 @@ class PrivateController extends ApiController
 			->get();
 
 		$data = [
-			'analyse_today' => $incomeRecordsToday->sum('money_active'),
-			'analyse' => $incomeRecords->sum('money_active')
+			'analyse_today' => $incomeRecordsToday->sum('money'),
+			'analyse' => $incomeRecords->sum('money')
 		];
 
 		return $this->success($data);

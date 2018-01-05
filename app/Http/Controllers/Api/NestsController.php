@@ -332,5 +332,4 @@ class NestsController extends ApiController
 
 		return $this->created();
 	}
-
 }

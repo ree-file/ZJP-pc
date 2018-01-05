@@ -4,7 +4,6 @@ namespace App\Admin\Controllers;
 
 use App\Contract;
 use App\Nest;
-use App\Supply;
 use App\User;
 
 use Carbon\Carbon;
@@ -135,18 +134,27 @@ class UsersController extends Controller
 			$tab->add('<span onclick="javascript:window.location.href='.$url.'">充值记录</span>', "");
 			$tab->add('<span onclick="javascript:window.location.href='.$url.'">提现记录</span>', "");
 			$tab->add('<span onclick="javascript:window.location.href='.$url.'">市场单</span>', "");*/
-
-			// 创建猫窝页面
-
-
 			$content->header('用户');
-			$content->description('编辑');
+			$content->description('查看与编辑');
 
-			$content->row(function ($row) {
-				$row->column(3, new InfoBox('猫窝', 'users', 'aqua', '/demo/users', '1024'));
-				$row->column(3, new InfoBox('', 'shopping-cart', 'green', '/demo/orders', '150%'));
-				$row->column(3, new InfoBox('Articles', 'book', 'yellow', '/demo/articles', '2786'));
-				$row->column(3, new InfoBox('市场单	', 'file', 'red', '/demo/files', '698726'));
+			$content->row(function ($row) use($id) {
+				$user = User::with('nests', 'rechargeApplications', 'withdrawalApplications', 'orders')->find($id);
+
+				$url = config('admin.route.prefix').'/nests?user='.$user->email;
+				$count = $user->nests->count();
+				$row->column(3, new InfoBox('猫窝', 'shopping-bag', 'red', $url, $count));
+
+				$url = config('admin.route.prefix').'/recharge-applications?user='.$user->email;
+				$count = $user->rechargeApplications->count();
+				$row->column(3, new InfoBox('充值申请', 'dollar', 'green', $url, $count));
+
+				$url = config('admin.route.prefix').'/withdrawal-applications?user='.$user->email;
+				$count = $user->withdrawalApplications->count();
+				$row->column(3, new InfoBox('提现申请', 'money', 'yellow', $url, $count));
+
+				$url = config('admin.route.prefix').'/orders?user='.$user->email;
+				$count = $user->orders->count();
+				$row->column(3, new InfoBox('市场单	', 'purple', 'purple', $url, $count));
 			});
 
             $content->body($this->form($id)->edit($id));
