@@ -14,8 +14,9 @@ Route::group([
 
 	$router->resources([
 		'users' => UsersController::class,
-		'supplies' => SuppliesController::class,
 		'nests' => NestsController::class,
+		'rechargeApplications' => RechargeApplicationsController::class,
+		'withdrawalApplications' => WithdrawalApplicationsController::class,
 		'orders' => OrdersController::class
 	]);
 

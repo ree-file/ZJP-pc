@@ -17,7 +17,7 @@ class OrdersController extends Controller
 	public function index(Request $request)
 	{
 		return Admin::content(function (Content $content) {
-			$content->header('市场');
+			$content->header('市场单');
 			$content->description('列表');
 			$content->body($this->grid());
 		});
@@ -26,40 +26,26 @@ class OrdersController extends Controller
 	protected function grid()
 	{
 		return Admin::grid(Order::class, function (Grid $grid) {
+			// 默认倒序
+			$grid->model()->orderBy('id', 'desc');
+
 			$grid->id('ID')->sortable();
-			$grid->nest('巢名')->display(function ($nest) {
-				return $nest['name'];
-			});
+			$grid->nest_id('猫窝ID');
 			$grid->status('状态')->sortable()->display(function ($status) {
-				if ($status == 'finished') return '<span class="text-success">已交易</span>';
-				if ($status == 'abandoned') return '<span class="text-danger">已下架</span>';
-				return '<span class="text-warning">售卖中</span>';
+				if ($status == 'finished') return '<strong class="text-success">已交易</strong>';
+				if ($status == 'abandoned') return '<strong class="text-danger">已下架</strong>';
+				return '<strong class="text-warning">售卖中</strong>';
 			});
 			$grid->price('价格')->sortable();
-			$grid->seller('售卖者')->display(function ($seller) {
-				return $seller['email'];
-			});
-			$grid->buyer('购买者')->display(function ($buyer) {
-				if ($buyer) {
-					return $buyer['email'];
-				} else {
-					return '';
-				}
-			});
+			$grid->seller_id('售卖者ID');
+			$grid->buyer_id('购买者ID');
 			$grid->created_at('创建于');
 
 			// 添加过滤分类
 			$grid->filter(function($filter){
-				$filter->where(function ($query) {
-					$query->whereHas('nest', function ($query) {
-						$query->where('name', 'like', "%{$this->input}%");
-					});
-				}, '巢名');
-				$filter->where(function ($query) {
-					$query->whereHas('seller', function ($query) {
-						$query->where('email', 'like', "%{$this->input}%");
-					});
-				}, '售卖者');
+				$filter->equal('nest_id', '猫窝ID');
+				$filter->equal('seller_id', '售卖者ID');
+				$filter->equal('buyer_id', '购买者ID');
 				$filter->equal('status', '状态')->radio([
 					''   => '所有',
 					'finished'    => '已交易',

@@ -37,7 +37,7 @@ class User extends Authenticatable
 		return $this->hasMany('App\Nest');
 	}
 
-	public function sold()
+	public function orders()
 	{
 		return $this->hasMany('App\Order', 'seller_id');
 	}

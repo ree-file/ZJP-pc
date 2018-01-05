@@ -30,41 +30,48 @@ class MenuTableSeeder extends Seeder
 			[
 				'parent_id' => 0,
 				'order' => 3,
-				'title' => '巢',
-				'icon' => 'fa-bitbucket',
+				'title' => '猫窝',
+				'icon' => 'fa-shopping-bag',
 				'uri' => '/nests'
 			],
 			[
 				'parent_id' => 0,
 				'order' => 4,
-				'title' => '申请',
-				'icon' => 'fa-credit-card-alt',
-				'uri' => '/supplies'
+				'title' => '充值申请',
+				'icon' => 'fa-dollar',
+				'uri' => '/rechargeApplications'
 			],
 			[
 				'parent_id' => 0,
 				'order' => 5,
-				'title' => '市场',
+				'title' => '提现申请',
+				'icon' => 'fa-money',
+				'uri' => '/withdrawalApplications'
+			],
+			[
+				'parent_id' => 0,
+				'order' => 6,
+				'title' => '市场单',
 				'icon' => 'fa-list-alt',
 				'uri' => '/orders'
 			],
 			[
 				'parent_id' => 0,
-				'order' => 6,
+				'order' => 7,
 				'title' => '统计',
 				'icon' => 'fa-bar-chart',
 				'uri' => '/analyse'
 			],
 			[
 				'parent_id' => 0,
-				'order' => 7,
+				'order' => 8,
 				'title' => '配置',
 				'icon' => 'fa-toggle-on',
 				'uri' => '/config'
 			],
 			[
 				'parent_id' => 0,
-				'order' => 8,
+				'order' => 9,
 				'title' => '运行任务',
 				'icon' => 'fa-clock-o',
 				'uri' => '/scheduling'

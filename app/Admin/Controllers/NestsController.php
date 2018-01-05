@@ -30,7 +30,7 @@ class NestsController extends Controller
     {
         return Admin::content(function (Content $content) {
 
-            $content->header('巢');
+            $content->header('猫窝');
             $content->description('列表');
 
             $content->body($this->grid());
@@ -63,30 +63,33 @@ class NestsController extends Controller
     protected function grid()
     {
         return Admin::grid(Nest::class, function (Grid $grid) {
+			// 默认倒序
+			$grid->model()->orderBy('id', 'desc');
 
-            $grid->id('ID')->sortable();
+			$grid->id('ID')->sortable();
 			$grid->name('名字');
-			$grid->community('社区')->sortable();
-			$grid->column('user.email', '用户邮箱');
-
+			$grid->user_id('用户ID');
             $grid->created_at('创建于')->sortable();
 
-			$grid->disableCreation();
-			$grid->disableRowSelector();
 			$grid->actions(function ($actions) {
 				$actions->disableDelete();
 				$actions->disableEdit();
 				$actions->append('<a href="/'.config('admin.route.prefix').'/nests/'.$actions->getKey().'"><i class="fa fa-eye"></i></a>');
 			});
+
 			$grid->filter(function($filter){
 				// 在这里添加字段过滤器
 				$filter->like('name', '名字');
-				$filter->like('community', '社区');
-				$filter->where(function ($query) {
-					$query->whereHas('user', function ($query) {
-						$query->where('email', 'like', "%{$this->input}%");
-					});
-				}, '用户邮箱');
+				$filter->equal('user_id', '用户ID');
+			});
+
+			// 取消创建
+			$grid->disableCreation();
+			// 取消批量删除
+			$grid->tools(function ($tools) {
+				$tools->batch(function ($batch) {
+					$batch->disableDelete();
+				});
 			});
         });
     }
@@ -110,11 +113,10 @@ class NestsController extends Controller
 	public function show($id)
 	{
 		return Admin::content(function (Content $content) use ($id) {
-			$content->header('巢');
+			$content->header('猫窝');
 			$content->description('查看');
-			$nest = Nest::where('id', $id)->with('children', 'receivers', 'children.children', 'contracts')->first();
-			$contracts = $nest->contracts->sortByDesc('id');
-			$grandchildren = $nest->children->pluck('children')->flatten();
+
+			$nest = Nest::where('id', $id)->with('contracts')->first();
 			$content->body(view('admin.models.nests.show', compact('nest', 'contracts', 'grandchildren')));
 		});
 	}

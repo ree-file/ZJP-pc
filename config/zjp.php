@@ -35,4 +35,7 @@ return [
 	'CONTRACT_MONEY_ACTIVE_RATE' => '0.7', // 合约获取活动资金比例
 	'CONTRACT_MONEY_LIMIT_RATE' => '0.2', // 合约获取限制资金比例
 	'CONTRACT_COINS_RATE' => '0.1', // 合约获取猫币比例
+	'WITHDRAW_MONEY_LIMIT_RATE' => '0.2', // 提现时转为限制资金的比例
+	'WITHDRAW_COINS_RATE' => '0.1', // 提现时转为猫币的比例
+	'WITHDRAW_CASH_RATE' => '0.7', // 提现时转为现金的比例
 ];
