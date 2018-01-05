@@ -113,6 +113,8 @@ class PrivateController extends ApiController
 		$nests = Nest::where('user_id', Auth::id())
 			->withCount(['contracts as eggs_sum' => function ($query) {
 				$query->select(DB::raw('SUM(eggs) as eggssum'));
+			}, 'contracts as hatches_sum' => function ($query) {
+				$query->select(DB::raw('SUM(hatches) as hatchessum'));
 			}])->get();
 
 		// 为每个猫窝添加计算出的价值属性
