@@ -3,13 +3,15 @@
 namespace App\Http\Controllers\Api;
 
 use App\Card;
+use App\Handlers\CodeCacheHandler;
 use App\Http\Resources\UserResource;
+use App\IncomeRecord;
 use App\Mail\ResetSecurityCodeMail;
 use App\Nest;
 use App\Order;
-use App\Supply;
-use App\Traits\CodeCacheHelper;
-use App\User;
+use App\RechargeApplication;
+use App\TransferRecord;
+use App\WithdrawalApplication;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,43 +19,111 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
 class PrivateController extends ApiController
 {
-	use CodeCacheHelper;
-	// 返回登录用户个人信息
-	public function user()
+	// 个人收益记录
+	public function incomeRecords(Request $request)
 	{
-		$user = Auth::user();
-		return $this->success(new UserResource($user));
+		// 如果请求今日收益
+		if ($request->tab == 'today') {
+			// 分页
+			$incomeRecords = IncomeRecord::where('user_id', Auth::id())
+				->where('created_at', '>=', Carbon::today())
+				->simplePaginate(10);
+
+			return $this->success($incomeRecords);
+		}
+
+		// 分页
+		$incomeRecords = IncomeRecord::where('user_id', Auth::id())
+			->simplePaginate(10);
+
+		return $this->success($incomeRecords);
 	}
-	// 返回私有资源
-	public function cards()
+
+	// 个人收益记录统计信息
+	public function incomeRecordsAnalyse()
 	{
-		$user = Auth::user();
-		$cards = Card::where('user_id', $user->id)->get();
+		// 今日收益
+		$incomeRecords = IncomeRecord::where('user_id', Auth::id())
+			->where('created_at', '>=', Carbon::today())
+			->get();
 
-		return $this->success($cards->toArray());
-	}
+		// 今日统计收益信息
+		$analyseToday = [
+			'money_active_sum' => $incomeRecords->sum('money_active'),
+			'money_limit_sum' => $incomeRecords->sum('money_limit'),
+			'coins' => $incomeRecords->sum('coins')
+		];
 
-	public function nests()
-	{
-		$user = Auth::user();
-		$nests = Nest::where('user_id', $user->id)->with(['contracts', 'records' => function ($query) {
-			$query->where('created_at', '>=', Carbon::today());
-		}])->get();
+		// 所有收益
+		$incomeRecords = IncomeRecord::where('user_id', Auth::id())
+			->get();
 
-		$receiversEggs = Nest::where('user_id', $user->id)->with('receivers.contracts')->get()->pluck('receivers')->flatten()->pluck('contracts')->flatten()->sum('eggs');
+		// 统计总收益信息
+		$analyse = [
+			'money_active_sum' => $incomeRecords->sum('money_active'),
+			'money_limit_sum' => $incomeRecords->sum('money_limit'),
+			'coins' => $incomeRecords->sum('coins')
+		];
 
 		$data = [
-			'nests' => $nests,
-			'receivers_eggs' => $receiversEggs
+			'analyse_today' => $analyseToday,
+			'analyse' => $analyse
 		];
 
 		return $this->success($data);
 	}
 
+	// 个人转账支付记录
+	public function transferRecords(Request $request)
+	{
+		// 查询收款记录
+		if ($request->tab == 'receiving') {
+			$transferRecords = TransferRecord::where('receiver_id', Auth::id())
+				->orderBy('created_at', 'desc')
+				->simplePaginate(10);
+
+			return $this->success($transferRecords);
+		}
+
+		// 查询付款记录
+		if ($request->tab == 'paying') {
+			$transferRecords = TransferRecord::where('payer_id', Auth::id())
+				->orderBy('created_at', 'desc')
+				->simplePaginate(10);
+
+			return $this->success($transferRecords);
+		}
+
+		// 查询所有
+		$transferRecords = TransferRecord::where('payer_id', Auth::id())
+			->orwhere('receiver_id', Auth::id())
+			->orderBy('created_at', 'desc')
+			->simplePaginate(10);
+
+		return $this->success($transferRecords);
+	}
+
+	// 个人猫窝
+	public function nests()
+	{
+		// 取出所有猫窝的同时取出相关联的合约蛋数和
+		$nests = Nest::where('user_id', Auth::id())
+			->withCount(['contracts as eggs_sum' => function ($query) {
+				$query->select(DB::raw('SUM(eggs) as eggssum'));
+			}])->get();
+
+		// 为每个猫窝添加计算出的价值属性
+		$nests = $nests->each(function ($item, $key) {
+			$item->val = $item->eggs_sum * config('zjp.EGG_VAL');
+		});
+
+		return $this->success($nests->toArray());
+	}
+
+	// 个人市场单
 	public function orders()
 	{
 		$user = Auth::user();
@@ -61,54 +131,41 @@ class PrivateController extends ApiController
 		return $this->success($orders);
 	}
 
-	public function supplies()
+	// 个人信息
+	public function user()
 	{
 		$user = Auth::user();
-		$supplies = Supply::where('user_id', $user->id)->orderBy('id', 'desc')->get();
-		return $this->success($supplies);
+		return $this->success(new UserResource($user));
 	}
-	// 个人钱包操作
-	public function transferMoney(Request $request)
-	{
-		$validator = Validator::make($request->all(), [
-			'pay' => 'required|numeric|min:0',
-			'type' => ['required', Rule::in([
-				'active-to-market',
-				'market-to-active'
-			])]
-		]);
-		if ($validator->fails()) {
-			return $this->failed($validator->errors()->first());
-		}
 
+	// 个人银行卡
+	public function cards()
+	{
 		$user = Auth::user();
-		$payment = $request->only(['pay', 'type']);
-		DB::beginTransaction();
-		try {
-			$user = User::where('id', $user->id)->lockForUpdate()->first();
-			if ($payment['type'] == 'active-to-market') {
-				if ($payment['pay'] > $user->money_active) {
-					throw new \Exception('Wallet no enough money.');
-				}
-				$user->money_active = $user->money_active - $payment['pay'];
-				$user->money_market = $user->money_market + $payment['pay'];
-				$user->save();
-			}
-			if ($payment['type'] == 'market-to-active') {
-				if ($payment['pay'] > $user->money_market) {
-					throw new \Exception('Wallet no enough money.');
-				}
-				$user->money_active = $user->money_active + $payment['pay'] * (1 - (float) config('zjp.MONEY_MARKET_TO_ACTIVE_TAX_RATE'));
-				$user->money_market = $user->money_market - $payment['pay'];
-				$user->save();
-			}
-			DB::commit();
-		} catch (\Exception $e) {
-			DB::rollBack();
-			return $this->failed($e->getMessage());
-		}
-		return $this->message('Transfered.');
+		$cards = Card::where('user_id', $user->id)->get();
+		return $this->success($cards);
 	}
+
+	// 个人充值申请
+	public function rechargeApplications()
+	{
+		$rechargeApplications = RechargeApplication::where('user_id', Auth::id())
+			->orderBy('created_at', 'desc')
+			->simplePaginate(10);
+
+		return $this->success($rechargeApplications);
+	}
+
+	// 个人提现申请
+	public function withdrawalApplications()
+	{
+		$withdrawalApplications = WithdrawalApplication::where('user_id', Auth::id())
+			->orderBy('created_at', 'desc')
+			->simplePaginate(10);
+
+		return $this->success($withdrawalApplications);
+	}
+
 	// 修改密码
 	public function changePassword(Request $request)
 	{
@@ -131,7 +188,8 @@ class PrivateController extends ApiController
 
 		return $this->message('Changed.');
 	}
-	// 修改安全密码
+
+	// 创建安全密码
 	public function storeSecurityCode(Request $request)
 	{
 		$validator = Validator::make($request->all(), [
@@ -151,22 +209,24 @@ class PrivateController extends ApiController
 		return $this->created();
 	}
 
-	public function forgetSecurityCode()
+	// 忘记安全密码
+	public function forgetSecurityCode(CodeCacheHandler $cacher)
 	{
 		$user = Auth::user();
 
-		if ($this->hasSent($user->email)) {
+		if ($cacher->hasSent($user->email)) {
 			return $this->failed('Send mail too often.');
 		}
 
 		$code = rand_code();
-		$this->setCode($user->email, $code);
+		$cacher->setCode($user->email, $code);
 		Mail::to($user->email)->queue(new ResetSecurityCodeMail($code));
 
 		return $this->created();
 	}
 
-	public function resetSecurityCode(Request $request)
+	// 重置安全密码
+	public function resetSecurityCode(Request $request, CodeCacheHandler $cacher)
 	{
 		$validator = Validator::make($request->all(), [
 			'security_code' => 'required',
@@ -179,21 +239,14 @@ class PrivateController extends ApiController
 
 		$user = Auth::user();
 
-		if ($this->getCode($user->email) != $request->code) {
+		if ($cacher->getCode($user->email) != $request->code) {
 			return $this->failed('Wrong code.');
 		}
 
-		$this->forgetCode($user->email);
+		$cacher->forgetCode($user->email);
 		$user->security_code = bcrypt($request->security_code);
 		$user->save();
 
 		return $this->message('Reseted.');
-	}
-	// 查询拥有的巢 id name 键值对
-	public function simpleNests()
-	{
-		$user = Auth::user();
-		$nests = Nest::where('user_id', $user->id)->select('id', 'name')->get();
-		return $this->success($nests);
 	}
 }

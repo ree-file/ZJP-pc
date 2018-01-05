@@ -3,9 +3,8 @@
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
-use Kalnoy\Nestedset\NestedSet;
 
-class CreateNestsTable extends Migration
+class CreateWithdrawalApplicationsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,12 +13,14 @@ class CreateNestsTable extends Migration
      */
     public function up()
     {
-        Schema::create('nests', function (Blueprint $table) {
+        Schema::create('withdrawal_applications', function (Blueprint $table) {
             $table->increments('id');
-			$table->string('name')->unique();
 			$table->integer('user_id')->unsigned();
+			$table->decimal('money', 10, 2)->unsigned();
+			$table->string('card_number');
+			$table->enum('status', ['processing', 'accepted', 'rejected'])->default('processing');
+			$table->string('message')->nullable();
             $table->timestamps();
-			NestedSet::columns($table);
         });
     }
 
@@ -30,6 +31,6 @@ class CreateNestsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('nests');
+        Schema::dropIfExists('withdrawal_applications');
     }
 }

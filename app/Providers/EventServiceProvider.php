@@ -15,8 +15,8 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
-        'App\Events\ContractUpgraded' => [
-            'App\Listeners\ContractGetExtra',
+        'App\Events\NestInvested' => [
+            'App\Listeners\ShareBonus',
         ],
     ];
 

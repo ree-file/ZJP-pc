@@ -17,8 +17,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+    	// mysql5.7以下数据库兼容问题
 		Schema::defaultStringLength(191);
-        Contract::observe(ContractObserver::class);
         if (env('LOAD_CONFIG') == true) {
 			Config::load();
 		}

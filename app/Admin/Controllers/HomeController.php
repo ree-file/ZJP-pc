@@ -6,8 +6,10 @@ use App\Contract;
 use App\Http\Controllers\Controller;
 use App\Nest;
 use App\Order;
+use App\RechargeApplication;
 use App\Supply;
 use App\User;
+use App\WithdrawalApplication;
 use Encore\Admin\Controllers\Dashboard;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Layout\Column;
@@ -25,7 +27,7 @@ class HomeController extends Controller
     {
         return Admin::content(function (Content $content) {
 
-            $content->header('主页');
+            $content->header('仪表盘');
             $content->description('导航面板');
 
             $content->row(function (Row $row) {
@@ -42,20 +44,20 @@ class HomeController extends Controller
                 });
 
                 $row->column(4, function (Column $column) {
-					$supplies = Supply::where('type', 'save')->where('status', 'processing')->get();
-					$infoBox = new InfoBox('（待处理）充值申请数量', 'dollar', 'green', '/'.config('admin.route.prefix').'/supplies?type=save&status=processing', count($supplies));
+					$rechargeApplications = RechargeApplication::where('status', 'processing')->get();
+					$infoBox = new InfoBox('（待处理）充值申请数量', 'dollar', 'green', '/'.config('admin.route.prefix').'/supplies?type=save&status=processing', count($rechargeApplications));
 					$column->append($infoBox);
                 });
 
 				$row->column(4, function (Column $column) {
-					$supplies = Supply::where('type', 'get')->where('status', 'processing')->get();
-					$infoBox = new InfoBox('（待处理）提现申请数量', 'money', 'yellow', '/'.config('admin.route.prefix').'/supplies?type=get&status=processing', count($supplies));
+					$withdrawalApplications = WithdrawalApplication::where('status', 'processing')->get();
+					$infoBox = new InfoBox('（待处理）提现申请数量', 'money', 'yellow', '/'.config('admin.route.prefix').'/supplies?type=get&status=processing', count($withdrawalApplications));
 					$column->append($infoBox);
 				});
 
 				$row->column(4, function (Column $column) {
 					$orders = Order::where('status', 'selling')->get();
-					$infoBox = new InfoBox('市场在售数量', 'list-alt', 'purple', '/'.config('admin.route.prefix').'/orders?status=selling', count($orders));
+					$infoBox = new InfoBox('（在售）市场单数量', 'list-alt', 'purple', '/'.config('admin.route.prefix').'/orders?status=selling', count($orders));
 					$column->append($infoBox);
 				});
 
@@ -74,12 +76,10 @@ class HomeController extends Controller
 			$content->description('显示');
 			$users = User::all();
 			$nests = Nest::all();
-			$supplies = Supply::all();
 			$contracts = Contract::all();
 			$orders = Order::all();
 			$tab = new Tab();
 			$tab->add('用户统计', view('admin.models.analyse._users', compact('users')));
-			$tab->add('申请统计', view('admin.models.analyse._supplies', compact('supplies')));
 			$tab->add('巢统计', view('admin.models.analyse._nests', compact('nests')));
 			$tab->add('合约统计', view('admin.models.analyse._contracts', compact('contracts')));
 			$tab->add('市场统计', view('admin.models.analyse._orders', compact('orders')));

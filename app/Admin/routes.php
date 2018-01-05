@@ -18,6 +18,9 @@ Route::group([
 		'nests' => NestsController::class,
 		'orders' => OrdersController::class
 	]);
+
+	$router->get('/users/{user}/cards', 'UsersController@editCards');
+
 	$router->get('/orders/{order}/abandon', 'OrdersController@abandon');
 	$router->get('/analyse', 'HomeController@analyse');
 });

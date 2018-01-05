@@ -47,9 +47,10 @@ class UsersController extends Controller
 			$grid->is_freezed('是否冻结')->switch();
 			$grid->money_active('交易资金')->sortable();
 			$grid->money_limit('激活资金')->sortable();
-			$grid->money_market('市场资金')->sortable();
-			$grid->cash_limit('提现限制')->sortable();
+			$grid->coins('猫币')->sortable();
+			$grid->withdrawal_limit('提现限制')->sortable();
 			$grid->created_at('创建于')->sortable();
+
 			$grid->tools(function ($tools) {
 				$tools->batch(function ($batch) {
 					$batch->disableDelete();
@@ -74,7 +75,7 @@ class UsersController extends Controller
         return Admin::content(function (Content $content) use ($id) {
             $content->header('用户');
             $content->description('编辑');
-            $nests = Nest::where('user_id', $id)->with('receivers')->get();
+/*            $nests = Nest::where('user_id', $id)->with('receivers')->get();
             $receviers = $nests->pluck('receivers')->flatten();
             $supplies = Supply::where('user_id', $id)->get();
             $money = $supplies->where('type', 'get')->where('status', 'accepted')->sum('money');
@@ -88,8 +89,8 @@ class UsersController extends Controller
             $tab->add('统计信息', view('admin.models.users._analyse', compact('analyse')));
 			$tab->add('银行卡', $this->form2()->edit($id));
             $tab->add('巢', view('admin.models.users._nests', compact('nests')));
-			$tab->add('项款请求', view('admin.models.users._supplies', compact('supplies')));
-            $content->body($tab);
+			$tab->add('项款请求', view('admin.models.users._supplies', compact('supplies')));*/
+            $content->body($this->form($id)->edit($id));
         });
     }
     /**
@@ -105,9 +106,8 @@ class UsersController extends Controller
 				$form->display('email', '邮箱');
 				$form->display('money_active', '交易资金');
 				$form->display('money_limit', '激活资金');
-				$form->display('money_market', '市场资金');
+				$form->currency('withdrawal_limit', '提现限制');
 				$form->switch('is_freezed', '是否冻结');
-				$form->number('cash_limit', '提现限制');
 				$form->display('created_at', '创建于');
 				$form->display('updated_at', '更新于');
 			} else {
@@ -117,7 +117,17 @@ class UsersController extends Controller
 		});
 	}
 
-	protected function form2()
+	public function editCards($id)
+	{
+		return Admin::content(function (Content $content) use($id) {
+			$content->header('用户-银行卡');
+			$content->description('编辑');
+
+			$content->body($this->formCards()->edit($id));
+		});
+	}
+
+	protected function formCards()
 	{
 		return Admin::form(User::class, function (Form $form) {
 			$form->hasMany('cards', '', function (Form\NestedForm $form) {
@@ -138,6 +148,7 @@ class UsersController extends Controller
 		return Admin::content(function (Content $content) {
 			$content->header('用户');
 			$content->description('添加');
+
 			$content->body($this->form());
 		});
 	}
@@ -147,6 +158,7 @@ class UsersController extends Controller
 		return $this->edit($id);
 	}
 
+	// 创建用户
 	public function store(Request $request)
 	{
 		DB::transaction(function () use ($request) {
@@ -154,18 +166,18 @@ class UsersController extends Controller
 			$user->email = $request->email;
 			$user->password = bcrypt($request->password);
 			$user->save();
+
 			$nest = new Nest();
 			$nest->name = rand_name();
 			$nest->user_id = $user->id;
-			$nest->community = 'A';
 			$nest->save();
+
 			$contract = new Contract();
 			$contract->nest_id = $nest->id;
 			$contract->eggs = config('zjp.CONTRACT_LEVEL_ONE');
-			$contract->cycle_date = Carbon::today();
 			$contract->save();
 		});
 
-		admin_toastr(trans('save_succeeded'));
+		admin_toastr(trans('admin.save_succeeded'));
 	}
 }

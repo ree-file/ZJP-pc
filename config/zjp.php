@@ -19,6 +19,20 @@ return [
 	'NEST_COMMUNITY_B_PROFIT_RATE' => '0.06', // 巢在社区B为上级贡献的获利率
 	'NEST_COMMUNITY_C_PROFIT_RATE' => '0.06', // 巢在社区C为上级贡献的获利率
 	'USER_WITHDRAW_TAX_RATE' => '0.2', // 用户提现时收取的税率
-	'USER_TOTAL_CASH_LIMIT' => '1000', // 用户总提现限制
-	'USER_DAILY_CASH_LIMIT' => '100' // 用户日常提现限制
+	'USER_DAILY_CASH_LIMIT' => '100', // 用户日常提现限制
+	'USER_TOTAL_WITHDRAWAL_LIMIT' => '1000', // 用户提款上限
+	'RECHARGE_APPLICATION_MONEY_MIN' => '100', // 充值最低金额
+	'WITHDRAWAL_APPLICATION_MONEY_MIN' => '100', // 提现最低金额
+	'TRANSFER_MONEY_MIN' => '100', // 转账最低金额
+	'TRANSFER_MONEY_ACTIVE_RATE' => '0.7', // 转账获取活动资金比例
+	'TRANSFER_MONEY_LIMIT_RATE' => '0.2', // 转账获取限制资金比例
+	'TRANSFER_COINS_RATE' => '0.1', // 转账获取猫币比例
+	'COIN_VAL' => '1', // 猫币价值
+	'BONUS_ONE_RATE' => '0.13', // 上一级分红金额比例
+	'BONUS_TWO_RATE' => '0.03', // 上二级分红金额比例
+	'BONUS_THREE_RATE' => '0.02', // 上三级分红金额比例
+	'CONTRACT_DAILY_HATCH_RATE' => '0.01', //每日孵化比例
+	'CONTRACT_MONEY_ACTIVE_RATE' => '0.7', // 合约获取活动资金比例
+	'CONTRACT_MONEY_LIMIT_RATE' => '0.2', // 合约获取限制资金比例
+	'CONTRACT_COINS_RATE' => '0.1', // 合约获取猫币比例
 ];

@@ -6,10 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
-	protected $fillable = [
-		'status', 'user_id', 'parent_id', 'type', 'community'
-	];
-
 	public function seller()
 	{
 		return $this->belongsTo('App\User', 'seller_id');
@@ -25,18 +21,25 @@ class Order extends Model
 		return $this->belongsTo('App\Nest');
 	}
 
-	public function scopeSelling($query)
+	public function scopePriceBetween($query, $min, $max)
 	{
-		return $query->where('status', 'selling');
+		if ($min && $max) {
+			return $query->where('price', '>=', $min)->where('price', '<=', $max);
+		} else if ($min) {
+			return $query->where('price', '>=', $min);
+		} else if ($max) {
+			return $query->where('price')->where('price', '<=', $max);
+		}
+
+		return $query;
 	}
 
-	public function scopeFinished($query)
+	public function scopeWithOrder($query, $order)
 	{
-		return $query->where('status', 'finished');
-	}
+		if ($order == 'desc') {
+			return $query->orderBy('id', 'desc');
+		}
 
-	public function scopeAbandoned($query)
-	{
-		return $query->where('status', 'abandoned');
+		return $query;
 	}
 }

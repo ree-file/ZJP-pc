@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Nest;
 use App\Order;
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -13,78 +14,31 @@ use Illuminate\Support\Facades\Validator;
 
 class OrdersController extends ApiController
 {
+	// 所有在售的市场单
 	public function index(Request $request)
 	{
-		$orderBy = 'asc';
-		$min = 0;
-		$max = 999999;
-		if ($request->has('orderBy') && $request->orderBy == 'desc') {
-			$orderBy = 'desc';
-		}
-		if ($request->has('min')) {
-			$min = $request->min;
-		}
-		if ($request->has('max')) {
-			$max = $request->max;
-		}
-		$orders = Order::selling()
-			->where('price', '>=', (float) $min)
-			->where('price', '<=', (float) $max)
-			->orderBy('id', $orderBy)
-			->with('seller', 'nest.contracts', 'nest.children', 'nest.children.children')->paginate(10);
+		// 可根据价格筛选及排序市场单，生成分页数据
+		$orders = Order::with(['seller' => function ($query) {
+			$query->select('id', 'email');
+		}, 'buyer' => function ($query) {
+			$query->select('id', 'email');
+		}])->where('status', 'selling')
+			->priceBetween($request->min, $request->max)
+			->withOrder($request->ordeyBy)
+			->simplePaginate(10);
+
 		return $this->success($orders);
 	}
 
-	public function show(Order $order)
+	// 取消在售市场单
+	public function abandon(Order $order)
 	{
-		if (! $order) {
-			return $this->notFound();
-		}
-
-		$order = Order::where('id', $order->id)
-			->with('seller', 'buyer', 'nest', 'nest.children', 'nest.children.children')
-			->first();
-
-		return $this->success(new OrderResource($order));
-	}
-
-	public function store(Request $request)
-	{
-		$validator = Validator::make($request->all(), [
-			'nest_id' => 'required',
-			'price' => 'required|numeric|min:0',
-		]);
-		if ($validator->fails()) {
-			return $this->failed($validator->errors()->first());
-		}
-
-		$nest = Nest::find($request->nest_id);
-		$this->authorize('update', $nest);
-
-		if (Order::selling()->where('nest_id', $nest->id)->count() > 0) {
-			return $this->failed('The order is on selling.');
-		}
-
-		$user = Auth::user();
-
-		$order = new Order();
-		$order->nest_id = $nest->id;
-		$order->price = $request->price;
-		$order->seller_id = $user->id;
-		$order->save();
-
-		return $this->created();
-	}
-
-	public function abandon(Request $request, Order $order)
-	{
-		if (! $order) {
-			return $this->notFound();
-		}
+		// 检查市场单是否为在售状态
 		if ($order->status != 'selling') {
 			return $this->failed('Not on selling.');
 		}
 
+		// 检查用户是否有操作权限
 		$this->authorize('update', $order);
 
 		$order->status = 'abandoned';
@@ -93,50 +47,50 @@ class OrdersController extends ApiController
 		return $this->message('Abandoned.');
 	}
 
-	public function buy(Request $request, Order $order)
+	// 购买市场单
+	public function buy(Order $order)
 	{
-		if (! $order) {
-			return $this->notFound();
-		}
+		// 确认市场单是否为在售状态
 		if ($order->status != 'selling') {
 			return $this->failed('Not in selling.');
 		}
 
-		$user = Auth::user();
-
-		if ($user->id == $order->seller_id) {
+		// 防止用户购买自己订单
+		if (Auth::id() == $order->seller_id) {
 			return $this->failed('Can not buy own order.');
 		}
 
-		$payment = [
-			'nest_id' => $order->nest_id,
-			'seller_id' => $order->seller_id,
-			'price' => $order->price,
-			'order_id' => $order->id
-		];
-
-
 		DB::beginTransaction();
 		try {
-			$buyer = User::where('id', $user->id)->lockForUpdate()->first();
-			if ($buyer->money_market < $payment['price']) {
+			// 锁定付款用户
+			$buyer = User::where('id', Auth::id())->lockForUpdate()->first();
+
+			// 如果钱包金额不足
+			if ($buyer->money_active < $order->price) {
 				throw new \Exception('Wallet no enough money.');
 			}
-			$buyer->money_market = $buyer->money_market - $payment['price'];
+			$buyer->money_active = $buyer->money_active - $order->price;
 			$buyer->save();
 
-			$seller = User::where('id', $payment['seller_id'])->lockForUpdate()->first();
-			$seller->money_market = $seller->money_market + $payment['price'] * (1 - (float) config('zjp.MARKET_TRANSCATION_TAX_RATE'));
+			// 扣税后收入的金额
+			$income = $order->price * (1 - config('zjp.MARKET_TRANSCATION_TAX_RATE'));
+
+			// 锁定收款用户
+			$seller = User::where('id', $order->seller_id)->lockForUpdate()->first();
+			$seller->money_active = $seller->money_active + $income;
 			$seller->save();
 
-			$nest = Nest::where('id', $payment['nest_id'])->lockForUpdate()->first();
+			// 将巢进行转移
+			$nest = Nest::where('id', $order->nest_id)->lockForUpdate()->first();
 			$nest->user_id = $buyer->id;
 			$nest->save();
 
-			$order = Order::where('id', $payment['order_id'])->lockForUpdate()->first();
+			// 更新市场单状态为完成，保存买家ID
+			$order = Order::where('id', $order->id)->lockForUpdate()->first();
 			$order->buyer_id = $buyer->id;
 			$order->status = 'finished';
 			$order->save();
+
 			DB::commit();
 		} catch (\Exception $e) {
 			DB::rollBack();

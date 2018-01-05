@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Contract;
 use App\Events\ContractUpgraded;
+use App\Events\NestInvested;
 use App\Http\Resources\NestResource;
+use App\IncomeRecord;
+use App\InvestRecord;
 use App\Nest;
-use App\NestRecord;
+use App\Order;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -17,88 +20,124 @@ use Illuminate\Validation\Rule;
 
 class NestsController extends ApiController
 {
-	public function index(Request $request)
-	{
-		if (! $request->has('name')) {
-			return $this->failed('Need name field.');
-		}
-		$nests = Nest::where('name', $request->name)->with('children')->get();
-		return $this->success($nests->toArray());
-	}
-
+	// 猫窝详情（包含下级统计信息）
 	public function show(Nest $nest)
 	{
-		if (! $nest) {
-			return $this->notFound();
-		}
+		$nest = Nest::where('id', $nest->id)
+			->with(['parent' => function ($query) {
+				$query->select('name');
+			}])
+			->withDepth()
+			->first();
 
-		$nest = Nest::where('id', $nest->id)->with('inviter', 'receivers.contracts', 'parent', 'children.children', 'contracts')->first();
 		return $this->success(new NestResource($nest));
 	}
-	// 有支付操作
+
+	// 猫窝合约
+	public function contracts(Nest $nest)
+	{
+		$contracts = Contract::where('nest_id', $nest->id)
+			->orderBy('created_at', 'desc')
+			->get();
+
+		// 为每个合约添加计算出的价值属性
+		$contracts = $contracts->each(function ($item, $key) {
+			$item->val = $item->eggs * config('zjp.EGG_VAL');
+		});
+
+		return $this->success($contracts);
+	}
+
+	// 猫窝投资记录
+	public function investRecords(Nest $nest)
+	{
+		// 限定该用户曾经的投资记录
+		$records = InvestRecord::where('nest_id', $nest->id)
+			->where('user_id', Auth::id())
+			->orderBy('created_at', 'desc')
+			->get();
+
+		return $this->success($records);
+	}
+
+	// 猫窝收益记录
+	public function incomeRecords(Nest $nest)
+	{
+		// 限定该用户曾经的收益记录
+		$records = IncomeRecord::where('nest_id', $nest->id)
+			->where('user_id', Auth::id())
+			->orderBy('created_at', 'desc')
+			->get();
+
+		return $this->success($records);
+	}
+
+	// 为自己创建巢
 	public function store(Request $request)
 	{
+		// 验证字段
 		$validator = Validator::make($request->all(), [
-			'inviter_name' => 'required',
 			'parent_name' => 'required',
-			'community' => ['required', Rule::in(['A', 'B', 'C'])],
-			'pay_active' => 'required|numeric|min:0',
-			'pay_limit' => 'required|numeric|min:0',
-			'eggs' => ['required', Rule::in([
-				(int) config('zjp.CONTRACT_LEVEL_ONE'),
-				(int) config('zjp.CONTRACT_LEVEL_TWO'),
-				(int) config('zjp.CONTRACT_LEVEL_THREE'),
-				(int) config('zjp.CONTRACT_LEVEL_FOUR'),
-				(int) config('zjp.CONTRACT_LEVEL_FIVE')])]
+			'eggs'        => ['required', Rule::in([
+				config('zjp.CONTRACT_LEVEL_ONE'),
+				config('zjp.CONTRACT_LEVEL_TWO'),
+				config('zjp.CONTRACT_LEVEL_THREE'),
+				config('zjp.CONTRACT_LEVEL_FOUR'),
+				config('zjp.CONTRACT_LEVEL_FIVE')])]
 		]);
+
+		// 验证失败
 		if ($validator->fails()) {
 			return $this->failed($validator->errors()->first());
 		}
 
-
-		$inviter = Nest::where('name', $request->inviter_name)->first();
+		// 查询上家是否存在
 		$parent = Nest::where('name', $request->parent_name)->first();
-
-		if (! $inviter||! $parent) {
-			return $this->failed('The inviter or parent is not existed.');
+		if (!$parent) {
+			return $this->failed('Parent not found.');
 		}
-
-		$user = Auth::user();
-		$payment = array_merge($request->only(['community', 'pay_active', 'pay_limit', 'eggs']), [
-			'price' => $request->eggs * config('zjp.EGG_VAL'),
-			'inviter_id' => $inviter->id,
-			'parent_id' => $parent->id
-		]);
-
 
 		DB::beginTransaction();
 		try {
-			$user = User::where('id', $user->id)->lockForUpdate()->first();
-			if ($payment['pay_active'] + $payment['pay_limit'] < $payment['price']) {
-				throw new \Exception('Not enough money.', 101);
+			// 锁定付款用户
+			$user = User::where('id', Auth::id())->lockForUpdate()->first();
+			// 付款价格
+			$price = $request->eggs * config('zjp.EGG_VAL');
+
+			// 如果金额不足则终止
+			if ($user->money_limit + $user->money_active < $price) {
+				throw new \Exception('Wallet no enough money.');
 			}
-			if ($payment['pay_active'] > $user->money_active || $payment['pay_limit'] > $user->money_limit) {
-				throw new \Exception('Wallet no enough money.', 101);
+
+			if ($user->money_limit >= $price) {
+				// 如果限制金额充足
+				$user->money_limit = $user->money_limit - $price;
+			} else {
+				// 如果限制金额不充足
+				$user->money_active = $user->money_active - ($price - $user->money_limit);
+				$user->money_limit = 0;
 			}
-			$user->money_active = $user->money_active - $payment['pay_active'];
-			$user->money_limit = $user->money_limit - $payment['pay_limit'];
 			$user->save();
 
 			$nest = new Nest();
+			// 生成随机巢名
 			$nest->name = rand_name();
-			$nest->inviter_id = $payment['inviter_id'];
-			$nest->parent_id = $payment['parent_id'];
-			$nest->community = $payment['community'];
 			$nest->user_id = $user->id;
-			$nest->save();
+			// 为巢绑定上家并保存
+			$nest->appendToNode($parent)->save();
 
+			// 为巢生成一个新合同
 			$contract = new Contract();
-			$contract->eggs = $payment['eggs'];
+			$contract->eggs = $request->eggs;
 			$contract->nest_id = $nest->id;
-			$contract->cycle_date = Carbon::today();
 			$contract->save();
+
 			DB::commit();
+
+			// 触发巢投资事件
+			event(new NestInvested($nest, $request->eggs));
 		} catch (\Exception $e) {
+
 			DB::rollBack();
 			return $this->failed($e->getMessage());
 		}
@@ -106,168 +145,192 @@ class NestsController extends ApiController
 		return $this->created();
 	}
 
-	public function reinvest(Request $request, Nest $nest) {
+	// 出售巢
+	public function sell(Request $request, Nest $nest)
+	{
+		// 验证字段
 		$validator = Validator::make($request->all(), [
-			'pay_active' => 'required|numeric|min:0',
-			'pay_limit' => 'required|numeric|min:0',
-			'eggs' => ['required', Rule::in([
-				(int) config('zjp.CONTRACT_LEVEL_ONE'),
-				(int) config('zjp.CONTRACT_LEVEL_TWO'),
-				(int) config('zjp.CONTRACT_LEVEL_THREE'),
-				(int) config('zjp.CONTRACT_LEVEL_FOUR'),
-				(int) config('zjp.CONTRACT_LEVEL_FIVE')])]
+			'price' => 'required|numeric|min:0',
 		]);
+
+		// 验证失败
 		if ($validator->fails()) {
 			return $this->failed($validator->errors()->first());
 		}
 
-		if (! $nest) {
-			return $this->notFound();
-		}
-
+		// 验证用户是否有操作资格
 		$this->authorize('update', $nest);
 
+		// 查看巢是否已经在销售
+		if (Order::where('status', 'selling')
+			->where('nest_id', $nest->id)->first()) {
+			return $this->failed('The order is on selling.');
+		}
+
+		$order = new Order();
+		$order->nest_id = $nest->id;
+		$order->price = $request->price;
+		$order->seller_id = Auth::id();
+		$order->save();
+
+		return $this->created();
+	}
+
+	// 为巢创建一个新合约
+	public function reinvest(Request $request, Nest $nest)
+	{
+		// 验证字段
+		$validator = Validator::make($request->all(), [
+			'eggs' => ['required', Rule::in([
+				config('zjp.CONTRACT_LEVEL_ONE'),
+				config('zjp.CONTRACT_LEVEL_TWO'),
+				config('zjp.CONTRACT_LEVEL_THREE'),
+				config('zjp.CONTRACT_LEVEL_FOUR'),
+				config('zjp.CONTRACT_LEVEL_FIVE')])]
+		]);
+		// 验证失败
+		if ($validator->fails()) {
+			return $this->failed($validator->errors()->first());
+		}
+
+		// 验证用户是否有操作资格
+		$this->authorize('update', $nest);
+
+		// 检查该巢最新进行合约是否完成
 		$contract = Contract::where('nest_id', $nest->id)->latest()->first();
 		if (!$contract->is_finished) {
 			return $this->failed('The lastest contract is not finished.');
 		}
 
-		$user = Auth::user();
-		$payment = array_merge($request->only(['pay_active', 'pay_limit', 'eggs']), [
-			'price' => $request->eggs * config('zjp.EGG_VAL'),
-			'nest_id' => $nest->id
-		]);
-
 		DB::beginTransaction();
 		try {
-			$user = User::where('id', $user->id)->lockForUpdate()->first();
-			if ($payment['pay_active'] + $payment['pay_limit'] < $payment['price']) {
-				throw new \Exception('No enough money.');
-			}
-			if ($payment['pay_active'] > $user->money_active || $payment['pay_limit'] > $user->money_limit) {
+			// 锁定用户
+			$user = User::where('id', Auth::id())->lockForUpdate()->first();
+			// 付款金额
+			$price = $request->eggs * config('zjp.EGG_VAL');
+
+			// 如果金额不足则终止
+			if ($user->money_limit + $user->money_active < $price) {
 				throw new \Exception('Wallet no enough money.');
 			}
-			$user->money_active = $user->money_active - $payment['pay_active'];
-			$user->money_limit = $user->money_limit - $payment['pay_limit'];
+
+			if ($user->money_limit >= $price) {
+				// 如果限制金额充足
+				$user->money_limit = $user->money_limit - $price;
+			} else {
+				// 如果限制金额不充足
+				$user->money_active = $user->money_active - ($price - $user->money_limit);
+				$user->money_limit = 0;
+			}
 			$user->save();
 
 			$contract = new Contract();
-			$contract->eggs = $payment['eggs'];
-			$contract->cycle_date = Carbon::today();
-			$contract->nest_id = $payment['nest_id'];
+			$contract->eggs = $request->eggs;
+			$contract->nest_id = $nest->id;
 			$contract->save();
 
-			$nest_record = new NestRecord();
-			$nest_record->nest_id = $contract->nest_id;
-			$nest_record->contract_id = $contract->id;
-			$nest_record->user_id = $user->id;
-			$nest_record->type = 'reinvest';
-			$nest_record->eggs = $payment['eggs'];
-			$nest_record->save();
+			// 创建巢复投操作记录
+			$investRecord = new InvestRecord();
+			$investRecord->nest_id = $nest->id;
+			$investRecord->contract_id = $contract->id;
+			$investRecord->user_id = $user->id;
+			$investRecord->type = 'reinvest';
+			$investRecord->eggs = $request->eggs;
+			$investRecord->save();
 
 			DB::commit();
 		} catch (\Exception $e) {
+
 			DB::rollBack();
 			return $this->failed($e->getMessage());
 		}
 
+		// 触发巢投资事件
+		event(new NestInvested($nest, $request->eggs));
+
 		return $this->created();
 	}
 
-	public function upgrade(Request $request, Nest $nest) {
+	// 为巢的最新进行合约升级
+	public function upgrade(Request $request, Nest $nest)
+	{
+		// 验证字段
 		$validator = Validator::make($request->all(), [
-			'pay_active' => 'required|numeric|min:0',
-			'pay_limit' => 'required|numeric|min:0',
-			'eggs' => 'required|integer'
+			'eggs'       => 'required|integer'
 		]);
+		// 验证失败
 		if ($validator->fails()) {
 			return $this->failed($validator->errors()->first());
 		}
 
+		// 查看用户是否有资格操作
 		$this->authorize('update', $nest);
 
+		// 查看最新进行合约是否完成
 		$contract = Contract::where('nest_id', $nest->id)->latest()->first();
 		if ($contract->is_finished) {
 			return $this->failed('The lastest contract is finished.');
 		}
 
-		if (!in_array((int) ($request->eggs + $contract->eggs), [
-			(int) config('zjp.CONTRACT_LEVEL_ONE'),
-			(int) config('zjp.CONTRACT_LEVEL_TWO'),
-			(int) config('zjp.CONTRACT_LEVEL_THREE'),
-			(int) config('zjp.CONTRACT_LEVEL_FOUR'),
-			(int) config('zjp.CONTRACT_LEVEL_FIVE')])) {
+		// 查看请求蛋数与合约蛋数相加是否满足合约分级蛋数量
+		if (!in_array(($request->eggs + $contract->eggs), [
+			config('zjp.CONTRACT_LEVEL_ONE'),
+			config('zjp.CONTRACT_LEVEL_TWO'),
+			config('zjp.CONTRACT_LEVEL_THREE'),
+			config('zjp.CONTRACT_LEVEL_FOUR'),
+			config('zjp.CONTRACT_LEVEL_FIVE')])) {
 			return $this->message('Eggs count wrong.');
 		}
 
-		$user = Auth::user();
-		$payment = array_merge($request->only(['pay_active', 'pay_limit', 'eggs']), [
-			'price' => $request->eggs * config('zjp.EGG_VAL'),
-			'contract_id' => $contract->id
-		]);
-
 		DB::beginTransaction();
 		try {
-			$contract = Contract::where('id', $payment['contract_id'])->lockForUpdate()->with('nest.parent.parent')->first();
-			if ($contract->is_finished) {
-				throw new \Exception('The contract is finished.');
-			}
-			$user = User::where('id', $user->id)->lockForUpdate()->first();
-			if ($payment['pay_active'] + $payment['pay_limit'] < $payment['price']) {
-				throw new \Exception('No enough money.');
-			}
-			if ($payment['pay_active'] > $user->money_active || $payment['pay_limit'] > $user->money_limit) {
+			// 锁定用户
+			$user = User::where('id', Auth::id())->lockForUpdate()->first();
+			// 付款金额
+			$price = $request->eggs * config('zjp.EGG_VAL');
+
+			// 如果金额不足则终止
+			if ($user->money_limit + $user->money_active < $price) {
 				throw new \Exception('Wallet no enough money.');
 			}
-			$user->money_active = $user->money_active - $payment['pay_active'];
-			$user->money_limit = $user->money_limit - $payment['pay_limit'];
+
+			if ($user->money_limit >= $price) {
+				// 如果限制金额充足
+				$user->money_limit = $user->money_limit - $price;
+			} else {
+				// 如果限制金额不充足
+				$user->money_active = $user->money_active - ($price - $user->money_limit);
+				$user->money_limit = 0;
+			}
 			$user->save();
 
-			$contract->eggs = $contract->eggs + $payment['eggs'];
+			// 锁定合约
+			$contract = Contract::where('id', $contract->id)
+				->lockForUpdate()
+				->first();
+			$contract->eggs = $contract->eggs + $request->eggs;
 			$contract->save();
 
-			$nest_record = new NestRecord();
-			$nest_record->nest_id = $contract->nest_id;
-			$nest_record->contract_id = $contract->id;
-			$nest_record->user_id = $user->id;
-			$nest_record->type = 'upgrade';
-			$nest_record->eggs = $payment['eggs'];
-			$nest_record->save();
+			// 创建巢升单操作记录
+			$investRecord = new InvestRecord();
+			$investRecord->nest_id = $nest->id;
+			$investRecord->contract_id = $contract->id;
+			$investRecord->user_id = $user->id;
+			$investRecord->type = 'upgrade';
+			$investRecord->eggs = $request->eggs;
+			$investRecord->save();
 
 			DB::commit();
 		} catch (\Exception $e) {
+
 			DB::rollBack();
 			return $this->failed($e->getMessage());
 		}
 
-		event(new ContractUpgraded($contract, $payment['eggs']));
+		// 触发巢投资事件
+		event(new NestInvested($nest, $request->eggs));
 
 		return $this->created();
 	}
 
-	public function records(Request $request, Nest $nest) {
-		if (! $nest) {
-			return $this->notFound();
-		}
-		$user = Auth::user();
-
-		$records = $nest->records;
-		$got_records = $records->filter(function ($value, $key) {
-			return in_array($value->type, ['week_got', 'invite_got', 'community_got']);
-		})->flatten();
-		$extract_records = $records->filter(function ($value, $key) use ($user) {
-			return $value->type == 'extract' && $value->user_id == $user->id;
-		})->flatten();
-		$contract_records = $records->filter(function ($value, $key) use ($user) {
-			return in_array($value->type, ['reinvest', 'upgrade']) && $value->user_id == $user->id;
-		})->flatten();
-
-		$data = [
-			'got_records' => $got_records,
-			'extract_records' => $extract_records,
-			'contract_records' => $contract_records,
-		];
-
-		return $this->success($data);
-	}
 }

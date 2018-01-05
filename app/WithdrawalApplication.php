@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Card extends Model
+class WithdrawalApplication extends Model
 {
 	public function user()
 	{

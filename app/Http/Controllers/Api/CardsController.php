@@ -24,7 +24,7 @@ class CardsController extends ApiController
 
 		// 判别用户的银行卡数量是否超过限制
 		$cards_count = Card::where('id', $user->id)->count();
-		if ($cards_count >= (int) config('zjp.USER_MAXIMUM_CARDS')) {
+		if ($cards_count >= config('zjp.USER_MAXIMUM_CARDS')) {
 			return $this->failed('Cards number has reached the limit.');
 		}
 
@@ -39,10 +39,6 @@ class CardsController extends ApiController
 
 	public function destroy(Request $request, Card $card)
 	{
-		if (! $card) {
-			return $this->notFound();
-		}
-
 		$this->authorize('update', $card);
 		$card->delete();
 

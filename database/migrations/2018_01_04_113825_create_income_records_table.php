@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateContractsTable extends Migration
+class CreateIncomeRecordsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,14 @@ class CreateContractsTable extends Migration
      */
     public function up()
     {
-        Schema::create('contracts', function (Blueprint $table) {
+        Schema::create('income_records', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('user_id')->unsiged();
+            $table->enum('type', ['daily', 'bonus']);
             $table->integer('nest_id')->unsigned();
-            $table->integer('eggs')->unsigned();
-            $table->integer('hatches')->unsiged()->default('0');
-            $table->boolean('is_finished')->default(false);
+            $table->decimal('money_active', 10, 2)->unsigned()->nullable();
+            $table->decimal('money_limit', 10, 2)->unsigned()->nullable();
+            $table->decimal('coins', 10, 2)->unsigned()->nullable();
             $table->timestamps();
         });
     }
@@ -30,6 +32,6 @@ class CreateContractsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('contracts');
+        Schema::dropIfExists('income_records');
     }
 }

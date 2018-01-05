@@ -47,8 +47,33 @@ class User extends Authenticatable
 		return $this->hasMany('App\Order', 'buyer_id');
 	}
 
-	public function supplies()
+	public function rechargeApplications()
 	{
-		return $this->hasMany('App\Supply');
+		return $this->hasMany('App\RechargeApplication');
+	}
+
+	public function withdrawalApplications()
+	{
+		return $this->hasMany('App\WithdrawlApplication');
+	}
+
+	public function transferRecordsOfPaying()
+	{
+		return $this->hasMany('App\TransferRecord', 'payer_id');
+	}
+
+	public function transferRecordsOfReceiving()
+	{
+		return $this->hasMany('App\TransferRecord', 'receiver_id');
+	}
+
+	public function incomeRecords()
+	{
+		return $this->hasMany('App\IncomeRecords');
+	}
+
+	public function investRecords()
+	{
+		return $this->hasMany('App\InvestRecord');
 	}
 }

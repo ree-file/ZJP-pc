@@ -3,12 +3,11 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Kalnoy\Nestedset\NodeTrait;
 
 class Nest extends Model
 {
-	protected $fillable = [
-		'user_id', 'parent_id', 'type', 'community'
-	];
+	use NodeTrait;
 
 	public function user()
 	{
@@ -20,9 +19,9 @@ class Nest extends Model
 		return $this->hasMany('App\Contract');
 	}
 
-	public function receivers()
+	public function parent()
 	{
-		return $this->hasMany('App\Nest', 'inviter_id');
+		return $this->belongsTo('App\Nest', 'parent_id');
 	}
 
 	public function children()
@@ -30,23 +29,8 @@ class Nest extends Model
 		return $this->hasMany('App\Nest', 'parent_id');
 	}
 
-	public function inviter()
+	public function incomeRecords()
 	{
-		return $this->belongsTo('App\Nest', 'inviter_id');
-	}
-
-	public function parent()
-	{
-		return $this->belongsTo('App\Nest', 'parent_id');
-	}
-
-	public function contract()
-	{
-		return $this->hasOne('App\Contract');
-	}
-
-	public function records()
-	{
-		return $this->hasMany('App\NestRecord');
+		return $this->hasMany('App\IncomeRecord');
 	}
 }

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateSuppliesTable extends Migration
+class CreateRechargeApplicationsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,14 @@ class CreateSuppliesTable extends Migration
      */
     public function up()
     {
-        Schema::create('supplies', function (Blueprint $table) {
+        Schema::create('recharge_applications', function (Blueprint $table) {
             $table->increments('id');
-			$table->enum('type', ['save', 'get']);
 			$table->integer('user_id')->unsigned();
+			$table->decimal('money', 10, 2)->unsigned();
 			$table->string('card_number');
-			$table->decimal('money', 10,2)->unsigned();
+			$table->enum('status', ['processing', 'accepted', 'rejected'])->default('processing');
 			$table->string('message')->nullable();
 			$table->string('image')->nullable();
-			$table->enum('status', ['processing', 'accepted', 'rejected'])->default('processing');
             $table->timestamps();
         });
     }
@@ -33,6 +32,6 @@ class CreateSuppliesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('supplies');
+        Schema::dropIfExists('recharge_applications');
     }
 }

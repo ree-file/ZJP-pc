@@ -1,21 +1,38 @@
 <?php
 
-namespace App\Observers;
+namespace App\Listeners;
 
-use App\Accelerator;
-use App\Contract;
+use App\Events\ContractUpgraded;
 use App\Nest;
-use App\NestRecord;
 use App\User;
-use Carbon\Carbon;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\DB;
 
-class ContractObserver
+class PayTribute
 {
-	public function created(Contract $contract)
-	{
+    /**
+     * Create the event listener.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        //
+    }
+
+    /**
+     * Handle the event.
+     *
+     * @param  ContractUpgraded  $event
+     * @return void
+     */
+    public function handle(ContractUpgraded $event)
+    {
+		$contract = $event->contract;
+		$eggs = $event->eggs;
+		// 找到相对大3级的前代
 		$nest = Nest::withDepth()->where('id', $contract->nest_id)->first();
-		$eggs = $contract->eggs;
 		$ancestors = Nest::withDepth()->having('depth', '>=', $nest->depth + 3)->ancestorsOf($nest->id);
 
 		DB::beginTransaction();
@@ -45,5 +62,5 @@ class ContractObserver
 		} catch (\Exception $e) {
 			DB::rollback();
 		}
-	}
+    }
 }

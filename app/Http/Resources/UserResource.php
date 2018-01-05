@@ -19,8 +19,9 @@ class UserResource extends Resource
 			'email'             => $this->email,
 			'money_active'      => $this->money_active,
 			'money_limit'       => $this->money_limit,
-			'money_market'      => $this->money_market,
+			'coins'				=> $this->coins,
 			'is_freezed'        => $this->is_freezed,
+			'created_at'		=> date($this->created_at),
 			'has_security_code' => $this->security_code != null ? true : false
 		];
     }

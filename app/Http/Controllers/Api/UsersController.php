@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Card;
 use App\Contract;
+use App\Events\NestInvested;
 use App\Mail\ResetPasswordMail;
 use App\Mail\UserCreatedMail;
 use App\Nest;
@@ -21,86 +22,96 @@ use Illuminate\Validation\Rule;
 
 class UsersController extends ApiController
 {
+	// 为他人创建用户或为他人买巢
 	public function store(Request $request)
 	{
+		// 进行字段验证
 		$validator = Validator::make($request->all(), [
-			'inviter_name' => 'required',
 			'parent_name' => 'required',
-			'community' => ['required', Rule::in(['A', 'B', 'C'])],
-			'pay_active' => 'required|numeric|min:0',
-			'pay_limit' => 'required|numeric|min:0',
 			'eggs' => ['required', Rule::in([
-				(int) config('zjp.CONTRACT_LEVEL_ONE'),
-				(int) config('zjp.CONTRACT_LEVEL_TWO'),
-				(int) config('zjp.CONTRACT_LEVEL_THREE'),
-				(int) config('zjp.CONTRACT_LEVEL_FOUR')])],
+				config('zjp.CONTRACT_LEVEL_ONE'),
+				config('zjp.CONTRACT_LEVEL_TWO'),
+				config('zjp.CONTRACT_LEVEL_THREE'),
+				config('zjp.CONTRACT_LEVEL_FOUR'),
+				config('zjp.CONTRACT_LEVEL_FIVE')])],
 			'email' => 'required|email',
 		]);
+
+		// 验证失败
 		if ($validator->fails()) {
 			return $this->failed($validator->errors()->first());
 		}
 
-		$inviter = Nest::where('name', $request->inviter_name)->first();
+		// 查询上家是否存在
 		$parent = Nest::where('name', $request->parent_name)->first();
-
-		if (! $inviter || ! $parent) {
-			return $this->failed('The inviter or parent is not existed.');
+		if (! $parent) {
+			return $this->failed('Parent not found.');
 		}
 
-		$user = Auth::user();
-		$payment = array_merge($request->only(['community', 'pay_active', 'pay_limit', 'eggs', 'email']), [
-			'price' => $request->eggs * config('zjp.EGG_VAL'),
-			'inviter_id' => $inviter->id,
-			'parent_id' => $parent->id
-		]);
 		$password = null;
 
 		DB::beginTransaction();
 		try {
-			$user = User::where('id', $user->id)->lockForUpdate()->first();
-			$getter = User::where('email', $payment['email'])->first();
-			if (! $getter) {
-				$getter = new User();
-				$getter->email = $payment['email'];
-				$password = rand_password();
-				$getter->password = bcrypt($password);
-				$getter->cash_limit = config('zjp.USER_TOTAL_CASH_LIMIT');
-				$getter->save();
-			}
+			// 锁付款用户
+			$user = User::where('id', Auth::id())->lockForUpdate()->first();
+			// 付款价格
+			$price = $request->eggs * config('zjp.EGG_VAL');
 
-			if ($payment['pay_active'] + $payment['pay_limit'] < $payment['price']) {
-				throw new \Exception('Not enough money.');
-			}
-			if ($payment['pay_active'] > $user->money_active || $payment['pay_limit'] > $user->money_limit) {
+			// 如果金额不足则终止
+			if ($user->money_limit + $user->money_active < $price) {
 				throw new \Exception('Wallet no enough money.');
 			}
 
-			$user->money_active = $user->money_active - $payment['pay_active'];
-			$user->money_limit = $user->money_limit - $payment['pay_limit'];
+			if ($user->money_limit >= $price) {
+				// 如果限制金额充足
+				$user->money_limit = $user->money_limit - $price;
+			} else {
+				// 如果限制金额不充足
+				$user->money_active = $user->money_active - ($price - $user->money_limit);
+				$user->money_limit = 0;
+			}
 			$user->save();
 
-			$nest = new Nest();
-			$nest->name = rand_name();
-			$nest->inviter_id = $payment['inviter_id'];
-			$nest->parent_id = $payment['parent_id'];
-			$nest->community = $payment['community'];
-			$nest->user_id = $getter->id;
-			$nest->save();
+			// 查询目标用户是否存在
+			$receiver = User::where('email', $request->email)->first();
 
+			if (! $receiver) {
+				// 若不存在，则创建新账户，同时存储密码
+				$receiver = new User();
+				$receiver->email = $request->email;
+				// 生成随机密码，保存密码信息
+				$password = rand_password();
+				$receiver->password = bcrypt($password);
+				// 用户默认提款上限设定
+				$receiver->withdrawal_limit = config('zjp.USER_TOTAL_WITHDRAWAL_LIMIT');
+				$receiver->save();
+			}
+
+			$nest = new Nest();
+			// 生成随机巢名
+			$nest->name = rand_name();
+			$nest->user_id = $receiver->id;
+			// 为巢绑定上家并保存
+			$nest->appendToNode($parent)->save();
+
+			// 为巢生成一个新合同
 			$contract = new Contract();
-			$contract->eggs = $payment['eggs'];
+			$contract->eggs = $request->eggs;
 			$contract->nest_id = $nest->id;
-			$contract->cycle_date = Carbon::today();
 			$contract->save();
+
 			DB::commit();
+
+			// 触发巢投资事件
+			event(new NestInvested($nest, $request->eggs));
 		} catch (\Exception $e) {
 			DB::rollBack();
 			return $this->failed($e->getMessage());
 		}
 
-		// 如果为新建用户，则发送邮件
+		// 如果为新用户，发送携带密码的邮件
 		if ($password != null) {
-			Mail::to($getter->email)->queue(new UserCreatedMail($password));
+			Mail::to($receiver->email)->queue(new UserCreatedMail($password));
 		}
 
 		return $this->created();

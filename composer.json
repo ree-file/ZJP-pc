@@ -10,6 +10,7 @@
         "encore/laravel-admin": "^1.5",
         "fideloper/proxy": "~3.3",
         "intervention/image": "^2.4",
+        "kalnoy/nestedset": "^4.3",
         "laravel-admin-ext/config": "^1.0",
         "laravel-admin-ext/scheduling": "^1.0",
         "laravel/framework": "5.5.*",

@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Supply extends Model
+class RechargeApplication extends Model
 {
     public function user()
 	{
