@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Handlers\ImageUploadHandler;
+use App\Handlers\WithdrawalCacheHandler;
 use App\RechargeApplication;
 use App\TransferRecord;
 use App\User;
@@ -51,7 +52,7 @@ class PaymentController extends ApiController
 	}
 
 	// 创建提现申请
-	public function withdrawalApplicationStore(Request $request)
+	public function withdrawalApplicationStore(Request $request, WithdrawalCacheHandler $cacher)
 	{
 		// 提现最低金额
 		$moneyMin = config('zjp.WITHDRAWAL_APPLICATION_MONEY_MIN');
@@ -65,6 +66,22 @@ class PaymentController extends ApiController
 		// 验证失败
 		if ($validator->fails()) {
 			return $this->failed($validator->errors()->first());
+		}
+
+		// 检查今日提现是否到达上限
+		$user = Auth::user();
+
+		if (! $cacher->getWithdrawalCeiling()) {
+			$withdrawalCeiling = $user->money * config('zjp.WITHDRAW_TODAY_RATE');
+			$cacher->setWithdrawalCeiling($user->id, $withdrawalCeiling);
+			$cacher->setWithdrawalAlready($user->id, 0);
+		}
+
+		$withdrawalCeiling = $cacher->getWithdrawalCeiling($user->id);
+		$withdrawalAlready = $cacher->getWithdrawalAlready($user->id);
+
+		if ($request->money + $withdrawalAlready > $withdrawalCeiling) {
+			return $this->failed('Reach the ceiling');
 		}
 
 		// 预扣除用户活动资金
@@ -91,6 +108,9 @@ class PaymentController extends ApiController
 			DB::rollBack();
 			return $this->failed($e->getMessage());
 		}
+
+		$withdrawalAlready = $withdrawalAlready + $request->money;
+		$cacher->setWithdrawalAlready($user->id, $withdrawalAlready);
 
 		return $this->created();
 	}

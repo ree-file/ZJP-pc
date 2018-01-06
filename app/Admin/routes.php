@@ -17,7 +17,8 @@ Route::group([
 		'nests' => NestsController::class,
 		'rechargeApplications' => RechargeApplicationsController::class,
 		'withdrawalApplications' => WithdrawalApplicationsController::class,
-		'orders' => OrdersController::class
+		'orders' => OrdersController::class,
+		'cards' => CardsController::class
 	]);
 
 	$router->get('/users/{user}/cards', 'UsersController@editCards');

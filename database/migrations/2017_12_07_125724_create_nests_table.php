@@ -18,6 +18,8 @@ class CreateNestsTable extends Migration
             $table->increments('id');
 			$table->string('name')->unique();
 			$table->integer('user_id')->unsigned();
+			$table->boolean('is_selling')->default(false);
+			$table->decimal('price', 10, 2)->nullable();
             $table->timestamps();
 			NestedSet::columns($table);
         });

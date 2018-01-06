@@ -68,7 +68,6 @@ class NestsController extends Controller
 
 			$grid->id('ID')->sortable();
 			$grid->name('名字');
-			$grid->user_id('用户ID');
             $grid->created_at('创建于')->sortable();
 
 			$grid->actions(function ($actions) {

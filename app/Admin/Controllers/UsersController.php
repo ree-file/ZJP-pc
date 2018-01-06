@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Card;
 use App\Contract;
+use App\InvestRecord;
 use App\Nest;
 use App\User;
 

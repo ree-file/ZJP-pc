@@ -15,10 +15,10 @@ class CreateInvestRecordsTable extends Migration
     {
         Schema::create('invest_records', function (Blueprint $table) {
 			$table->increments('id');
+			$table->integer('user_id')->unsigned();
 			$table->integer('nest_id')->unsigned();
 			$table->integer('contract_id')->unsigned();
-			$table->integer('user_id')->unsigned();
-			$table->enum('type', ['reinvest', 'upgrade']);
+			$table->enum('type', ['reinvest', 'upgrade', 'store']);
 			$table->integer('eggs')->unsigned();
 			$table->timestamps();
         });
