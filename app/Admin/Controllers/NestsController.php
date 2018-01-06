@@ -63,11 +63,21 @@ class NestsController extends Controller
     protected function grid()
     {
         return Admin::grid(Nest::class, function (Grid $grid) {
+
 			// 默认倒序
 			$grid->model()->orderBy('id', 'desc');
 
+			// 猫窝信息
 			$grid->id('ID')->sortable();
 			$grid->name('名字');
+			$grid->contracts('合约数')->display(function ($contracts) {
+				$count = count($contracts);
+				return "<span>{$count}</span>";
+			});
+			$grid->is_selling('出售状态')->display(function ($boolean) {
+				return $boolean ? "<strong class='text-success'>出售中</strong>" : "<strong class='text-success'>出售中</strong>";
+			});
+			$grid->column('user.email', '窝主邮箱');
             $grid->created_at('创建于')->sortable();
 
 			$grid->actions(function ($actions) {

@@ -81,7 +81,7 @@ class PaymentController extends ApiController
 		$withdrawalAlready = $cacher->getWithdrawalAlready($user->id);
 
 		if ($request->money + $withdrawalAlready > $withdrawalCeiling) {
-			return $this->failed('Reach the ceiling');
+			return $this->failed("Reach the ceiling.Ceiling:{$withdrawalCeiling},Already:{$withdrawalAlready}");
 		}
 
 		// 预扣除用户活动资金

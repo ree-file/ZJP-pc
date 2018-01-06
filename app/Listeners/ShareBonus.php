@@ -55,7 +55,7 @@ class ShareBonus
 
 				$incomeRecord = new IncomeRecord();
 				$incomeRecord->user_id = $user1->id;
-				$incomeRecord->money = $income;
+				$incomeRecord->money_active = $income;
 				$incomeRecord->type = 'bonus';
 				$incomeRecord->nest_id = $ancestor1->id;
 				$incomeRecord->save();
@@ -70,7 +70,7 @@ class ShareBonus
 
 				$incomeRecord = new IncomeRecord();
 				$incomeRecord->user_id = $user2->id;
-				$incomeRecord->money = $income;
+				$incomeRecord->money_active = $income;
 				$incomeRecord->type = 'bonus';
 				$incomeRecord->nest_id = $ancestor2->id;
 				$incomeRecord->save();
@@ -85,7 +85,7 @@ class ShareBonus
 
 				$incomeRecord = new IncomeRecord();
 				$incomeRecord->user_id = $user3->id;
-				$incomeRecord->money = $income;
+				$incomeRecord->money_active = $income;
 				$incomeRecord->type = 'bonus';
 				$incomeRecord->nest_id = $ancestor3->id;
 				$incomeRecord->save();
