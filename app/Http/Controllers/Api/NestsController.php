@@ -10,6 +10,7 @@ use App\IncomeRecord;
 use App\InvestRecord;
 use App\Nest;
 use App\Order;
+use App\TransactionRecord;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -20,13 +21,42 @@ use Illuminate\Validation\Rule;
 
 class NestsController extends ApiController
 {
-	// 猫窝详情（包含下级统计信息）
-	public function show(Nest $nest)
+	// 猫窝（在售列表）分页
+	public function index(Request $request)
 	{
+		$nests = Nest::with(['user' => function ($query) {
+			$query->select('id', 'email');
+		}])->where('is_selling', true)
+			->priceBetween($request->min, $request->max)
+			->withOrder($request->ordeyBy)
+			->simplePaginate(10);
+
+		return $this->success($nests);
+	}
+
+	// 猫窝详情（包含下级统计信息）（若所有者查看将包含部分统计信息）
+	public function show(Request $request, Nest $nest)
+	{
+		// 如果要求详细信息（包含统计，且为窝主请求）
+		if ($request->tab == 'detail' && $nest->user_id == Auth::id()) {
+			$nest = Nest::where('id', $nest->id)
+				->with(['parent' => function ($query) {
+					$query->select('id', 'name');
+				}, 'user' => function ($query) {
+					$query->select('id', 'email');
+				}, 'contracts', 'incomeRecords', 'investRecords', 'transactionRecords'])
+				->withDepth()
+				->first();
+
+			return $this->success(new NestResource($nest));
+		}
+
 		$nest = Nest::where('id', $nest->id)
 			->with(['parent' => function ($query) {
-				$query->select('name');
-			}])
+				$query->select('id', 'name');
+			}, 'user' => function ($query) {
+				$query->select('id', 'email');
+			}, 'transactionRecords'])
 			->withDepth()
 			->first();
 
@@ -48,7 +78,7 @@ class NestsController extends ApiController
 		return $this->success($contracts);
 	}
 
-	// 猫窝投资记录
+	// 猫窝投资记录（限定用户）
 	public function investRecords(Nest $nest)
 	{
 		// 限定该用户曾经的投资记录
@@ -60,12 +90,22 @@ class NestsController extends ApiController
 		return $this->success($records);
 	}
 
-	// 猫窝收益记录
+	// 猫窝收益记录（限定用户）
 	public function incomeRecords(Nest $nest)
 	{
 		// 限定该用户曾经的收益记录
 		$records = IncomeRecord::where('nest_id', $nest->id)
 			->where('user_id', Auth::id())
+			->orderBy('created_at', 'desc')
+			->get();
+
+		return $this->success($records);
+	}
+
+	// 猫窝成交记录
+	public function transactionRecords(Nest $nest)
+	{
+		$records = TransactionRecord::where('nest_id', $nest->id)
 			->orderBy('created_at', 'desc')
 			->get();
 
@@ -154,10 +194,9 @@ class NestsController extends ApiController
 		return $this->created();
 	}
 
-	// 出售巢
-	public function sell(Request $request, Nest $nest)
+	// 购买猫窝
+	public function sell2(Request $request, Nest $nest)
 	{
-		// 验证字段
 		$validator = Validator::make($request->all(), [
 			'price' => 'required|numeric|min:0',
 		]);
@@ -171,21 +210,91 @@ class NestsController extends ApiController
 		$this->authorize('update', $nest);
 
 		// 查看巢是否已经在销售
-		if (Order::where('status', 'selling')
-			->where('nest_id', $nest->id)->first()) {
-			return $this->failed('The order is on selling.');
+		if ($nest->is_selling) {
+			return $this->failed('The nest is on selling.');
 		}
 
-		$order = new Order();
-		$order->nest_id = $nest->id;
-		$order->price = $request->price;
-		$order->seller_id = Auth::id();
-		$order->save();
+		$nest->is_selling = true;
+		$nest->price = $request->price;
+		$nest->save();
 
 		return $this->created();
 	}
 
-	// 为巢创建一个新合约
+	// 购买猫窝
+	public function buy(Request $request, Nest $nest)
+	{
+		// 确认猫窝是否为在售状态
+		if (! $nest->is_selling) {
+			return $this->failed('Not on selling.');
+		}
+
+		// 防止用户购买自己订单
+		if (Auth::id() == $nest->seller_id) {
+			return $this->failed('Can not buy own nest.');
+		}
+
+		DB::beginTransaction();
+		try {
+			// 锁定付款用户
+			$buyer = User::where('id', Auth::id())->lockForUpdate()->first();
+
+			// 如果钱包金额不足
+			if ($buyer->money_active < $nest->price) {
+				throw new \Exception('Wallet no enough money.');
+			}
+			$buyer->money_active = $buyer->money_active - $nest->price;
+			$buyer->save();
+
+			// 扣税后收入的金额
+			$income = $nest->price * (1 - config('website.MARKET_TRANSCATION_TAX_RATE'));
+
+			// 锁定收款用户
+			$seller = User::where('id', $nest->user_id)->lockForUpdate()->first();
+			$seller->money_active = $seller->money_active + $income;
+			$seller->save();
+
+			// 将巢进行转移
+			$nest = Nest::where('id', $nest->id)->lockForUpdate()->first();
+			$nest->user_id = $buyer->id;
+			$nest->is_selling = false;
+			$nest->save();
+
+			// 保存交易记录
+			$transactionRecord = new TransactionRecord();
+			$transactionRecord->seller_id = $seller->id;
+			$transactionRecord->buyer_id = $buyer->id;
+			$transactionRecord->price = $nest->price;
+			$transactionRecord->income = $income;
+			$transactionRecord->save();
+
+			DB::commit();
+		} catch (\Exception $e) {
+			DB::rollBack();
+			return $this->failed($e->getMessage());
+		}
+
+		return $this->message('Bought.');
+	}
+
+	// 取消出售猫窝
+	public function unsell(Request $request, Nest $nest)
+	{
+		// 检查猫窝是否为在售状态
+		if (! $nest->is_selling) {
+			return $this->failed('Not on selling.');
+		}
+
+		// 检查用户是否有操作权限
+		$this->authorize('update', $nest);
+
+		$nest->is_selling = false;
+		$nest->save();
+
+		return $this->message('Unsold.');
+	}
+
+	// 为猫窝创建一个新合约
 	public function reinvest(Request $request, Nest $nest)
 	{
 		// 验证字段
@@ -260,7 +369,7 @@ class NestsController extends ApiController
 		return $this->created();
 	}
 
-	// 为巢的最新进行合约升级
+	// 为猫窝的最新进行合约升级
 	public function upgrade(Request $request, Nest $nest)
 	{
 		// 验证字段
@@ -338,6 +447,40 @@ class NestsController extends ApiController
 
 		// 触发巢投资事件
 		event(new NestInvested($nest, $request->eggs));
+
+		return $this->created();
+	}
+
+	/*
+	 * 将废除
+	 */
+	// 出售猫窝
+	public function sell(Request $request, Nest $nest)
+	{
+		// 验证字段
+		$validator = Validator::make($request->all(), [
+			'price' => 'required|numeric|min:0',
+		]);
+
+		// 验证失败
+		if ($validator->fails()) {
+			return $this->failed($validator->errors()->first());
+		}
+
+		// 验证用户是否有操作资格
+		$this->authorize('update', $nest);
+
+		// 查看巢是否已经在销售
+		if (Order::where('status', 'selling')
+			->where('nest_id', $nest->id)->first()) {
+			return $this->failed('The order is on selling.');
+		}
+
+		$order = new Order();
+		$order->nest_id = $nest->id;
+		$order->price = $request->price;
+		$order->seller_id = Auth::id();
+		$order->save();
 
 		return $this->created();
 	}

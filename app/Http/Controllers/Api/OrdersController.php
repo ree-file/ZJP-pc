@@ -14,6 +14,10 @@ use Illuminate\Support\Facades\Validator;
 
 class OrdersController extends ApiController
 {
+	/*
+	 * 将废除
+	 * */
+
 	// 所有在售的市场单
 	public function index(Request $request)
 	{

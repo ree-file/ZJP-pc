@@ -15,6 +15,11 @@ class CreateTransactionRecordsTable extends Migration
     {
         Schema::create('transaction_records', function (Blueprint $table) {
             $table->increments('id');
+			$table->integer('nest_id')->unsigned();
+			$table->integer('seller_id')->unsigned();
+			$table->integer('buyer_id')->unsigned()->nullable();
+			$table->decimal('price', 10, 2)->unsigned();
+			$table->decimal('income', 10, 2)->unsigned();
             $table->timestamps();
         });
     }

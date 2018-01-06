@@ -85,24 +85,24 @@ class UsersController extends Controller
 			$content->description('查看与编辑');
 
 			$content->row(function ($row) use($id) {
-				$user = User::with('nests', 'rechargeApplications', 'withdrawalApplications', 'orders')
+				$user = User::with('nests', 'rechargeApplications', 'withdrawalApplications', 'cards', 'incomeRecords', 'investRecords', 'transferRecordsOfPaying', 'transactionRecordsOfSelling')
 					->find($id);
 
 				$url = '/'.config('admin.route.prefix').'/nests?user_id='.$user->id;
 				$count = $user->nests->count();
 				$row->column(3, new InfoBox('猫窝', 'shopping-bag', 'red', $url, $count));
 
-				$url = '/'.config('admin.route.prefix').'/rechargeApplications?user_id='.$user->id;
+				$url = '/'.config('admin.route.prefix').'/recharge_applications?user_id='.$user->id;
 				$count = $user->rechargeApplications->count();
 				$row->column(3, new InfoBox('充值申请', 'dollar', 'green', $url, $count));
 
-				$url = '/'.config('admin.route.prefix').'/withdrawalApplications?user_id='.$user->id;
+				$url = '/'.config('admin.route.prefix').'/withdrawal_applications?user_id='.$user->id;
 				$count = $user->withdrawalApplications->count();
 				$row->column(3, new InfoBox('提现申请', 'money', 'yellow', $url, $count));
 
-				$url = '/'.config('admin.route.prefix').'/orders?seller_id='.$user->id;
-				$count = $user->orders->count();
-				$row->column(3, new InfoBox('市场单	', 'list-alt', 'purple', $url, $count));
+				$url = '/'.config('admin.route.prefix').'/cards?user_id='.$user->id;
+				$count = $user->cards->count();
+				$row->column(3, new InfoBox('银行卡', 'credit-card', 'light-blue', $url, $count));
 			});
 
             $content->body($this->form($id)->edit($id));
@@ -111,55 +111,27 @@ class UsersController extends Controller
 
     public function update($id)
 	{
-		return $this->form($id, true)->update($id);
+		return $this->form($id)->update($id);
 	}
     /**
      * Make a form builder.
      *
      * @return Form
      */
-	protected function form($id = null, $update = false)
+	protected function form($id = null)
 	{
-		return Admin::form(User::class, function (Form $form) use ($id, $update) {
+		return Admin::form(User::class, function (Form $form) use ($id) {
 			if ($id) {
-				if ($update) {
-
-					// 如果为上传
-					$form->currency('withdrawal_limit', '提现限制');
-					$form->switch('is_freezed', '是否冻结');
-				} else {
-
-					// 如果为编辑显示
-					$form->tab('基本信息', function ($form) {
-						$form->display('id', 'ID');
-						$form->display('email', '邮箱');
-						$form->display('money_active', '交易资金');
-						$form->display('money_limit', '激活资金');
-						$form->currency('withdrawal_limit', '提现限制');
-						$form->switch('is_freezed', '是否冻结');
-						$form->display('created_at', '创建于');
-						$form->display('updated_at', '更新于');
-					})->tab('银行卡', function ($form) use ($id) {
-						$cards = Card::where('user_id', $id)->get();
-
-						// 表格头
-						$headers = ['ID', '银行', '账户名', '卡号', '创建于'];
-						// 表格行
-						$rows = [];
-						foreach ($cards as $card) {
-							$row = [$card->id, $card->bankname, $card->username, $card->number, $card->created_at];
-							array_push($rows, $row);
-						}
-
-						// 列出银行卡
-						$table = new Table($headers, $rows);
-						$box = new Box('银行卡列表', $table);
-
-						$form->html($box->solid()->style('success'));
-					});
-				}
+				$form->display('id', 'ID');
+				$form->display('email', '邮箱');
+				$form->display('money_active', '交易资金');
+				$form->display('money_limit', '激活资金');
+				$form->currency('withdrawal_limit', '提现限制');
+				$form->switch('is_freezed', '是否冻结');
+				$form->display('created_at', '创建于');
+				$form->display('updated_at', '更新于');
+				$form->html('<button type="button" class="btn btn-block">查看用户统计信息</button>');
 			} else {
-
 				// 如果为创建
 				$form->email('email', '邮箱')->rules('required|unique:users');
 				$form->password('password', '密码')->rules('required');

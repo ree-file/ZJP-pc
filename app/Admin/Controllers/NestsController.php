@@ -75,8 +75,9 @@ class NestsController extends Controller
 				return "<span>{$count}</span>";
 			});
 			$grid->is_selling('是否在售')->display(function ($boolean) {
-				return $boolean ? "<strong class='text-success'>是</strong>" : "<strong>否</strong>";
+				return $boolean ? "<strong class='text-green'>是</strong>" : "<strong>否</strong>";
 			})->sortable();
+			$grid->price('售价');
 			$grid->column('user.email', '窝主邮箱');
             $grid->created_at('创建于')->sortable();
 

@@ -37,16 +37,6 @@ class User extends Authenticatable
 		return $this->hasMany('App\Nest');
 	}
 
-	public function orders()
-	{
-		return $this->hasMany('App\Order', 'seller_id');
-	}
-
-	public function bought()
-	{
-		return $this->hasMany('App\Order', 'buyer_id');
-	}
-
 	public function rechargeApplications()
 	{
 		return $this->hasMany('App\RechargeApplication');
@@ -69,11 +59,34 @@ class User extends Authenticatable
 
 	public function incomeRecords()
 	{
-		return $this->hasMany('App\IncomeRecords');
+		return $this->hasMany('App\IncomeRecord');
 	}
 
 	public function investRecords()
 	{
 		return $this->hasMany('App\InvestRecord');
+	}
+
+	public function transactionRecordsOfSelling()
+	{
+		return $this->hasMany('App\TransactionRecord', 'seller_id');
+	}
+
+	public function transactionRecordsOfBuying()
+	{
+		return $this->hasMany('App\TransactionRecord', 'buyer_id');
+	}
+
+	/*
+	 * 将废除
+	 */
+	public function orders()
+	{
+		return $this->hasMany('App\Order', 'seller_id');
+	}
+
+	public function bought()
+	{
+		return $this->hasMany('App\Order', 'buyer_id');
 	}
 }

@@ -78,16 +78,6 @@ class ConfigTableSeeder extends Seeder
 				'description' => '四级合约蛋数'
 			],
 			[
-				'name' => 'website.CONTRACT_LEVEL_FOUR',
-				'value' => '2000',
-				'description' => '四级合约蛋数'
-			],
-			[
-				'name' => 'website.CONTRACT_LEVEL_FIVE',
-				'value' => '4000',
-				'description' => '五级合约蛋数'
-			],
-			[
 				'name' => 'website.CONTRACT_LEVEL_FIVE',
 				'value' => '4000',
 				'description' => '五级合约蛋数'
@@ -113,11 +103,6 @@ class ConfigTableSeeder extends Seeder
 				'description' => '充值最低金额'
 			],
 			[
-				'name' => 'website.RECHARGE_APPLICATION_MONEY_MIN',
-				'value' => '0',
-				'description' => '充值最低金额'
-			],
-			[
 				'name' => 'website.WITHDRAWAL_APPLICATION_MONEY_MIN',
 				'value' => '0',
 				'description' => '提现最低金额'
@@ -131,6 +116,31 @@ class ConfigTableSeeder extends Seeder
 				'name' => 'website.TRANSFER_MONEY_MIN',
 				'value' => '0',
 				'description' => '转账最低金额'
+			],
+			[
+				'name' => 'mail.host',
+				'value' => 'smtp.exmail.qq.com',
+				'description' => 'SMTP服务地址'
+			],
+			[
+				'name' => 'mail.port',
+				'value' => '465',
+				'description' => '邮箱端口'
+			],
+			[
+				'name' => 'mail.username',
+				'value' => 'acount',
+				'description' => '邮箱账号'
+			],
+			[
+				'name' => 'mail.password',
+				'value' => 'password',
+				'description' => '邮箱密码'
+			],
+			[
+				'name' => 'mail.encryption',
+				'value' => 'ssl',
+				'description' => '邮箱加密方式'
 			]
 		]);
     }

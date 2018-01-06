@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Validator;
 
 class CommonController extends ApiController
 {
+	// 配置信息
 	public function index()
 	{
 		$webConfig = config('website');

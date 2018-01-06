@@ -93,7 +93,7 @@ class WithdrawalApplicationsController extends Controller
 			$form->select('doStatus', '操作状态')->options([
 				'accepted' => '接受',
 				'rejected' => '拒绝'
-			])->help("只允许操作处理中的申请；拒绝请选择附加信息，金额将打回用户账号内。操作人员自行把将提现申请金额扣除手续费比例{ {$feeRate}打入用户银行卡号。");
+			])->help("只允许操作处理中的申请；拒绝请选择附加信息，金额将打回用户账号内。操作人员自行把将提现申请金额扣除手续费比例{$feeRate}打入用户银行卡号。");
 
 			$form->select('message', '返回附加信息')->options([
 				'默认拒绝申请' => '默认拒绝申请',

@@ -6,11 +6,14 @@ use App\Card;
 use App\Handlers\CodeCacheHandler;
 use App\Http\Resources\UserResource;
 use App\IncomeRecord;
+use App\InvestRecord;
 use App\Mail\ResetSecurityCodeMail;
 use App\Nest;
 use App\Order;
 use App\RechargeApplication;
+use App\TransactionRecord;
 use App\TransferRecord;
+use App\User;
 use App\WithdrawalApplication;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -22,56 +25,59 @@ use Illuminate\Support\Facades\Validator;
 
 class PrivateController extends ApiController
 {
+
+	// 个人信息（包含统计信息）
+	public function user(Request $request)
+	{
+		// 如果要求详细信息
+		if ($request->tab == 'detail') {
+			$user = User::with(['cards', 'nests', 'rechargeApplications', 'withdrawalApplications', 'transferRecordsOfPaying', 'transferRecordsOfReceiving', 'incomeRecords', 'investRecords', 'transactionRecordsOfSelling', 'transactionRecordsOfBuying'])
+				->where('id', Auth::id())
+				->first();
+
+			return $this->success(new UserResource($user));
+		}
+
+		$user = Auth::user();
+		return $this->success(new UserResource($user));
+	}
+
+	// 个人投资记录
+	public function investRecords()
+	{
+		$investRecords = InvestRecord::with(['nest' => function ($query) {
+			$query->select('id', 'name');
+		}])->where('user_id', Auth::id())
+			->orderBy('created_at', 'desc')
+			->simplePaginate(10);
+
+		return $this->success($investRecords);
+	}
+
 	// 个人收益记录
 	public function incomeRecords(Request $request)
 	{
 		// 如果请求今日收益
 		if ($request->tab == 'today') {
 			// 分页
-			$incomeRecords = IncomeRecord::where('user_id', Auth::id())
+			$incomeRecords = IncomeRecord::with(['nest' => function ($query) {
+				$query->select('id', 'name');
+			}])->where('user_id', Auth::id())
 				->where('created_at', '>=', Carbon::today())
+				->orderBy('created_at', 'desc')
 				->simplePaginate(10);
 
 			return $this->success($incomeRecords);
 		}
 
 		// 分页
-		$incomeRecords = IncomeRecord::where('user_id', Auth::id())
+		$incomeRecords = IncomeRecord::with(['nest' => function ($query) {
+			$query->select('id', 'name');
+		}])->where('user_id', Auth::id())
+			->orderBy('created_at', 'desc')
 			->simplePaginate(10);
 
 		return $this->success($incomeRecords);
-	}
-
-	// 个人收益记录统计信息
-	public function incomeRecordsAnalyse()
-	{
-		// 今日收益
-		$incomeRecordsToday = IncomeRecord::where('user_id', Auth::id())
-			->where('created_at', '>=', Carbon::today())
-			->get();
-
-		// 所有收益
-		$incomeRecords = IncomeRecord::where('user_id', Auth::id())
-			->get();
-
-		$analyseToday = [
-			'money_active' => $incomeRecordsToday->sum('money_active'),
-			'money_limit' => $incomeRecordsToday->sum('money_limit'),
-			'coins' => $incomeRecordsToday->sum('coins'),
-		];
-
-		$analyse = [
-			'money_active' => $incomeRecords->sum('money_active'),
-			'money_limit' => $incomeRecords->sum('money_limit'),
-			'coins' => $incomeRecords->sum('coins'),
-		];
-
-		$data = [
-			'analyse_today' => $analyseToday,
-			'analyse' => $analyse
-		];
-
-		return $this->success($data);
 	}
 
 	// 个人转账支付记录
@@ -79,7 +85,11 @@ class PrivateController extends ApiController
 	{
 		// 查询收款记录
 		if ($request->tab == 'receiving') {
-			$transferRecords = TransferRecord::where('receiver_id', Auth::id())
+			$transferRecords = TransferRecord::with(['payer' => function ($query) {
+				$query->select('id', 'email');
+			}, 'receiver' => function ($query) {
+				$query->select('id', 'email');
+			}])->where('receiver_id', Auth::id())
 				->orderBy('created_at', 'desc')
 				->get();
 
@@ -88,7 +98,11 @@ class PrivateController extends ApiController
 
 		// 查询付款记录
 		if ($request->tab == 'paying') {
-			$transferRecords = TransferRecord::where('payer_id', Auth::id())
+			$transferRecords = TransferRecord::with(['payer' => function ($query) {
+				$query->select('id', 'email');
+			}, 'receiver' => function ($query) {
+				$query->select('id', 'email');
+			}])->where('payer_id', Auth::id())
 				->orderBy('created_at', 'desc')
 				->get();
 
@@ -96,12 +110,64 @@ class PrivateController extends ApiController
 		}
 
 		// 查询所有
-		$transferRecords = TransferRecord::where('payer_id', Auth::id())
+		$transferRecords = TransferRecord::with(['payer' => function ($query) {
+				$query->select('id', 'email');
+			}, 'receiver' => function ($query) {
+				$query->select('id', 'email');
+			}])->where('payer_id', Auth::id())
 			->orwhere('receiver_id', Auth::id())
 			->orderBy('created_at', 'desc')
 			->get();
 
 		return $this->success($transferRecords);
+	}
+
+	// 个人成交记录
+	public function transactionRecords(Request $request)
+	{
+		// 查询卖出记录
+		if ($request->tab == 'sold') {
+			$transactionRecords = TransactionRecord::with(['nest' => function ($query) {
+				$query->select('id', 'name');
+			}, 'seller' => function ($query) {
+				$query->select('id', 'email');
+			}, 'buyer' => function ($query) {
+				$query->select('id', 'email');
+			}])->where('seller_id', Auth::id())
+				->orderBy('created_at', 'desc')
+				->get();
+
+			return $this->success($transactionRecords);
+		}
+
+		// 查询购买记录
+		if ($request->tab == 'bought') {
+			$transactionRecords = TransactionRecord::with(['nest' => function ($query) {
+				$query->select('id', 'name');
+			}, 'seller' => function ($query) {
+				$query->select('id', 'email');
+			}, 'buyer' => function ($query) {
+				$query->select('id', 'email');
+			}])->where('buyer_id', Auth::id())
+				->orderBy('created_at', 'desc')
+				->get();
+
+			return $this->success($transactionRecords);
+		}
+
+		// 查询所有
+		$transactionRecords = TransactionRecord::with(['nest' => function ($query) {
+			$query->select('id', 'name');
+		}, 'seller' => function ($query) {
+			$query->select('id', 'email');
+		}, 'buyer' => function ($query) {
+			$query->select('id', 'email');
+		}])->where('buyer_id', Auth::id())
+			->orWhere('seller_id', Auth::id())
+			->orderBy('created_at', 'desc')
+			->get();
+
+		return $this->success($transactionRecords);
 	}
 
 	// 个人猫窝
@@ -121,21 +187,6 @@ class PrivateController extends ApiController
 		});
 
 		return $this->success($nests->toArray());
-	}
-
-	// 个人市场单
-	public function orders()
-	{
-		$user = Auth::user();
-		$orders = Order::where('seller_id', $user->id)->orWhere('buyer_id', $user->id)->with('nest')->get();
-		return $this->success($orders);
-	}
-
-	// 个人信息
-	public function user()
-	{
-		$user = Auth::user();
-		return $this->success(new UserResource($user));
 	}
 
 	// 个人银行卡
@@ -248,5 +299,48 @@ class PrivateController extends ApiController
 		$user->save();
 
 		return $this->message('Reseted.');
+	}
+
+	/*
+	 * 将废除
+	 * */
+	// 个人收益记录统计信息
+	public function incomeRecordsAnalyse()
+	{
+		// 今日收益
+		$incomeRecordsToday = IncomeRecord::where('user_id', Auth::id())
+			->where('created_at', '>=', Carbon::today())
+			->get();
+
+		// 所有收益
+		$incomeRecords = IncomeRecord::where('user_id', Auth::id())
+			->get();
+
+		$analyseToday = [
+			'money_active' => $incomeRecordsToday->sum('money_active'),
+			'money_limit' => $incomeRecordsToday->sum('money_limit'),
+			'coins' => $incomeRecordsToday->sum('coins'),
+		];
+
+		$analyse = [
+			'money_active' => $incomeRecords->sum('money_active'),
+			'money_limit' => $incomeRecords->sum('money_limit'),
+			'coins' => $incomeRecords->sum('coins'),
+		];
+
+		$data = [
+			'analyse_today' => $analyseToday,
+			'analyse' => $analyse
+		];
+
+		return $this->success($data);
+	}
+
+	// 个人市场单
+	public function orders()
+	{
+		$user = Auth::user();
+		$orders = Order::where('seller_id', $user->id)->orWhere('buyer_id', $user->id)->with('nest')->get();
+		return $this->success($orders);
 	}
 }

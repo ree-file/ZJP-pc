@@ -15,10 +15,15 @@ Route::group([
 	$router->resources([
 		'users' => UsersController::class,
 		'nests' => NestsController::class,
-		'rechargeApplications' => RechargeApplicationsController::class,
-		'withdrawalApplications' => WithdrawalApplicationsController::class,
+		'recharge_applications' => RechargeApplicationsController::class,
+		'withdrawal_applications' => WithdrawalApplicationsController::class,
 		'orders' => OrdersController::class,
-		'cards' => CardsController::class
+		'cards' => CardsController::class,
+		'transfer_records' => TransferRecordsController::class,
+		'transaction_records' => TransactionRecordsController::class,
+		'invest_records' => InvestRecordsController::class,
+		'income_records' => IncomeRecordsController::class,
+		'contracts' => ContractsController::class
 	]);
 
 	$router->get('/users/{user}/cards', 'UsersController@editCards');

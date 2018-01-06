@@ -2,7 +2,7 @@
 
 namespace App\Admin\Controllers;
 
-use App\TransferRecord;
+use App\TransactionRecord;
 
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
@@ -11,7 +11,7 @@ use Encore\Admin\Layout\Content;
 use App\Http\Controllers\Controller;
 use Encore\Admin\Controllers\ModelForm;
 
-class TransferRecordsController extends Controller
+class TransactionRecordsController extends Controller
 {
     use ModelForm;
 
@@ -24,31 +24,32 @@ class TransferRecordsController extends Controller
     {
         return Admin::content(function (Content $content) {
 
-            $content->header('转账记录');
+            $content->header('交易记录');
             $content->description('列表');
 
             $content->body($this->grid());
         });
     }
 
-
     protected function grid()
     {
-        return Admin::grid(TransferRecord::class, function (Grid $grid) {
+        return Admin::grid(TransactionRecord::class, function (Grid $grid) {
 
 			// 默认倒序
 			$grid->model()->orderBy('id', 'desc');
 
-            $grid->id('ID')->sortable();
-            $grid->column('payer.email', '转款者邮箱');
-            $grid->column('receiver.email', '收款者邮箱');
-            $grid->money('金额')->sortable();
-
-            $grid->created_at('创建于');
+			$grid->id('ID')->sortable();
+			$grid->column('seller.email', '卖家邮箱');
+			$grid->column('buyer.email', '买家邮箱');
+			$grid->column('nest.name', '猫窝名');
+			$grid->price('售出价格')->sortable();
+			$grid->income('卖家收款');
+			$grid->created_at('创建于');
 
 			$grid->filter(function($filter){
-				$filter->equal('payer_id', '转款者ID');
-				$filter->equal('receiver_id', '收款者ID');
+				$filter->equal('seller_id', '卖家ID');
+				$filter->equal('buyer_id', '买家ID');
+				$filter->equal('nest_id', '猫窝ID');
 			});
 
 			// 取消创建
