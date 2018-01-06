@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateTransferRecordsTable extends Migration
+class CreateTransactionRecordsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,9 @@ class CreateTransferRecordsTable extends Migration
      */
     public function up()
     {
-        Schema::create('transfer_records', function (Blueprint $table) {
-			$table->increments('id');
-			$table->integer('payer_id')->unsigned();
-			$table->integer('receiver_id')->unsigned();
-			$table->decimal('money', 10, 2)->unsigned();
-			$table->timestamps();
+        Schema::create('transaction_records', function (Blueprint $table) {
+            $table->increments('id');
+            $table->timestamps();
         });
     }
 
@@ -29,6 +26,6 @@ class CreateTransferRecordsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('transfer_records');
+        Schema::dropIfExists('transaction_records');
     }
 }

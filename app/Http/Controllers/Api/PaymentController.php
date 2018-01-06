@@ -153,25 +153,18 @@ class PaymentController extends ApiController
 			$user->save();
 
 			// 收款用户金额及币增加数值
-			$increasedMoneyActive = $request->money * config('zjp.TRANSFER_MONEY_ACTIVE_RATE');
-			$increasedMoneyLimit = $request->money * config('zjp.TRANSFER_MONEY_LIMIT_RATE');
-			$increasedCoins = $request->money * config('zjp.TRANSFER_COINS_RATE') / config('zjp.COIN_VAL');
+			$increasedMoneyActive = $request->money;
 
 			// 锁收款用户
 			$receiver = User::where('id', $receiver->id)->lockForUpdate()->first();
 
 			$receiver->money_active = $receiver->money_active + $increasedMoneyActive;
-			$receiver->money_limit = $receiver->money_limit + $increasedMoneyLimit;
-			$receiver->coins = $receiver->coins + $increasedCoins;
 			$receiver->save();
 
 			$transferRecord = new TransferRecord();
 			$transferRecord->payer_id = $user->id;
 			$transferRecord->receiver_id = $receiver->id;
 			$transferRecord->money = $request->money;
-			$transferRecord->money_active = $increasedMoneyActive;
-			$transferRecord->money_limit = $increasedMoneyLimit;
-			$transferRecord->coins = $increasedCoins;
 			$transferRecord->save();
 
 			DB::commit();

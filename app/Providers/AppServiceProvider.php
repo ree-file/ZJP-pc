@@ -17,8 +17,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-    	// mysql5.7以下数据库兼容问题
+    	// mysql 低版本 utf8 字节长度问题
 		Schema::defaultStringLength(191);
+
+		// 开启数据库读取配置功能
         if (env('LOAD_CONFIG') == true) {
 			Config::load();
 		}

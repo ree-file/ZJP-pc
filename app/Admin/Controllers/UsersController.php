@@ -205,6 +205,14 @@ class UsersController extends Controller
 			$contract->nest_id = $nest->id;
 			$contract->eggs = config('zjp.CONTRACT_LEVEL_ONE');
 			$contract->save();
+
+			$investRecord = new \App\InvestRecord();
+			$investRecord->nest_id = $nest->id;
+			$investRecord->user_id = $user->id;
+			$investRecord->contract_id = $contract->id;
+			$investRecord->type = 'store';
+			$investRecord->eggs = $contract->eggs;
+			$investRecord->save();
 		});
 
 		admin_toastr(trans('admin.save_succeeded'));
