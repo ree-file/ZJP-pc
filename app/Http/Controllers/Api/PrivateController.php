@@ -81,7 +81,7 @@ class PrivateController extends ApiController
 		if ($request->tab == 'receiving') {
 			$transferRecords = TransferRecord::where('receiver_id', Auth::id())
 				->orderBy('created_at', 'desc')
-				->simplePaginate(10);
+				->get();
 
 			return $this->success($transferRecords);
 		}
@@ -90,7 +90,7 @@ class PrivateController extends ApiController
 		if ($request->tab == 'paying') {
 			$transferRecords = TransferRecord::where('payer_id', Auth::id())
 				->orderBy('created_at', 'desc')
-				->simplePaginate(10);
+				->get();
 
 			return $this->success($transferRecords);
 		}
@@ -99,7 +99,7 @@ class PrivateController extends ApiController
 		$transferRecords = TransferRecord::where('payer_id', Auth::id())
 			->orwhere('receiver_id', Auth::id())
 			->orderBy('created_at', 'desc')
-			->simplePaginate(10);
+			->get();
 
 		return $this->success($transferRecords);
 	}
@@ -117,7 +117,7 @@ class PrivateController extends ApiController
 
 		// 为每个猫窝添加计算出的价值属性
 		$nests = $nests->each(function ($item, $key) {
-			$item->val = $item->eggs_sum * config('zjp.EGG_VAL');
+			$item->val = $item->eggs_sum * config('website.EGG_VAL');
 		});
 
 		return $this->success($nests->toArray());

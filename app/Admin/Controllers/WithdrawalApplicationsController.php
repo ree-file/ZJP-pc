@@ -86,7 +86,7 @@ class WithdrawalApplicationsController extends Controller
 			$form->display('created_at', '创建于');
 			$form->display('updated_at', '更新于');
 
-			$feeRate = config('zjp.WITHDRAWAL_FEE_RATE');
+			$feeRate = config('website.WITHDRAWAL_FEE_RATE');
 
 			// 处理操作
 			$form->divider();

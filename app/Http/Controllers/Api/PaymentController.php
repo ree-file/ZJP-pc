@@ -19,7 +19,7 @@ class PaymentController extends ApiController
 	public function rechargeApplicationStore(Request $request, ImageUploadHandler $uploader)
 	{
 		// 充值最低金额
-		$moneyMin = config('zjp.RECHARGE_APPLICATION_MONEY_MIN');
+		$moneyMin = config('website.RECHARGE_APPLICATION_MONEY_MIN');
 
 		// 验证字段是否符合规则
 		$validator = Validator::make($request->all(), [
@@ -55,7 +55,7 @@ class PaymentController extends ApiController
 	public function withdrawalApplicationStore(Request $request, WithdrawalCacheHandler $cacher)
 	{
 		// 提现最低金额
-		$moneyMin = config('zjp.WITHDRAWAL_APPLICATION_MONEY_MIN');
+		$moneyMin = config('website.WITHDRAWAL_APPLICATION_MONEY_MIN');
 
 		// 验证字段是否符合规则
 		$validator = Validator::make($request->all(), [
@@ -119,7 +119,7 @@ class PaymentController extends ApiController
 	public function transferRecordStore(Request $request)
 	{
 		// 转账最低金额
-		$moneyMin = config('zjp.TRANSFER_MONEY_MIN');
+		$moneyMin = config('website.TRANSFER_MONEY_MIN');
 
 		// 验证字段是否符合规则
 		$validator = Validator::make($request->all(), [

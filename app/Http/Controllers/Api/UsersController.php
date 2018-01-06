@@ -30,11 +30,11 @@ class UsersController extends ApiController
 		$validator = Validator::make($request->all(), [
 			'parent_name' => 'required',
 			'eggs' => ['required', Rule::in([
-				config('zjp.CONTRACT_LEVEL_ONE'),
-				config('zjp.CONTRACT_LEVEL_TWO'),
-				config('zjp.CONTRACT_LEVEL_THREE'),
-				config('zjp.CONTRACT_LEVEL_FOUR'),
-				config('zjp.CONTRACT_LEVEL_FIVE')])],
+				config('website.CONTRACT_LEVEL_ONE'),
+				config('website.CONTRACT_LEVEL_TWO'),
+				config('website.CONTRACT_LEVEL_THREE'),
+				config('website.CONTRACT_LEVEL_FOUR'),
+				config('website.CONTRACT_LEVEL_FIVE')])],
 			'email' => 'required|email',
 		]);
 
@@ -56,7 +56,7 @@ class UsersController extends ApiController
 			// 锁付款用户
 			$user = User::where('id', Auth::id())->lockForUpdate()->first();
 			// 付款价格
-			$price = $request->eggs * config('zjp.EGG_VAL');
+			$price = $request->eggs * config('website.EGG_VAL');
 
 			// 如果金额不足则终止
 			if ($user->money_limit + $user->money_active < $price) {
@@ -84,7 +84,7 @@ class UsersController extends ApiController
 				$password = rand_password();
 				$receiver->password = bcrypt($password);
 				// 用户默认提款上限设定
-				$receiver->withdrawal_limit = config('zjp.USER_TOTAL_WITHDRAWAL_LIMIT');
+				$receiver->withdrawal_limit = config('website.USER_WITHDRAWAL_LIMIT');
 				$receiver->save();
 			}
 

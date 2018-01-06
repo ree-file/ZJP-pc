@@ -19,5 +19,6 @@
  */
 
 Encore\Admin\Form::forget(['map', 'editor']);
+
+// 设置默认视图目录
 app('view')->prependNamespace('admin', resource_path('views/admin'));
-\Encore\Admin\Facades\Admin::js('/vendor/echarts/dist/echarts.simple.min.js');

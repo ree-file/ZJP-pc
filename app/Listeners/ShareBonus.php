@@ -39,7 +39,6 @@ class ShareBonus
 		$nest = Nest::withDepth()->where('id', $nest->id)->first();
 		$ancestors = Nest::withDepth()->having('depth', '>=', $nest->depth - 3)->ancestorsOf($nest->id);
 
-
 		DB::beginTransaction();
 		try {
 			$ancestor1 = $ancestors->where('depth', $nest->depth - 1)->first();
@@ -48,7 +47,7 @@ class ShareBonus
 
 			// 如果前1级存在
 			if ($ancestor1) {
-				$income = $eggs * config('zjp.BONUS_ONE_RATE') * config('zjp.EGG_VAL');
+				$income = $eggs * config('website.BONUS_ONE_RATE') * config('website.EGG_VAL');
 				$user1 = User::where('id', $ancestor1->user_id)->lockForUpdate()->first();
 				$user1->money_active = $user1->money_active + $income;
 				$user1->save();
@@ -63,7 +62,7 @@ class ShareBonus
 
 			// 如果前2级存在
 			if ($ancestor2) {
-				$income = $eggs * config('zjp.BONUS_TWO_RATE') * config('zjp.EGG_VAL');
+				$income = $eggs * config('website.BONUS_TWO_RATE') * config('website.EGG_VAL');
 				$user2 = User::where('id', $ancestor2->user_id)->lockForUpdate()->first();
 				$user2->money_active = $user2->money_active + $income;
 				$user2->save();
@@ -78,7 +77,7 @@ class ShareBonus
 
 			// 如果前3级存在
 			if ($ancestor3) {
-				$income = $eggs * config('zjp.BONUS_THREE_RATE') * config('zjp.EGG_VAL');
+				$income = $eggs * config('website.BONUS_THREE_RATE') * config('website.EGG_VAL');
 				$user3 = User::where('id', $ancestor3->user_id)->lockForUpdate()->first();
 				$user3->money_active = $user3->money_active + $income;
 				$user3->save();

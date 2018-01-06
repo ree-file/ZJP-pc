@@ -2,8 +2,6 @@
 
 namespace App\Providers;
 
-use App\Contract;
-use App\Observers\ContractObserver;
 use Encore\Admin\Config\Config;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;

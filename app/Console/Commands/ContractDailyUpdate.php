@@ -45,9 +45,9 @@ class ContractDailyUpdate extends Command
 			$contracts = Contract::where('is_finished', false)->lockForUpdate()->get();
 			foreach ($contracts as $contract) {
 				// 每日孵化蛋树
-				$dailyEggs = $contract->eggs * config('zjp.CONTRACT_DAILY_HATCH_RATE');
+				$dailyEggs = $contract->eggs * config('website.CONTRACT_DAILY_HATCH_RATE');
 				// 合约总获利蛋数
-				$profitEggs = $contract->eggs * config('zjp.CONTRACT_PROFITE_RATE');
+				$profitEggs = $contract->eggs * config('website.CONTRACT_PROFITE_RATE');
 
 				// 如果孵化完成
 				if ($contract->hatches + $dailyEggs >= $profitEggs) {
@@ -58,9 +58,9 @@ class ContractDailyUpdate extends Command
 					$contract->is_finished = true;
 					$contract->save();
 
-					$increasedMoneyActive = $incomeEggs * config('zjp.EGG_VAL') * config('zjp.CONTRACT_MONEY_ACTIVE_RATE');
-					$increasedMoneyLimit = $incomeEggs * config('zjp.EGG_VAL') * config('zjp.CONTRACT_MONEY_LIMIT_RATE');
-					$increasedCoins = $incomeEggs * config('zjp.EGG_VAL') * config('zjp.CONTRACT_COINS_RATE');
+					$increasedMoneyActive = $incomeEggs * config('website.EGG_VAL') * config('website.CONTRACT_MONEY_ACTIVE_RATE');
+					$increasedMoneyLimit = $incomeEggs * config('website.EGG_VAL') * config('website.CONTRACT_MONEY_LIMIT_RATE');
+					$increasedCoins = $incomeEggs * config('website.EGG_VAL') * config('website.CONTRACT_COINS_RATE');
 
 					$user = User::where('id', $contract->nest->user_id)->lockForUpdate()->first();
 					$user->money_active = $user->money_active + $increasedMoneyActive;
@@ -84,9 +84,9 @@ class ContractDailyUpdate extends Command
 					$contract->hatches = $contract->hatches + $incomeEggs;
 					$contract->save();
 
-					$increasedMoneyActive = $incomeEggs * config('zjp.EGG_VAL') * config('zjp.CONTRACT_MONEY_ACTIVE_RATE');
-					$increasedMoneyLimit = $incomeEggs * config('zjp.EGG_VAL') * config('zjp.CONTRACT_MONEY_LIMIT_RATE');
-					$increasedCoins = $incomeEggs * config('zjp.EGG_VAL') * config('zjp.CONTRACT_COINS_RATE');
+					$increasedMoneyActive = $incomeEggs * config('website.EGG_VAL') * config('website.CONTRACT_MONEY_ACTIVE_RATE');
+					$increasedMoneyLimit = $incomeEggs * config('website.EGG_VAL') * config('website.CONTRACT_MONEY_LIMIT_RATE');
+					$increasedCoins = $incomeEggs * config('website.EGG_VAL') * config('website.CONTRACT_COINS_RATE');
 
 					$user = User::where('id', $contract->nest->user_id)->lockForUpdate()->first();
 					$user->money_active = $user->money_active + $increasedMoneyActive;

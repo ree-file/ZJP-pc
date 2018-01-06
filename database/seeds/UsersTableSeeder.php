@@ -27,7 +27,7 @@ class UsersTableSeeder extends Seeder
 		$contract = new \App\Contract();
 		$contract->nest_id = $nest->id;
 		$contract->is_finished = false;
-		$contract->eggs = config('zjp.CONTRACT_LEVEL_ONE');
+		$contract->eggs = config('website.CONTRACT_LEVEL_ONE');
 		$contract->save();
 
 		$investRecord = new \App\InvestRecord();

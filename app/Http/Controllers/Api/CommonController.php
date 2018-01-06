@@ -19,8 +19,8 @@ class CommonController extends ApiController
 {
 	public function index()
 	{
-		$zjp = config('zjp');
-		return $this->success($zjp);
+		$webConfig = config('website');
+		return $this->success($webConfig);
 	}
 
 	// 忘记密码

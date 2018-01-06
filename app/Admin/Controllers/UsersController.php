@@ -194,6 +194,7 @@ class UsersController extends Controller
 			$user = new User();
 			$user->email = $request->email;
 			$user->password = bcrypt($request->password);
+			$user->withdrawal_limit = config('website.USER_WITHDRAWAL_LIMIT');
 			$user->save();
 
 			$nest = new Nest();
@@ -203,7 +204,7 @@ class UsersController extends Controller
 
 			$contract = new Contract();
 			$contract->nest_id = $nest->id;
-			$contract->eggs = config('zjp.CONTRACT_LEVEL_ONE');
+			$contract->eggs = config('website.CONTRACT_LEVEL_ONE');
 			$contract->save();
 
 			$investRecord = new \App\InvestRecord();

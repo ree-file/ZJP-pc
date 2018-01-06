@@ -75,7 +75,7 @@ class OrdersController extends ApiController
 			$buyer->save();
 
 			// 扣税后收入的金额
-			$income = $order->price * (1 - config('zjp.MARKET_TRANSCATION_TAX_RATE'));
+			$income = $order->price * (1 - config('website.MARKET_TRANSCATION_TAX_RATE'));
 
 			// 锁定收款用户
 			$seller = User::where('id', $order->seller_id)->lockForUpdate()->first();

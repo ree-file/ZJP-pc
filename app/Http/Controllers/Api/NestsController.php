@@ -42,7 +42,7 @@ class NestsController extends ApiController
 
 		// 为每个合约添加计算出的价值属性
 		$contracts = $contracts->each(function ($item, $key) {
-			$item->val = $item->eggs * config('zjp.EGG_VAL');
+			$item->val = $item->eggs * config('website.EGG_VAL');
 		});
 
 		return $this->success($contracts);
@@ -79,11 +79,11 @@ class NestsController extends ApiController
 		$validator = Validator::make($request->all(), [
 			'parent_name' => 'required',
 			'eggs'        => ['required', Rule::in([
-				config('zjp.CONTRACT_LEVEL_ONE'),
-				config('zjp.CONTRACT_LEVEL_TWO'),
-				config('zjp.CONTRACT_LEVEL_THREE'),
-				config('zjp.CONTRACT_LEVEL_FOUR'),
-				config('zjp.CONTRACT_LEVEL_FIVE')])]
+				config('website.CONTRACT_LEVEL_ONE'),
+				config('website.CONTRACT_LEVEL_TWO'),
+				config('website.CONTRACT_LEVEL_THREE'),
+				config('website.CONTRACT_LEVEL_FOUR'),
+				config('website.CONTRACT_LEVEL_FIVE')])]
 		]);
 
 		// 验证失败
@@ -102,7 +102,7 @@ class NestsController extends ApiController
 			// 锁定付款用户
 			$user = User::where('id', Auth::id())->lockForUpdate()->first();
 			// 付款价格
-			$price = $request->eggs * config('zjp.EGG_VAL');
+			$price = $request->eggs * config('website.EGG_VAL');
 
 			// 如果金额不足则终止
 			if ($user->money_limit + $user->money_active < $price) {
@@ -191,11 +191,11 @@ class NestsController extends ApiController
 		// 验证字段
 		$validator = Validator::make($request->all(), [
 			'eggs' => ['required', Rule::in([
-				config('zjp.CONTRACT_LEVEL_ONE'),
-				config('zjp.CONTRACT_LEVEL_TWO'),
-				config('zjp.CONTRACT_LEVEL_THREE'),
-				config('zjp.CONTRACT_LEVEL_FOUR'),
-				config('zjp.CONTRACT_LEVEL_FIVE')])]
+				config('website.CONTRACT_LEVEL_ONE'),
+				config('website.CONTRACT_LEVEL_TWO'),
+				config('website.CONTRACT_LEVEL_THREE'),
+				config('website.CONTRACT_LEVEL_FOUR'),
+				config('website.CONTRACT_LEVEL_FIVE')])]
 		]);
 		// 验证失败
 		if ($validator->fails()) {
@@ -216,7 +216,7 @@ class NestsController extends ApiController
 			// 锁定用户
 			$user = User::where('id', Auth::id())->lockForUpdate()->first();
 			// 付款金额
-			$price = $request->eggs * config('zjp.EGG_VAL');
+			$price = $request->eggs * config('website.EGG_VAL');
 
 			// 如果金额不足则终止
 			if ($user->money_limit + $user->money_active < $price) {
@@ -283,11 +283,11 @@ class NestsController extends ApiController
 
 		// 查看请求蛋数与合约蛋数相加是否满足合约分级蛋数量
 		if (!in_array(($request->eggs + $contract->eggs), [
-			config('zjp.CONTRACT_LEVEL_ONE'),
-			config('zjp.CONTRACT_LEVEL_TWO'),
-			config('zjp.CONTRACT_LEVEL_THREE'),
-			config('zjp.CONTRACT_LEVEL_FOUR'),
-			config('zjp.CONTRACT_LEVEL_FIVE')])) {
+			config('website.CONTRACT_LEVEL_ONE'),
+			config('website.CONTRACT_LEVEL_TWO'),
+			config('website.CONTRACT_LEVEL_THREE'),
+			config('website.CONTRACT_LEVEL_FOUR'),
+			config('website.CONTRACT_LEVEL_FIVE')])) {
 			return $this->message('Eggs count wrong.');
 		}
 
@@ -296,7 +296,7 @@ class NestsController extends ApiController
 			// 锁定用户
 			$user = User::where('id', Auth::id())->lockForUpdate()->first();
 			// 付款金额
-			$price = $request->eggs * config('zjp.EGG_VAL');
+			$price = $request->eggs * config('website.EGG_VAL');
 
 			// 如果金额不足则终止
 			if ($user->money_limit + $user->money_active < $price) {
