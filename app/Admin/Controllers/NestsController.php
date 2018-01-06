@@ -74,9 +74,9 @@ class NestsController extends Controller
 				$count = count($contracts);
 				return "<span>{$count}</span>";
 			});
-			$grid->is_selling('出售状态')->display(function ($boolean) {
-				return $boolean ? "<strong class='text-success'>出售中</strong>" : "<strong class='text-success'>出售中</strong>";
-			});
+			$grid->is_selling('是否在售')->display(function ($boolean) {
+				return $boolean ? "<strong class='text-success'>是</strong>" : "<strong>否</strong>";
+			})->sortable();
 			$grid->column('user.email', '窝主邮箱');
             $grid->created_at('创建于')->sortable();
 

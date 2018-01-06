@@ -28,5 +28,4 @@ Route::get('/', function () {
 
 	dd($a->toArray());*/
 	\App\Nest::fixTree();
-
 });

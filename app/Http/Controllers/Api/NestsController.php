@@ -132,6 +132,15 @@ class NestsController extends ApiController
 			$contract->nest_id = $nest->id;
 			$contract->save();
 
+			// 创建一条投资记录
+			$investRecord = new InvestRecord();
+			$investRecord->eggs = $request->eggs;
+			$investRecord->contract_id = $contract->id;
+			$investRecord->nest_id = $nest->id;
+			$investRecord->user_id = $user->id;
+			$investRecord->type = 'store';
+			$investRecord->save();
+
 			DB::commit();
 
 			// 触发巢投资事件

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Card;
 use App\Contract;
 use App\Events\NestInvested;
+use App\InvestRecord;
 use App\Mail\ResetPasswordMail;
 use App\Mail\UserCreatedMail;
 use App\Nest;
@@ -99,6 +100,15 @@ class UsersController extends ApiController
 			$contract->eggs = $request->eggs;
 			$contract->nest_id = $nest->id;
 			$contract->save();
+
+			// 创建一条投资记录
+			$investRecord = new InvestRecord();
+			$investRecord->eggs = $request->eggs;
+			$investRecord->contract_id = $contract->id;
+			$investRecord->nest_id = $nest->id;
+			$investRecord->user_id = $user->id;
+			$investRecord->type = 'store';
+			$investRecord->save();
 
 			DB::commit();
 

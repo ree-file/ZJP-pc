@@ -19,16 +19,6 @@ class Nest extends Model
 		return $this->hasMany('App\Contract');
 	}
 
-	public function parent()
-	{
-		return $this->belongsTo('App\Nest', 'parent_id');
-	}
-
-	public function children()
-	{
-		return $this->hasMany('App\Nest', 'parent_id');
-	}
-
 	public function incomeRecords()
 	{
 		return $this->hasMany('App\IncomeRecord');
