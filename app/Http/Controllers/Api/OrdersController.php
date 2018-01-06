@@ -22,6 +22,8 @@ class OrdersController extends ApiController
 			$query->select('id', 'email');
 		}, 'buyer' => function ($query) {
 			$query->select('id', 'email');
+		}, 'nest' => function ($query) {
+			$query->select('id', 'name');
 		}])->where('status', 'selling')
 			->priceBetween($request->min, $request->max)
 			->withOrder($request->ordeyBy)
