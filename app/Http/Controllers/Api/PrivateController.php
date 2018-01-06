@@ -151,7 +151,7 @@ class PrivateController extends ApiController
 	{
 		$rechargeApplications = RechargeApplication::where('user_id', Auth::id())
 			->orderBy('created_at', 'desc')
-			->simplePaginate(10);
+			->get();
 
 		return $this->success($rechargeApplications);
 	}
@@ -161,7 +161,7 @@ class PrivateController extends ApiController
 	{
 		$withdrawalApplications = WithdrawalApplication::where('user_id', Auth::id())
 			->orderBy('created_at', 'desc')
-			->simplePaginate(10);
+			->get();
 
 		return $this->success($withdrawalApplications);
 	}

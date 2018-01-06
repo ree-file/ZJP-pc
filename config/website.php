@@ -7,7 +7,7 @@ return [
 	'MARKET_TRANSCATION_TAX_RATE' => '0.05', // 猫窝在市场交易完成时扣取的税率
 	'EGG_VAL' => '7', // 蛋单位金额
 	'CONTRACT_PROFITE_RATE' => '3', // 合约获利倍率
-	'CONTRACT_DAILY_HATCH_RATE' => '0.01', //每日孵化比例
+	'CONTRACT_DAILY_HATCH_RATE' => '0.01', // 每日孵化比例
 	'CONTRACT_MONEY_ACTIVE_RATE' => '0.7', // 合约获取活动资金比率
 	'CONTRACT_MONEY_LIMIT_RATE' => '0.2', // 合约获取限制资金比率
 	'CONTRACT_COINS_RATE' => '0.1', // 合约获取猫币比例
