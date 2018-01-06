@@ -86,15 +86,14 @@ class WithdrawalApplicationsController extends Controller
 			$form->display('created_at', '创建于');
 			$form->display('updated_at', '更新于');
 
-			$moneyLimitRate = config('zjp.WITHDRAW_MONEY_LIMIT_RATE');
-			$coinsRate = config('zjp.WITHDRAW_COINS_RATE');
-			$cashRate = config('zjp.WITHDRAW_CASH_RATE');
+			$feeRate = config('zjp.WITHDRAWAL_FEE_RATE');
+
 			// 处理操作
 			$form->divider();
 			$form->select('doStatus', '操作状态')->options([
 				'accepted' => '接受',
 				'rejected' => '拒绝'
-			])->help("只允许操作处理中的申请；拒绝请选择附加信息，金额将打回用户账号内。接受后系统将会把占提现申请金额的{$moneyLimitRate}，{$coinsRate}的资金打入账号激活资金和猫币，操作人员自行把剩余{$cashRate}的比例的提现申请金额打入用户银行卡号。");
+			])->help("只允许操作处理中的申请；拒绝请选择附加信息，金额将打回用户账号内。操作人员自行把将提现申请金额扣除手续费比例{ {$feeRate}打入用户银行卡号。");
 
 			$form->select('message', '返回附加信息')->options([
 				'默认拒绝申请' => '默认拒绝申请',
@@ -167,28 +166,6 @@ class WithdrawalApplicationsController extends Controller
 
 		// 操作为接受
 		if ($request->doStatus == 'accepted') {
-			DB::beginTransaction();
-			try {
-				// 锁定用户
-				$user = User::where('id', $withdrawalApplication->user->id)->lockForUpdate()->first();
-
-				$moneyLimit = $withdrawalApplication->money * config('zjp.WITHDRAW_MONEY_LIMIT_RATE');
-				$coins = $withdrawalApplication->money * config('zjp.WITHDRAW_COINS_RATE');
-
-				$user->money_limit = $user->money_limit + $moneyLimit;
-				$user->coins = $user->coins + $coins;
-
-				$user->save();
-				DB::commit();
-			} catch (\Exception $e) {
-				DB::rollBack();
-				$error = new MessageBag([
-					'title'   => '操作失败',
-					'message' => $e->getMessage(),
-				]);
-				return back()->withInput()->with(compact('error'));
-			}
-
 			$withdrawalApplication->status = 'accepted';
 			$withdrawalApplication->save();
 			admin_toastr(trans('admin.update_succeeded'));

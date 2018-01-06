@@ -71,8 +71,8 @@ class PaymentController extends ApiController
 		// 检查今日提现是否到达上限
 		$user = Auth::user();
 
-		if (! $cacher->getWithdrawalCeiling()) {
-			$withdrawalCeiling = $user->money * config('zjp.WITHDRAW_TODAY_RATE');
+		if (! $cacher->getWithdrawalCeiling($user->id)) {
+			$withdrawalCeiling = $user->money_active * config('zjp.WITHDRAW_TODAY_RATE');
 			$cacher->setWithdrawalCeiling($user->id, $withdrawalCeiling);
 			$cacher->setWithdrawalAlready($user->id, 0);
 		}

@@ -58,15 +58,21 @@ class ContractDailyUpdate extends Command
 					$contract->is_finished = true;
 					$contract->save();
 
-					$increasedMoneyActive = $incomeEggs * config('zjp.EGG_VAL');
+					$increasedMoneyActive = $incomeEggs * config('zjp.EGG_VAL') * config('zjp.CONTRACT_MONEY_ACTIVE_RATE');
+					$increasedMoneyLimit = $incomeEggs * config('zjp.EGG_VAL') * config('zjp.CONTRACT_MONEY_LIMIT_RATE');
+					$increasedCoins = $incomeEggs * config('zjp.EGG_VAL') * config('zjp.CONTRACT_COINS_RATE');
 
 					$user = User::where('id', $contract->nest->user_id)->lockForUpdate()->first();
 					$user->money_active = $user->money_active + $increasedMoneyActive;
+					$user->money_limit = $user->money_limit + $increasedMoneyLimit;
+					$user->coins = $user->coins + $increasedCoins;
 					$user->save();
 
 					$incomeRecord = new IncomeRecord();
 					$incomeRecord->user_id = $user->id;
-					$incomeRecord->money = $incomeRecord->money + $increasedMoneyActive;
+					$incomeRecord->money_active = $increasedMoneyActive;
+					$incomeRecord->money_limit = $increasedMoneyLimit;
+					$incomeRecord->coins = $increasedCoins;
 					$incomeRecord->type = 'daily';
 					$incomeRecord->nest_id = $contract->nest_id;
 					$incomeRecord->save();
@@ -78,15 +84,21 @@ class ContractDailyUpdate extends Command
 					$contract->hatches = $contract->hatches + $incomeEggs;
 					$contract->save();
 
-					$increasedMoneyActive = $incomeEggs * config('zjp.EGG_VAL');
+					$increasedMoneyActive = $incomeEggs * config('zjp.EGG_VAL') * config('zjp.CONTRACT_MONEY_ACTIVE_RATE');
+					$increasedMoneyLimit = $incomeEggs * config('zjp.EGG_VAL') * config('zjp.CONTRACT_MONEY_LIMIT_RATE');
+					$increasedCoins = $incomeEggs * config('zjp.EGG_VAL') * config('zjp.CONTRACT_COINS_RATE');
 
 					$user = User::where('id', $contract->nest->user_id)->lockForUpdate()->first();
 					$user->money_active = $user->money_active + $increasedMoneyActive;
+					$user->money_limit = $user->money_limit + $increasedMoneyLimit;
+					$user->coins = $user->coins + $increasedCoins;
 					$user->save();
 
 					$incomeRecord = new IncomeRecord();
 					$incomeRecord->user_id = $user->id;
-					$incomeRecord->money = $increasedMoneyActive;
+					$incomeRecord->money_active = $increasedMoneyActive;
+					$incomeRecord->money_limit = $increasedMoneyLimit;
+					$incomeRecord->coins = $increasedCoins;
 					$incomeRecord->type = 'daily';
 					$incomeRecord->nest_id = $contract->nest_id;
 					$incomeRecord->save();

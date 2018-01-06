@@ -22,7 +22,7 @@ return [
 	'USER_DAILY_CASH_LIMIT' => '100', // 用户日常提现限制
 	'USER_TOTAL_WITHDRAWAL_LIMIT' => '1000', // 用户提款上限
 	'RECHARGE_APPLICATION_MONEY_MIN' => '100', // 充值最低金额
-	'WITHDRAWAL_APPLICATION_MONEY_MIN' => '100', // 提现最低金额
+	'WITHDRAWAL_APPLICATION_MONEY_MIN' => '0', // 提现最低金额
 	'TRANSFER_MONEY_MIN' => '100', // 转账最低金额
 	'TRANSFER_MONEY_ACTIVE_RATE' => '0.7', // 转账获取活动资金比例
 	'TRANSFER_MONEY_LIMIT_RATE' => '0.2', // 转账获取限制资金比例
@@ -38,5 +38,6 @@ return [
 	'WITHDRAW_MONEY_LIMIT_RATE' => '0.2', // 提现时转为限制资金的比例
 	'WITHDRAW_COINS_RATE' => '0.1', // 提现时转为猫币的比例
 	'WITHDRAW_CASH_RATE' => '0.7', // 提现时转为现金的比例
-	'WITHDRAW_TODAY_RATE' => '0.06' // 今日提现上限比例
+	'WITHDRAW_TODAY_RATE' => '0.06', // 今日提现上限比例
+	'WITHDRAWAL_FEE_RATE' => '0.055' // 提现手续费比率
 ];

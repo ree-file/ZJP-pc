@@ -24,7 +24,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-		$schedule->command('contracts:dailyUpdate')
+		$schedule->command('contract:dailyUpdate')
 			->daily()->description('每日日常合约获利计算并发布');
     }
 

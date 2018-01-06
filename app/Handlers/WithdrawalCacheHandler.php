@@ -32,6 +32,6 @@ class WithdrawalCacheHandler
 	public function setWithdrawalAlready($id, $money)
 	{
 		$expiresAt = Carbon::tomorrow();
-		Cache::put('withdrawal_ceiling_user_'.$id, $money, $expiresAt);
+		Cache::put('withdrawal_already_user_'.$id, $money, $expiresAt);
 	}
 }
