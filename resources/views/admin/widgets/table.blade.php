@@ -1,4 +1,5 @@
 <table {!! $attributes !!}>
+    @if($headers)
     <thead>
     <tr>
         @foreach($headers as $header)
@@ -6,6 +7,7 @@
         @endforeach
     </tr>
     </thead>
+    @endif
     <tbody>
     @foreach($rows as $row)
     <tr>

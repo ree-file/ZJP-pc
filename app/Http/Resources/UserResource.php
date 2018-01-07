@@ -36,8 +36,6 @@ class UserResource extends Resource
 					return $today->lt($value->created_at);
 				});
 
-
-
 			$incomeMoneyActiveToday = $incomeToday->sum('money_active');
 			$incomeMoneyLimitToday = $incomeToday->sum('money_limit');
 			$incomeCoinsToday = $incomeToday->sum('coins');
