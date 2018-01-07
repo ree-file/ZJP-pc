@@ -40,7 +40,7 @@ class PaymentController extends ApiController
 
 		// 如果存在照片上传，则存储照片
 		if ($request->image) {
-			$result = $uploader ->save($request->image, 'supplies', Auth::id(), 800);
+			$result = $uploader ->save($request->image, 'recharge_applications', Auth::id(), 800);
 			if ($result) {
 				$rechargeApplication->image = $result['path'];
 			}
@@ -136,6 +136,11 @@ class PaymentController extends ApiController
 		$receiver = User::where('id', $request->user_id)->first();
 		if (! $receiver) {
 			return $this->faild('Receiver not found.');
+		}
+
+		// 如果收款账户是本人
+		if ($receiver->id == Auth::id()) {
+			return $this->faild('Can not transfer to yourself.');
 		}
 
 		// 进行转账
