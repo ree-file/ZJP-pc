@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Handlers\WithdrawalCacheHandler;
 use Carbon\Carbon;
 use Illuminate\Http\Resources\Json\Resource;
 
@@ -15,6 +16,30 @@ class UserResource extends Resource
 	 */
 	public function toArray($request)
 	{
+		// 今日提现
+		$cacher = new WithdrawalCacheHandler();
+		$withdrawalCeiling = $cacher->getWithdrawalCeiling($this->id);
+		$withdrawalAlready = $cacher->getWithdrawalCeiling($this->id);
+
+		$todayWithdrawal = [
+			'today_has_withdrawn' => $withdrawalCeiling ? true : false,
+			'withdrawal_ceiling' => $withdrawalCeiling,
+			'withdrawal_already' => $withdrawalAlready
+		];
+
+		$data = [
+			'id'                => $this->id,
+			'email'             => $this->email,
+			'money_active'      => $this->money_active,
+			'money_limit'       => $this->money_limit,
+			'coins'				=> $this->coins,
+			'withdrawal_limit'  => $this->withdrawal_limit,
+			'is_freezed'        => $this->is_freezed,
+			'created_at'		=> date($this->created_at),
+			'has_security_code' => $this->security_code != null ? true : false,
+			'today_withdrawal'  => $todayWithdrawal
+		];
+
 		// 如果请求详细信息
 		if ($request->tab == 'detail') {
 
@@ -65,31 +90,8 @@ class UserResource extends Resource
 				'transaction_income' => $transactionIncome
 			];
 
-			$data = [
-				'id'                => $this->id,
-				'email'             => $this->email,
-				'money_active'      => $this->money_active,
-				'money_limit'       => $this->money_limit,
-				'coins'				=> $this->coins,
-				'is_freezed'        => $this->is_freezed,
-				'created_at'		=> date($this->created_at),
-				'has_security_code' => $this->security_code != null ? true : false,
-				'analyse' => $analyse
-			];
-
-			return $data;
+			$data['analyse'] = $analyse;
 		}
-
-		$data = [
-			'id'                => $this->id,
-			'email'             => $this->email,
-			'money_active'      => $this->money_active,
-			'money_limit'       => $this->money_limit,
-			'coins'				=> $this->coins,
-			'is_freezed'        => $this->is_freezed,
-			'created_at'		=> date($this->created_at),
-			'has_security_code' => $this->security_code != null ? true : false
-		];
 
 		return $data;
     }

@@ -27,4 +27,10 @@ Route::get('/', function () {
 	});
 
 	dd($a->toArray());*/
+	$s = [
+		's' => 1
+	];
+	$b = ['d' => 2];
+	$t = array_add($s, 'f', $b);
+	dd($t);
 });
