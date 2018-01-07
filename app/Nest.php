@@ -34,6 +34,15 @@ class Nest extends Model
 		return $this->hasMany('App\TransactionRecord');
 	}
 
+	public function scopeSelling($query, $tab)
+	{
+		if ($tab == 'selling') {
+			return $query->where('is_selling', true);
+		}
+
+		return $query;
+	}
+
 	public function scopePriceBetween($query, $min, $max)
 	{
 		if ($min && $max) {

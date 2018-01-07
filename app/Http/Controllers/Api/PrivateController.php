@@ -171,10 +171,12 @@ class PrivateController extends ApiController
 	}
 
 	// 个人猫窝
-	public function nests()
+	public function nests(Request $request)
 	{
+		// $request->tab == 'selling' 时取出所有销售中巢
 		// 取出所有猫窝的同时取出相关联的合约蛋数和
 		$nests = Nest::where('user_id', Auth::id())
+			->selling($request->tab)
 			->withCount(['contracts as eggs_sum' => function ($query) {
 				$query->select(DB::raw('SUM(eggs) as eggssum'));
 			}, 'contracts as hatches_sum' => function ($query) {
