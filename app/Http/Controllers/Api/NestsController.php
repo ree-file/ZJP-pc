@@ -265,6 +265,7 @@ class NestsController extends ApiController
 			$transactionRecord->seller_id = $seller->id;
 			$transactionRecord->buyer_id = $buyer->id;
 			$transactionRecord->price = $nest->price;
+			$transactionRecord->nest_id = $nest->id;
 			$transactionRecord->income = $income;
 			$transactionRecord->save();
 
