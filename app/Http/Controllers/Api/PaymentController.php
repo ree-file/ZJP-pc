@@ -135,7 +135,7 @@ class PaymentController extends ApiController
 		// 查询转账收款用户是否存在
 		$receiver = User::where('id', $request->user_id)->first();
 		if (! $receiver) {
-			return $this->faild('Receiver not found.');
+			return $this->failed('Receiver not found.');
 		}
 
 		// 如果收款账户是本人
