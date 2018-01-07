@@ -138,7 +138,7 @@ class UsersController extends Controller
 	{
 		return Admin::content(function (Content $content) use ($id) {
 			$content->header('用户');
-			$content->description('查看与编辑');
+			$content->description('查看');
 
 			$user = User::with('nests', 'rechargeApplications', 'withdrawalApplications', 'cards', 'incomeRecords', 'investRecords', 'transferRecordsOfPaying', 'transferRecordsOfReceiving', 'transactionRecordsOfSelling', 'transactionRecordsOfBuying')
 				->find($id);

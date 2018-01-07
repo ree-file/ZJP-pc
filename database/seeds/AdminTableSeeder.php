@@ -126,16 +126,16 @@ class AdminTableSeeder extends Seeder
 			[
 				'parent_id' => 8,
 				'order' => 9,
-				'title' => '收益记录',
+				'title' => '投资记录',
 				'icon' => 'fa-cube',
-				'uri' => '/income_records'
+				'uri' => '/invest_records'
 			],
 			[
 				'parent_id' => 8,
 				'order' => 10,
-				'title' => '投资记录',
+				'title' => '收益记录',
 				'icon' => 'fa-cube',
-				'uri' => '/invest_records'
+				'uri' => '/income_records'
 			],
 			[
 				'parent_id' => 8,

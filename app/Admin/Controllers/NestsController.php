@@ -112,7 +112,7 @@ class NestsController extends Controller
 
 			$tab = new Tab();
 
-			$userUrl = '/'.config('admin.route.prefix').'/user/'.$nest->user->id;
+			$userUrl = '/'.config('admin.route.prefix').'/users/'.$nest->user->id;
 			$rows = [
 				["<strong>ID</strong>", $nest->id],
 				["<strong>名字</strong>", $nest->name],

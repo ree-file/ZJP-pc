@@ -111,7 +111,7 @@ class WithdrawalApplicationsController extends Controller
 		return Admin::content(function (Content $content) use ($id) {
 
 			$content->header('提现申请');
-			$content->description('查看与编辑');
+			$content->description('编辑');
 
 			$content->body($this->form()->edit($id));
 		});
