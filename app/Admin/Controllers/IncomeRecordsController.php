@@ -43,7 +43,7 @@ class IncomeRecordsController extends Controller
 			$grid->column('user.email', '用户邮箱');
 			$grid->column('nest.name', '猫窝名');
 			$grid->type('类型')->display(function ($type) {
-				if ($type == 'reinvest') return "<strong class='text-red'>分红</strong>";
+				if ($type == 'bonus') return "<strong class='text-red'>分红</strong>";
 				return "<strong class='text-yellow'>日常</strong>";
 			});
 			$grid->money_active('活动资金');
