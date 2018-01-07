@@ -140,7 +140,7 @@ class PaymentController extends ApiController
 
 		// 如果收款账户是本人
 		if ($receiver->id == Auth::id()) {
-			return $this->faild('Can not transfer to yourself.');
+			return $this->failed('Can not transfer to yourself.');
 		}
 
 		// 进行转账
