@@ -29,7 +29,7 @@ class ConfigTableSeeder extends Seeder
 			],
 			[
 				'name' => 'website.EGG_VAL',
-				'value' => '1000',
+				'value' => '7',
 				'description' => '蛋单位金额'
 			],
 			[
