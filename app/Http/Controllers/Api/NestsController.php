@@ -194,7 +194,7 @@ class NestsController extends ApiController
 		return $this->created();
 	}
 
-	// 购买猫窝
+	// 出售猫窝
 	public function sell2(Request $request, Nest $nest)
 	{
 		$validator = Validator::make($request->all(), [

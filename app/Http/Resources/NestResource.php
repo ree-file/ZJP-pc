@@ -74,7 +74,9 @@ class NestResource extends Resource
 			'user_id' => $this->user_id,
 			'user' => $this->user,
 			'created_at' => date($this->created_at),
-			'parent' => $this->parent,
+			'is_selling' => $this->is_selling,
+			'price' => $this->price,
+ 			'parent' => $this->parent,
 			'analyse' => $analyse,
 			'is_owner' => $this->user_id == Auth::id() ? true : false,
 		];

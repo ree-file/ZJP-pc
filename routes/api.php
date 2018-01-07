@@ -83,8 +83,6 @@ Route::group(['middleware' => ['jwt.auth', 'auth.freezed'], 'prefix' => 'v1'], f
 	Route::get('/nests/{nest}/income-records', 'Api\NestsController@incomeRecords');
 	// 猫窝成交记录
 	Route::get('/nests/{nest}/transaction-records', 'Api\NestsController@transactionRecords');
-	// 猫窝购买 （暂时封锁）
-	Route::post('/nests/{nest}/sell2', 'Api\NestsController@sell2');
 	// 猫窝取消出售
 	Route::post('/nests/{nest}/unsell', 'Api\NestsController@unsell');
 
@@ -117,6 +115,8 @@ Route::group(['middleware' => ['jwt.auth', 'auth.freezed', 'auth.pay'], 'prefix'
 	Route::post('/users', 'Api\UsersController@store');
 	// 为自己购买巢
 	Route::post('/nests', 'Api\NestsController@store');
+	// 猫窝购买 （暂时封锁）
+	Route::post('/nests/{nest}/sell2', 'Api\NestsController@sell2');
 	// 猫窝复投
 	Route::post('/nests/{nest}/reinvest', 'Api\NestsController@reinvest');
 	// 猫窝升级

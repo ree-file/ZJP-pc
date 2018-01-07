@@ -27,5 +27,4 @@ Route::get('/', function () {
 	});
 
 	dd($a->toArray());*/
-	return redirect('/home');
 });
