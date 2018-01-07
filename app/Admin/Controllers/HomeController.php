@@ -50,13 +50,13 @@ class HomeController extends Controller
 
                 $row->column(4, function (Column $column) {
 					$rechargeApplications = RechargeApplication::where('status', 'processing')->get();
-					$infoBox = new InfoBox('（待处理）充值申请数量', 'dollar', 'green', '/'.config('admin.route.prefix').'/rechargeApplications?status=processing', count($rechargeApplications));
+					$infoBox = new InfoBox('（待处理）充值申请数量', 'dollar', 'green', '/'.config('admin.route.prefix').'/recharge_applications?status=processing', count($rechargeApplications));
 					$column->append($infoBox);
                 });
 
 				$row->column(4, function (Column $column) {
 					$withdrawalApplications = WithdrawalApplication::where('status', 'processing')->get();
-					$infoBox = new InfoBox('（待处理）提现申请数量', 'money', 'yellow', '/'.config('admin.route.prefix').'/withdrawalApplications?status=processing', count($withdrawalApplications));
+					$infoBox = new InfoBox('（待处理）提现申请数量', 'money', 'yellow', '/'.config('admin.route.prefix').'/withdrawal_applications?status=processing', count($withdrawalApplications));
 					$column->append($infoBox);
 				});
 
