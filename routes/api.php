@@ -67,8 +67,8 @@ Route::group(['middleware' => ['jwt.auth', 'auth.freezed'], 'prefix' => 'v1'], f
 	Route::get('/private/invest-records', 'Api\PrivateController@investRecords');
 	// 个人成交记录
 	Route::get('/private/transaction-records', 'Api\PrivateController@transactionRecords');
-	// 个人收益记录，分页，可选择请求今日个人收益
-	Route::get('/private/income-records', 'Api\PrivateController@incomeRecords');
+	// 个人收益记录，分页，可选择请求今日个人收益（待更改）
+	Route::get('/private/income', 'Api\PrivateController@incomeRecords');
 
 
 	// 猫窝在售列表
