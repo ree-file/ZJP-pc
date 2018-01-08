@@ -9,6 +9,7 @@
         "barryvdh/laravel-cors": "^0.10.0",
         "encore/laravel-admin": "^1.5",
         "fideloper/proxy": "~3.3",
+        "guzzlehttp/guzzle": "^6.3",
         "intervention/image": "^2.4",
         "kalnoy/nestedset": "^4.3",
         "laravel-admin-ext/config": "^1.0",

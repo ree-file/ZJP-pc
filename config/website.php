@@ -27,5 +27,7 @@ return [
 	'WITHDRAWAL_APPLICATION_MONEY_MIN' => '0', // 提现最低金额
 	'WITHDRAWAL_FEE_RATE' => '0.055', // 提现手续费比率
 	// 转账配置
-	'TRANSFER_MONEY_MIN' => '0' // 转账最低金额
+	'TRANSFER_MONEY_MIN' => '0', // 转账最低金额
+	// 汇率
+	'USD_TO_CNY' => '6.5'
 ];

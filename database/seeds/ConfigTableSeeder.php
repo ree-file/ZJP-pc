@@ -118,6 +118,11 @@ class ConfigTableSeeder extends Seeder
 				'description' => '转账最低金额'
 			],
 			[
+				'name' => 'website.CNY_TO_USD',
+				'value' => '6.5',
+				'description' => '美元对人民币汇率（自动更新）'
+			],
+			[
 				'name' => 'mail.host',
 				'value' => 'smtp.exmail.qq.com',
 				'description' => 'SMTP服务地址'

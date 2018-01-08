@@ -26,6 +26,9 @@ class Kernel extends ConsoleKernel
     {
 		$schedule->command('contract:dailyUpdate')
 			->daily()->description('每日日常合约获利计算并发布');
+
+		$schedule->command('contract:dailyUpdate')
+			->daily()->description('每日更新美元对人名币汇率');
     }
 
     /**
