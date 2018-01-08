@@ -19,7 +19,7 @@ class UserResource extends Resource
 		// 今日提现
 		$cacher = new WithdrawalCacheHandler();
 		$withdrawalCeiling = $cacher->getWithdrawalCeiling($this->id);
-		$withdrawalAlready = $cacher->getWithdrawalCeiling($this->id);
+		$withdrawalAlready = $cacher->getWithdrawalAlready($this->id);
 
 		$todayWithdrawal = [
 			'today_has_withdrawn' => $withdrawalCeiling ? true : false,

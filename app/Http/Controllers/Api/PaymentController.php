@@ -72,7 +72,7 @@ class PaymentController extends ApiController
 		$user = Auth::user();
 
 		if (! $cacher->getWithdrawalCeiling($user->id)) {
-			$withdrawalCeiling = $user->money_active * config('zjp.WITHDRAW_TODAY_RATE');
+			$withdrawalCeiling = round($user->money_active * config('zjp.WITHDRAW_TODAY_RATE'), 2);
 			$cacher->setWithdrawalCeiling($user->id, $withdrawalCeiling);
 			$cacher->setWithdrawalAlready($user->id, 0);
 		}
@@ -118,7 +118,7 @@ class PaymentController extends ApiController
 		}
 
 		$withdrawalAlready = $withdrawalAlready + $request->money;
-		$cacher->setWithdrawalAlready($user->id, $withdrawalAlready);
+		$cacher->setWithdrawalAlready($user->id, round($withdrawalAlready, 2));
 
 		return $this->created();
 	}
