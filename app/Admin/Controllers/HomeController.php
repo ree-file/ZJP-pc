@@ -61,12 +61,6 @@ class HomeController extends Controller
 				});
 
 				$row->column(4, function (Column $column) {
-					$orders = Order::where('status', 'selling')->get();
-					$infoBox = new InfoBox('（在售）市场单数量', 'list-alt', 'purple', '/'.config('admin.route.prefix').'/orders?status=selling', count($orders));
-					$column->append($infoBox);
-				});
-
-				$row->column(4, function (Column $column) {
 					$infoBox = new InfoBox('网站统计', 'bar-chart', 'gray', '/'.config('admin.route.prefix').'/analyse', '-');
 					$column->append($infoBox);
 				});

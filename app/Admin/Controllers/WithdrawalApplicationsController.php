@@ -145,7 +145,7 @@ class WithdrawalApplicationsController extends Controller
 			try {
 				// 锁定用户
 				$user = User::where('id', $withdrawalApplication->user->id)->lockForUpdate()->first();
-				$user->money_active = $user->money_active + $withdrawalApplication->money;
+				$user->money_withdrawal = $user->money_withdrawal + $withdrawalApplication->money;
 
 				$user->save();
 				DB::commit();

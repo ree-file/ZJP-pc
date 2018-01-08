@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Contract;
 use App\Nest;
 
 use App\User;
@@ -136,13 +137,17 @@ class NestsController extends Controller
 			$depth3Count = $descendants->where('depth', $nest->depth + 3)->count();
 			$descendantsCount = $descendants->count();
 
+			$cids = $descendants->pluck('id');
+			$descendantsEggs = Contract::whereIn('id', $cids)->get()->sum('eggs');
+			$descendantsEggsVal = $descendantsEggs * config('website.EGG_VAL');
+
 			$contractsEggsSum = $nest->contracts->sum('eggs');
 			$contractsHatchesSum = $nest->contracts->sum('hatches');
 			$contractsEggsSumVal = $contractsEggsSum * config('website.EGG_VAL');
 
 			$incomeMoneyActive = $nest->incomeRecords->sum('money_active');
 			$incomeMoneyLimit = $nest->incomeRecords->sum('money_limit');
-			$incomeCoins = $nest->incomeRecords->sum('money_coins');
+			$incomeCoins = $nest->incomeRecords->sum('coins');
 
 			$highestPrice = $nest->transactionRecords->max('price');
 
@@ -151,6 +156,8 @@ class NestsController extends Controller
 				["<strong class='text-primary'>下二级猫窝数量统计</strong>", $depth2Count],
 				["<strong class='text-primary'>下三级猫窝数量统计</strong>", $depth3Count],
 				["<strong class='text-primary'>下二十级猫窝数量统计</strong>", $descendantsCount],
+				["<strong class='text-primary'>下二十级级猫窝合约总蛋数</strong>", $descendantsEggs],
+				["<strong class='text-primary'>下二十级级猫窝合约总价值</strong>", $descendantsEggsVal],
 				["<strong class='text-orange'>合约蛋数统计</strong>", $contractsEggsSum],
 				["<strong class='text-orange'>合约孵化蛋数统计</strong>", $contractsHatchesSum],
 				["<strong class='text-navy'>总投资价值</strong>", $contractsEggsSumVal],

@@ -24,11 +24,14 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-		$schedule->command('contract:dailyUpdate')
+		$schedule->command('contract:update')
 			->daily()->description('每日日常合约获利计算并发布');
 
 		$schedule->command('site:accessExRate')
 			->daily()->description('每日更新美元对人名币汇率');
+
+		$schedule->command('withdrawal:increase')
+			->daily()->description('每日转换用户活动资金打入到可提现资金');
     }
 
     /**

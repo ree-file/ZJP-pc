@@ -59,16 +59,21 @@ class UsersController extends ApiController
 			$price = $request->eggs * config('website.EGG_VAL');
 
 			// 如果金额不足则终止
-			if ($user->money_limit + $user->money_active < $price) {
+			if ($user->money_limit + $user->money_active + $user->money_withdrawal < $price) {
 				throw new \Exception('Wallet no enough money.');
 			}
 
 			if ($user->money_limit >= $price) {
 				// 如果限制金额充足
 				$user->money_limit = $user->money_limit - $price;
-			} else {
-				// 如果限制金额不充足
+			} else if ($user->money_limit + $user->money_active >= $price) {
+				// 如果活动资金充足
 				$user->money_active = $user->money_active - ($price - $user->money_limit);
+				$user->money_limit = 0;
+			} else {
+				// 限制金额与活动资金都用光了
+				$user->money_withdrawal = $user->money_withdrawal - ($price - $user->money_limit - $user->money_active);
+				$user->money_active = 0;
 				$user->money_limit = 0;
 			}
 			$user->save();
@@ -83,8 +88,6 @@ class UsersController extends ApiController
 				// 生成随机密码，保存密码信息
 				$password = rand_password();
 				$receiver->password = bcrypt($password);
-				// 用户默认提款上限设定
-				$receiver->withdrawal_limit = config('website.USER_WITHDRAWAL_LIMIT');
 				$receiver->save();
 			}
 

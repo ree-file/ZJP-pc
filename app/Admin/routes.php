@@ -17,7 +17,6 @@ Route::group([
 		'nests' => NestsController::class,
 		'recharge_applications' => RechargeApplicationsController::class,
 		'withdrawal_applications' => WithdrawalApplicationsController::class,
-		'orders' => OrdersController::class,
 		'cards' => CardsController::class,
 		'transfer_records' => TransferRecordsController::class,
 		'transaction_records' => TransactionRecordsController::class,

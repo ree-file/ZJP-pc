@@ -18,11 +18,6 @@ class ConfigTableSeeder extends Seeder
 				'description' => '用户可登记的银行卡的最大数量'
 			],
 			[
-				'name' => 'website.USER_WITHDRAWAL_LIMIT',
-				'value' => '1000',
-				'description' => '用户提现上限'
-			],
-			[
 				'name' => 'website.MARKET_TRANSCATION_TAX_RATE',
 				'value' => '0.05',
 				'description' => '猫窝在市场交易完成时扣取的税率'
@@ -123,6 +118,11 @@ class ConfigTableSeeder extends Seeder
 				'description' => '美元对人民币汇率（自动更新）'
 			],
 			[
+				'name' => 'website.MONEY_WITHDRAWAL_INCREASE_RATE',
+				'value' => '0.06',
+				'description' => '每日活动资金转为可提现资金'
+			],
+/*			[
 				'name' => 'mail.host',
 				'value' => 'smtp.exmail.qq.com',
 				'description' => 'SMTP服务地址'
@@ -146,7 +146,7 @@ class ConfigTableSeeder extends Seeder
 				'name' => 'mail.encryption',
 				'value' => 'ssl',
 				'description' => '邮箱加密方式'
-			]
+			]*/
 		]);
     }
 }

@@ -56,6 +56,6 @@ class AccessExRate extends Command
 		$this->call('config:clear');
 		$this->call('config:cache');
 
-		print '更新汇率成功';
+		print '日常更新汇率成功';
     }
 }

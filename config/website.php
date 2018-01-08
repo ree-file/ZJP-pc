@@ -2,7 +2,6 @@
 return [
 	// 用户配置
 	'USER_MAXIMUM_CARDS' => '5', // 用户可登记的银行卡的最大数量
-	'USER_WITHDRAWAL_LIMIT' => '1000', // 用户提现上限
 	// 猫窝及合约配置
 	'MARKET_TRANSCATION_TAX_RATE' => '0.05', // 猫窝在市场交易完成时扣取的税率
 	'EGG_VAL' => '5', // 蛋单位金额
@@ -24,6 +23,7 @@ return [
 	// 充值配置
 	'RECHARGE_APPLICATION_MONEY_MIN' => '0', // 充值最低金额
 	// 提现配置
+	'MONEY_WITHDRAWAL_INCREASE_RATE' => '0.06', // 每日活动资金转为限制资金比例
 	'WITHDRAWAL_APPLICATION_MONEY_MIN' => '0', // 提现最低金额
 	'WITHDRAWAL_FEE_RATE' => '0.055', // 提现手续费比率
 	// 转账配置

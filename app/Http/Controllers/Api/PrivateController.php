@@ -302,47 +302,4 @@ class PrivateController extends ApiController
 
 		return $this->message('Reseted.');
 	}
-
-	/*
-	 * 将废除
-	 * */
-	// 个人收益记录统计信息
-	public function incomeRecordsAnalyse()
-	{
-		// 今日收益
-		$incomeRecordsToday = IncomeRecord::where('user_id', Auth::id())
-			->where('created_at', '>=', Carbon::today())
-			->get();
-
-		// 所有收益
-		$incomeRecords = IncomeRecord::where('user_id', Auth::id())
-			->get();
-
-		$analyseToday = [
-			'money_active' => $incomeRecordsToday->sum('money_active'),
-			'money_limit' => $incomeRecordsToday->sum('money_limit'),
-			'coins' => $incomeRecordsToday->sum('coins'),
-		];
-
-		$analyse = [
-			'money_active' => $incomeRecords->sum('money_active'),
-			'money_limit' => $incomeRecords->sum('money_limit'),
-			'coins' => $incomeRecords->sum('coins'),
-		];
-
-		$data = [
-			'analyse_today' => $analyseToday,
-			'analyse' => $analyse
-		];
-
-		return $this->success($data);
-	}
-
-	// 个人市场单
-	public function orders()
-	{
-		$user = Auth::user();
-		$orders = Order::where('seller_id', $user->id)->orWhere('buyer_id', $user->id)->with('nest')->get();
-		return $this->success($orders);
-	}
 }

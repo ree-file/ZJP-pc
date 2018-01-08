@@ -68,7 +68,7 @@ Route::group(['middleware' => ['jwt.auth', 'auth.freezed'], 'prefix' => 'v1'], f
 	// 个人成交记录
 	Route::get('/private/transaction-records', 'Api\PrivateController@transactionRecords');
 	// 个人收益记录，分页，可选择请求今日个人收益（待更改）
-	Route::get('/private/income', 'Api\PrivateController@incomeRecords');
+	Route::get('/private/income-records', 'Api\PrivateController@incomeRecords');
 
 
 	// 猫窝在售列表
@@ -86,18 +86,6 @@ Route::group(['middleware' => ['jwt.auth', 'auth.freezed'], 'prefix' => 'v1'], f
 	// 猫窝取消出售
 	Route::post('/nests/{nest}/unsell', 'Api\NestsController@unsell');
 
-
-	/*
-	 * 将废弃
-	 * */
-	// 市场单列表
-	Route::get('/orders', 'Api\OrdersController@index');
-	// 个人收益统计
-	Route::get('/private/income-analyse', 'Api\PrivateController@incomeRecordsAnalyse');
-	// 个人市场单
-	Route::get('/private/orders', 'Api\PrivateController@orders');
-	// 下架市场单
-	Route::post('/orders/{order}/abandon', 'Api\OrdersController@abandon');
 });
 
 // 需要验证的路由、安全密码支付的路由
@@ -116,21 +104,12 @@ Route::group(['middleware' => ['jwt.auth', 'auth.freezed', 'auth.pay'], 'prefix'
 	// 为自己购买巢
 	Route::post('/nests', 'Api\NestsController@store');
 	// 猫窝购买 （暂时封锁）
-	Route::post('/nests/{nest}/sell2', 'Api\NestsController@sell2');
+	Route::post('/nests/{nest}/sell', 'Api\NestsController@sell');
 	// 猫窝复投
 	Route::post('/nests/{nest}/reinvest', 'Api\NestsController@reinvest');
 	// 猫窝升级
 	Route::post('/nests/{nest}/upgrade', 'Api\NestsController@upgrade');
 	// 猫窝购买
 	Route::post('/nests/{nest}/buy', 'Api\NestsController@buy');
-
-	/*
-	 * 将废弃
-	 * */
-	// 出售巢（更改）
-	Route::post('/nests/{nest}/sell', 'Api\NestsController@sell');
-
-	// 购买市场单
-	Route::post('/orders/{order}/buy', 'Api\OrdersController@buy');
 });
 

@@ -17,6 +17,7 @@ class NestResource extends Resource
 	 */
 	public function toArray($request)
 	{
+		Nest::fixTree();
 		// 找到相对深度为20的所有下级
 		$descendants = Nest::withDepth()
 			->having('depth', '<=', $this->depth + 20)
@@ -28,11 +29,16 @@ class NestResource extends Resource
 		$depth3Count = $descendants->where('depth', $this->depth + 3)->count();
 		$descendantsCount = $descendants->count();
 
+		$cids = $descendants->pluck('id');
+		$descendantsEggs = Contract::whereIn('id', $cids)->get()->sum('eggs');
+
 		$analyse = [
 			'depth1_count' => $depth1Count,
 			'depth2_count' => $depth2Count,
 			'depth3_count' => $depth3Count,
 			'descendants_count' => $descendantsCount,
+			'descendantsEggs' => $descendantsEggs,
+			'descendantsEggsVal' => $descendantsEggs * config('website.EGG_VAL'),
 			'highest_price' => $this->transactionRecords->max('price')
 		];
 

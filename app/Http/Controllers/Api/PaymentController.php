@@ -52,7 +52,7 @@ class PaymentController extends ApiController
 	}
 
 	// 创建提现申请
-	public function withdrawalApplicationStore(Request $request, WithdrawalCacheHandler $cacher)
+	public function withdrawalApplicationStore(Request $request)
 	{
 		// 提现最低金额
 		$moneyMin = config('website.WITHDRAWAL_APPLICATION_MONEY_MIN');
@@ -68,41 +68,16 @@ class PaymentController extends ApiController
 			return $this->failed($validator->errors()->first());
 		}
 
-		// 检查今日提现是否到达上限
-		$user = Auth::user();
-
-		if (! $cacher->getWithdrawalCeiling($user->id)) {
-			$withdrawalCeiling = round($user->money_active * config('zjp.WITHDRAW_TODAY_RATE'), 2);
-			$cacher->setWithdrawalCeiling($user->id, $withdrawalCeiling);
-			$cacher->setWithdrawalAlready($user->id, 0);
-		}
-
-		$withdrawalCeiling = $cacher->getWithdrawalCeiling($user->id);
-		$withdrawalAlready = $cacher->getWithdrawalAlready($user->id);
-
-		if ($request->money + $withdrawalAlready > $withdrawalCeiling) {
-			return $this->failed("Reach the daily ceiling.");
-		}
-
-		// 检查是否到达用户提现上限
-		$userWithdrawal = WithdrawalApplication::where('user_id', $user->id)
-			->where('status', 'accepted')
-			->sum('money');
-		if ($userWithdrawal + $request->money > $user->withdrawal_limit) {
-			return $this->failed("Reach the user ceiling.");
-		}
-
 		// 预扣除用户活动资金
 		DB::beginTransaction();
 		try {
 			$user = User::where('id', Auth::id())->lockForUpdate()->first();
 
 			// 如果用户资金不足
-			if ($user->money_active < $request->money) {
+			if ($user->money_withdrawal < $request->money) {
 				throw new \Exception('Wallet money not enough.');
 			}
-
-			$user->money_active = $user->money_active - $request->money;
+			$user->money_withdrawal = $user->money_withdrawal - $request->money;
 			$user->save();
 
 			$withdrawalApplication = new WithdrawalApplication();
@@ -116,9 +91,6 @@ class PaymentController extends ApiController
 			DB::rollBack();
 			return $this->failed($e->getMessage());
 		}
-
-		$withdrawalAlready = $withdrawalAlready + $request->money;
-		$cacher->setWithdrawalAlready($user->id, round($withdrawalAlready, 2));
 
 		return $this->created();
 	}
@@ -158,11 +130,18 @@ class PaymentController extends ApiController
 			$user = User::where('id', Auth::id())->lockForUpdate()->first();
 
 			// 如果付款用户资金不足
-			if ($user->money_active < $request->money) {
+			if ($user->money_active + $user->money_withdrawal < $request->money) {
 				throw new \Exception('Wallet money not enough.');
 			}
 
-			$user->money_active = $user->money_active - $request->money;
+			// 如果用户活动资金充足
+			if ($user->money_active >= $request->money) {
+				$user->money_active = $user->money_active - $request->money;
+			} else {
+				// 用户活动资金不足
+				$user->money_withdrawal = $user->money_withdrawal - ($request->money - $user->money_active);
+				$user->money_active = 0;
+			}
 			$user->save();
 
 			// 收款用户金额及币增加数值

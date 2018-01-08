@@ -145,16 +145,21 @@ class NestsController extends ApiController
 			$price = $request->eggs * config('website.EGG_VAL');
 
 			// 如果金额不足则终止
-			if ($user->money_limit + $user->money_active < $price) {
+			if ($user->money_limit + $user->money_active + $user->money_withdrawal < $price) {
 				throw new \Exception('Wallet no enough money.');
 			}
 
 			if ($user->money_limit >= $price) {
 				// 如果限制金额充足
 				$user->money_limit = $user->money_limit - $price;
-			} else {
-				// 如果限制金额不充足
+			} else if ($user->money_limit + $user->money_active >= $price) {
+				// 如果活动资金充足
 				$user->money_active = $user->money_active - ($price - $user->money_limit);
+				$user->money_limit = 0;
+			} else {
+				// 限制金额与活动资金都用光了
+				$user->money_withdrawal = $user->money_withdrawal - ($price - ($user->money_limit + $user->money_active));
+				$user->money_active = 0;
 				$user->money_limit = 0;
 			}
 			$user->save();
@@ -195,7 +200,7 @@ class NestsController extends ApiController
 	}
 
 	// 出售猫窝
-	public function sell2(Request $request, Nest $nest)
+	public function sell(Request $request, Nest $nest)
 	{
 		$validator = Validator::make($request->all(), [
 			'price' => 'required|numeric|min:0',
@@ -240,10 +245,18 @@ class NestsController extends ApiController
 			$buyer = User::where('id', Auth::id())->lockForUpdate()->first();
 
 			// 如果钱包金额不足
-			if ($buyer->money_active < $nest->price) {
+			if ($buyer->money_active + $buyer->money_withdrawal < $nest->price) {
 				throw new \Exception('Wallet no enough money.');
 			}
-			$buyer->money_active = $buyer->money_active - $nest->price;
+
+			// 如果用户活动资金充足
+			if ($buyer->money_active >= $nest->price) {
+				$buyer->money_active = $buyer->money_active - $nest->price;
+			} else {
+				// 用户活动资金不足
+				$buyer->money_withdrawal = $buyer->money_withdrawal - ($nest->price - $buyer->money_active);
+				$buyer->money_active = 0;
+			}
 			$buyer->save();
 
 			// 扣税后收入的金额
@@ -329,16 +342,21 @@ class NestsController extends ApiController
 			$price = $request->eggs * config('website.EGG_VAL');
 
 			// 如果金额不足则终止
-			if ($user->money_limit + $user->money_active < $price) {
+			if ($user->money_limit + $user->money_active + $user->money_withdrawal < $price) {
 				throw new \Exception('Wallet no enough money.');
 			}
 
 			if ($user->money_limit >= $price) {
 				// 如果限制金额充足
 				$user->money_limit = $user->money_limit - $price;
-			} else {
-				// 如果限制金额不充足
+			} else if ($user->money_limit + $user->money_active >= $price) {
+				// 如果活动资金充足
 				$user->money_active = $user->money_active - ($price - $user->money_limit);
+				$user->money_limit = 0;
+			} else {
+				// 限制金额与活动资金都用光了
+				$user->money_withdrawal = $user->money_withdrawal - ($price - $user->money_limit - $user->money_active);
+				$user->money_active = 0;
 				$user->money_limit = 0;
 			}
 			$user->save();
@@ -409,16 +427,21 @@ class NestsController extends ApiController
 			$price = $request->eggs * config('website.EGG_VAL');
 
 			// 如果金额不足则终止
-			if ($user->money_limit + $user->money_active < $price) {
+			if ($user->money_limit + $user->money_active + $user->money_withdrawal < $price) {
 				throw new \Exception('Wallet no enough money.');
 			}
 
 			if ($user->money_limit >= $price) {
 				// 如果限制金额充足
 				$user->money_limit = $user->money_limit - $price;
-			} else {
-				// 如果限制金额不充足
+			} else if ($user->money_limit + $user->money_active >= $price) {
+				// 如果活动资金充足
 				$user->money_active = $user->money_active - ($price - $user->money_limit);
+				$user->money_limit = 0;
+			} else {
+				// 限制金额与活动资金都用光了
+				$user->money_withdrawal = $user->money_withdrawal - ($price - $user->money_limit - $user->money_active);
+				$user->money_active = 0;
 				$user->money_limit = 0;
 			}
 			$user->save();
@@ -448,40 +471,6 @@ class NestsController extends ApiController
 
 		// 触发巢投资事件
 		event(new NestInvested($nest, $request->eggs));
-
-		return $this->created();
-	}
-
-	/*
-	 * 将废除
-	 */
-	// 出售猫窝
-	public function sell(Request $request, Nest $nest)
-	{
-		// 验证字段
-		$validator = Validator::make($request->all(), [
-			'price' => 'required|numeric|min:0',
-		]);
-
-		// 验证失败
-		if ($validator->fails()) {
-			return $this->failed($validator->errors()->first());
-		}
-
-		// 验证用户是否有操作资格
-		$this->authorize('update', $nest);
-
-		// 查看巢是否已经在销售
-		if (Order::where('status', 'selling')
-			->where('nest_id', $nest->id)->first()) {
-			return $this->failed('The order is on selling.');
-		}
-
-		$order = new Order();
-		$order->nest_id = $nest->id;
-		$order->price = $request->price;
-		$order->seller_id = Auth::id();
-		$order->save();
 
 		return $this->created();
 	}

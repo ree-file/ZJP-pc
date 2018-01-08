@@ -20,9 +20,9 @@ class CreateUsersTable extends Migration
 			$table->string('security_code')->nullable();
 			$table->decimal('money_active', 10, 2)->unsigned()->default(0);
 			$table->decimal('money_limit', 10, 2)->unsigned()->default(0);
+			$table->decimal('money_withdrawal', 10, 2)->unsigned()->default(0);
 			$table->decimal('coins', 10, 2)->unsigned()->default(0);
 			$table->boolean('is_freezed')->default(false);
-			$table->decimal('withdrawal_limit', 10, 2)->default(1000);
             $table->rememberToken();
             $table->timestamps();
         });

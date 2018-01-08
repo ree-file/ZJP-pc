@@ -155,7 +155,7 @@ class RechargeApplicationsController extends Controller
 			try {
 				// 锁定用户
 				$user = User::where('id', $rechargeApplication->user->id)->lockForUpdate()->first();
-				$user->money_active = $user->money_active + $rechargeApplication->money;
+				$user->money_withdrawal = $user->money_withdrawal + $rechargeApplication->money;
 
 				$user->save();
 				DB::commit();

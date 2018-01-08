@@ -53,10 +53,10 @@ class UsersController extends Controller
 			$grid->id('ID')->sortable();
 			$grid->email('邮箱');
 			$grid->is_freezed('是否冻结')->switch();
+			$grid->money_withdrawal('可提现资金')->sortable();
 			$grid->money_active('活动资金')->sortable();
 			$grid->money_limit('限制资金')->sortable();
 			$grid->coins('猫币')->sortable();
-			$grid->withdrawal_limit('提现限制')->sortable();
 			$grid->created_at('创建于')->sortable();
 
 			$grid->tools(function ($tools) {
@@ -104,10 +104,10 @@ class UsersController extends Controller
 			if ($id) {
 				$form->display('id', 'ID');
 				$form->display('email', '邮箱');
+				$form->display('money_withdrawal', '可提现资金');
 				$form->display('money_active', '活动资金');
 				$form->display('money_limit', '限制资金');
 				$form->display('coins', '猫币');
-				$form->currency('withdrawal_limit', '提现限制');
 				$form->switch('is_freezed', '是否冻结');
 				$form->display('created_at', '创建于');
 				$form->display('updated_at', '更新于');
@@ -185,10 +185,10 @@ class UsersController extends Controller
 				["<strong>名字</strong>", $user->email],
 				["<strong>是否冻结</strong>", $user->is_freezed ? '<strong class="text-info">是</strong>' : '<strong>否</strong>'],
 				["<strong>是否有安全密码</strong>", $user->security_code ? '<strong class="text-info">是</strong>' : '<strong class="text-danger">否</strong>'],
+				["<strong>可提现资金</strong>", $user->money_withdrawal],
 				["<strong>活动资金</strong>", $user->money_active],
 				["<strong>限制资金</strong>", $user->money_limit],
 				["<strong>猫币</strong>", $user->coins],
-				["<strong>提现限制</strong>", $user->withdrawal_limit],
 				["<strong>创建于</strong>", $user->created_at],
 				["<strong>更新于</strong>", $user->updated_at]
 			];
