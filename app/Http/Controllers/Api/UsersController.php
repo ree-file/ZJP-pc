@@ -106,7 +106,7 @@ class UsersController extends ApiController
 			$investRecord->eggs = $request->eggs;
 			$investRecord->contract_id = $contract->id;
 			$investRecord->nest_id = $nest->id;
-			$investRecord->user_id = $user->id;
+			$investRecord->user_id = $receiver->id;
 			$investRecord->type = 'store';
 			$investRecord->save();
 
