@@ -244,7 +244,6 @@ class UsersController extends Controller
 			$user = new User();
 			$user->email = $request->email;
 			$user->password = bcrypt($request->password);
-			$user->withdrawal_limit = config('website.USER_WITHDRAWAL_LIMIT');
 			$user->save();
 
 			$nest = new Nest();
