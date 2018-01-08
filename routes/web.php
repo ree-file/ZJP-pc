@@ -11,20 +11,4 @@
 |
 */
 
-Route::get('/', function () {
-/*	\App\Nest::fixTree();
-	$result = \App\Nest::withDepth()->having('depth', '<=', 1)->descendantsOf(1)->toArray();
-	$nest = \App\Nest::find(1);
-	dd($result);
-	dd(\App\Nest::withDepth()->with('')->get()->toArray());
-	return redirect('/home');*/
-
-/*	$s = collect([new \App\Nest(), new \App\Nest()]);
-
-	$a = $s->map(function ($item, $key) {
-		$item->s = 2;
-		return $item;
-	});
-
-	dd($a->toArray());*/
-});
+Route::redirect('/', '/home', 301);

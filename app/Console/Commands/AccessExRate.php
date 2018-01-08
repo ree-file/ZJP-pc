@@ -53,6 +53,9 @@ class AccessExRate extends Command
 				'value' => $USDTOCNY
 			]);
 
+		$this->call('config:clear');
+		$this->call('config:cache');
+
 		print '更新汇率成功';
     }
 }
