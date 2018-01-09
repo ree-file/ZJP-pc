@@ -15,6 +15,11 @@ class AuthenticateController extends ApiController
 
 
 		$user = User::where('email', $credentials['email'])->first();
+
+		if (! $user) {
+			return $this->failed('Not found.', 403);
+		}
+
 		// 用户账号已被冻结
 		if ($user->is_freezed) {
 			return $this->failed('Freezed.', 403);
