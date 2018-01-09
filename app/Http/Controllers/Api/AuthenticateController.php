@@ -13,21 +13,27 @@ class AuthenticateController extends ApiController
 	{
 		$credentials = $request->only('email', 'password');
 
+
+		$user = User::where('email', $credentials['email'])->first();
+		// 用户账号已被冻结
+		if ($user->is_freezed) {
+			return $this->failed('Freezed.', 403);
+		}
+
 		try {
 			if (! $token = JWTAuth::attempt($credentials)) {
 				return $this->failed('Unauthroized', 401);
 			}
 
-			// 用户账号已被冻结
-			if (User::where('email', $credentials['email'])->first()->is_freezed) {
-				return $this->failed('Freezed.', 403);
-			}
+
 		} catch (JWTException $e) {
 			return $this->failed('Could not create token.', 500);
 		}
 
+		$id = $user->id;
+
 		// 返回 jwt_token 给客户端
-		return $this->success(['jwt_token' => $token]);
+		return $this->success(['jwt_token' => $token, 'id' => $id]);
 	}
 
 	public function logout()
