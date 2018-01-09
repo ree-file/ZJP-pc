@@ -237,7 +237,7 @@ class NestsController extends ApiController
 		}
 
 		// 防止用户购买自己订单
-		if (Auth::id() == $nest->seller_id) {
+		if (Auth::id() == $nest->user_id) {
 			return $this->failed('Can not buy own nest.');
 		}
 
