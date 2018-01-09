@@ -17,14 +17,9 @@ class AdminTableSeeder extends Seeder
     {
 		Administrator::truncate();
 		Administrator::create([
-			'username' => 'admin',
+			'username' => 'zjpuserbbb',
 			'password' => bcrypt('admin'),
 			'name'     => 'Administrator',
-		]);
-		Administrator::create([
-			'username' => 'admin2',
-			'password' => bcrypt('admin2'),
-			'name'     => 'admin'
 		]);
 
 		// create a role.
@@ -41,7 +36,6 @@ class AdminTableSeeder extends Seeder
 
 		// add role to user.
 		Administrator::first()->roles()->save(Role::first());
-		Administrator::find(2)->roles()->save(Role::find(2));
 
 		//create a permission
 		Permission::truncate();
