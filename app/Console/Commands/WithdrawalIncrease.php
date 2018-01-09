@@ -44,16 +44,20 @@ class WithdrawalIncrease extends Command
 
 			$dber = new DBHandler();
 
-			$users = User::where('money_active', '<>', 0)->lockForUpdate()->get();
+			$now = now();
+			$users = User::where('money_active', '<>', 0)
+				->select('id', 'money_active', 'money_withdrawal', 'updated_at')
+				->lockForUpdate()->get();
 			foreach($users as $user) {
 				$transMoney = round($user->money_active * config('website.MONEY_WITHDRAWAL_INCREASE_RATE'), 2);
 				$user->money_active = $user->money_active - $transMoney;
 				$user->money_withdrawal = $user->money_withdrawal + $transMoney;
+				$user->updated_at = $now;
 			}
 
 			$dber->updateBatch('users', $users->toArray());
 		}, 5);
 
-		print '每日转换用户活动资金打入到可提现资金';
+		print '每日转换用户活动资金打入到可提现资金完成';
     }
 }

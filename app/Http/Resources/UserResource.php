@@ -54,6 +54,7 @@ class UserResource extends Resource
 			$incomeCoinsToday = $incomeToday->sum('coins');
 
 			$investEggs = $this->investRecords->sum('eggs');
+			$investMoney = $this->investRecords->sum('money');
 			$investVal = $this->investRecords->sum('eggs') * config('website.EGG_VAL');
 
 			$transactionPayed = $this->transactionRecordsOfSelling->sum('price');
@@ -73,7 +74,7 @@ class UserResource extends Resource
 				'income_money_limit_today' => $incomeMoneyLimitToday,
 				'income_coins_today' => $incomeCoinsToday,
 				'invest_eggs' => $investEggs,
-				'invest_val' => $investVal,
+				'invest_money' => $investMoney,
 				'transaction_payed' => $transactionPayed,
 				'transaction_income' => $transactionIncome
 			];

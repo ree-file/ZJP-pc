@@ -20,6 +20,7 @@ class CreateInvestRecordsTable extends Migration
 			$table->integer('contract_id')->unsigned();
 			$table->enum('type', ['reinvest', 'upgrade', 'store']);
 			$table->integer('eggs')->unsigned();
+			$table->decimal('money', 10, 2)->unsigned();
 			$table->timestamps();
         });
     }

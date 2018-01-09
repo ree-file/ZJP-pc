@@ -145,7 +145,7 @@ class HomeController extends Controller
 			$rows = [
 				["<strong class='text-success'>充值申请总数</strong>", $rechargeApplications->count()],
 				["<strong class='text-success'>充值申请接受数</strong>", $rechargeApplicationsAccepted->count()],
-				["<strong class='text-success'>充值金额</strong>", $withdrawalMoney],
+				["<strong class='text-success'>充值金额</strong>", $rechargeMoney],
 				["<strong class='text-warning'>提现申请总数</strong>", $withdrawalApplications->count()],
 				["<strong class='text-warning'>提现申请接受数</strong>", $withdrawalApplicationsAccepted->count()],
 				["<strong class='text-warning'>提现金额</strong>", $withdrawalMoney]
@@ -157,7 +157,7 @@ class HomeController extends Controller
 
 			// 记录统计
 			$investEggsSum = $investRecords->sum('eggs');
-			$investVal = $investEggsSum * config('website.EGG_VAL');
+			$investMoney = $investRecords->sum('money');
 
 			$incomeMoneyActive = $incomeRecords->sum('money_active');
 			$incomeMoneyLimit = $incomeRecords->sum('money_limit');
@@ -169,7 +169,7 @@ class HomeController extends Controller
 			$rows = [
 				["<strong class='text-purple'>投资记录总数</strong>", $investRecords->count()],
 				["<strong class='text-purple'>投资总蛋数</strong>", $investEggsSum],
-				["<strong class='text-purple'>投资总价</strong>", $investVal],
+				["<strong class='text-purple'>投资总价</strong>", $investMoney],
 				["<strong class='text-success'>收益记录总数</strong>", $incomeRecords->count()],
 				["<strong class='text-success'>收益总活动资金</strong>", $incomeMoneyActive],
 				["<strong class='text-success'>收益总限制资金</strong>", $incomeMoneyLimit],

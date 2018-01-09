@@ -4,6 +4,7 @@ namespace App\Listeners;
 
 use App\Events\NestInvested;
 use App\Events\NestUpgraded;
+use App\Handlers\DBHandler;
 use App\IncomeRecord;
 use App\Nest;
 use App\User;
@@ -35,9 +36,9 @@ class ShareBonus
 		$nest = $event->nest;
 		$eggs = $event->eggs;
 
-		// 找到相对大3级的前代
+		// 找到相对前20级的前代
 		$nest = Nest::withDepth()->where('id', $nest->id)->first();
-		$ancestors = Nest::withDepth()->having('depth', '>=', $nest->depth - 3)->ancestorsOf($nest->id);
+		$ancestors = Nest::withDepth()->having('depth', '>=', $nest->depth - 20)->ancestorsOf($nest->id);
 
 		DB::beginTransaction();
 		try {
@@ -89,6 +90,21 @@ class ShareBonus
 				$incomeRecord->nest_id = $ancestor3->id;
 				$incomeRecord->save();
 			}
+
+			// 父节点20层增加奖池
+			$now = now();
+			$nids =  $ancestors->pluck('id');
+			$nests = Nest::whereIn('id', $nids)
+				->lockForUpdate()
+				->select('id', 'prize_pool', 'updated_at')
+				->get();
+			foreach ($nests as $nest) {
+				$nest->prize_pool = $nest->prize_pool + $eggs;
+				$nest->updated_at = $now;
+			}
+
+			$dber = new DBHandler();
+			$dber->updateBatch('nests', $nests->toArray());
 
 			DB::commit();
 		} catch (\Exception $e) {

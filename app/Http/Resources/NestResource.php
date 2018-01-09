@@ -29,16 +29,11 @@ class NestResource extends Resource
 		$depth3Count = $descendants->where('depth', $this->depth + 3)->count();
 		$descendantsCount = $descendants->count();
 
-		$cids = $descendants->pluck('id');
-		$descendantsEggs = Contract::whereIn('id', $cids)->get()->sum('eggs');
-
 		$analyse = [
 			'depth1_count' => $depth1Count,
 			'depth2_count' => $depth2Count,
 			'depth3_count' => $depth3Count,
 			'descendants_count' => $descendantsCount,
-			'descendantsEggs' => $descendantsEggs,
-			'descendantsEggsVal' => $descendantsEggs * config('website.EGG_VAL'),
 			'highest_price' => $this->transactionRecords->max('price')
 		];
 
@@ -51,8 +46,9 @@ class NestResource extends Resource
 			$contractsHatchesSum = $this->contracts->sum('hatches');
 
 			// 窝主投资统计信息
-			$investEggsSum = $this->investRecords->where('user_id', Auth::id())->sum('eggs');
-			$investVal = $investEggsSum * config('website.EGG_VAL');
+			$investRecords = $this->investRecords->where('user_id', Auth::id());
+			$investEggsSum = $investRecords->sum('eggs');
+			$investMoney = $investRecords->sum('money');
 
 			// 窝主收入统计信息
 			$incomeMoneyActive = $this->incomeRecords->where('user_id', Auth::id())->sum('money_active');
@@ -65,7 +61,7 @@ class NestResource extends Resource
 				'contracts_val' => $contractsVal,
 				'contracts_hatches_sum' => $contractsHatchesSum,
 				'invest_eggs_sum' => $investEggsSum,
-				'invest_val' => $investVal,
+				'invest_money' => $investMoney,
 				'income_money_active' => $incomeMoneyActive,
 				'income_money_limit' => $incomeMoneyLimit,
 				'income_coins' => $incomeCoins,
@@ -80,6 +76,7 @@ class NestResource extends Resource
 			'user_id' => $this->user_id,
 			'user' => $this->user,
 			'created_at' => date($this->created_at),
+			'prize_pool' => $this->prize_pool,
 			'is_selling' => $this->is_selling,
 			'price' => $this->price,
  			'parent' => $this->parent,

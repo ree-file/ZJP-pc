@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Contract;
 use App\Events\ContractUpgraded;
 use App\Events\NestInvested;
+use App\Handlers\DBHandler;
 use App\Http\Resources\NestResource;
 use App\IncomeRecord;
 use App\InvestRecord;
@@ -165,10 +166,10 @@ class NestsController extends ApiController
 			$user->save();
 
 			$nest = new Nest();
-			// 生成随机巢名
+			// 生成随机名猫窝
 			$nest->name = rand_name();
 			$nest->user_id = $user->id;
-			// 为巢绑定上家并保存
+			// 为猫窝绑定上家并保存
 			$nest->appendToNode($parent)->save();
 
 			// 为巢生成一个新合同
@@ -179,11 +180,12 @@ class NestsController extends ApiController
 
 			// 创建一条投资记录
 			$investRecord = new InvestRecord();
-			$investRecord->eggs = $request->eggs;
 			$investRecord->contract_id = $contract->id;
 			$investRecord->nest_id = $nest->id;
 			$investRecord->user_id = $user->id;
 			$investRecord->type = 'store';
+			$investRecord->eggs = $request->eggs;
+			$investRecord->money = $request->eggs * config('website.EGG_VAL');
 			$investRecord->save();
 
 			DB::commit();
@@ -227,7 +229,7 @@ class NestsController extends ApiController
 	}
 
 	// 购买猫窝
-	public function buy(Request $request, Nest $nest)
+	public function buy(Nest $nest)
 	{
 		// 确认猫窝是否为在售状态
 		if (! $nest->is_selling) {
@@ -292,7 +294,7 @@ class NestsController extends ApiController
 	}
 
 	// 取消出售猫窝
-	public function unsell(Request $request, Nest $nest)
+	public function unsell(Nest $nest)
 	{
 		// 检查猫窝是否为在售状态
 		if (! $nest->is_selling) {
@@ -373,6 +375,7 @@ class NestsController extends ApiController
 			$investRecord->user_id = $user->id;
 			$investRecord->type = 'reinvest';
 			$investRecord->eggs = $request->eggs;
+			$investRecord->money = $request->eggs * config('website.EGG_VAL');
 			$investRecord->save();
 
 			DB::commit();
@@ -460,6 +463,7 @@ class NestsController extends ApiController
 			$investRecord->user_id = $user->id;
 			$investRecord->type = 'upgrade';
 			$investRecord->eggs = $request->eggs;
+			$investRecord->money = $request->eggs * config('website.EGG_VAL');
 			$investRecord->save();
 
 			DB::commit();

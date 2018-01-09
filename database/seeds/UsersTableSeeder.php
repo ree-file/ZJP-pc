@@ -36,6 +36,7 @@ class UsersTableSeeder extends Seeder
 		$investRecord->contract_id = $contract->id;
 		$investRecord->type = 'store';
 		$investRecord->eggs = $contract->eggs;
+		$investRecord->money = $contract->eggs * config('website.EGG_VAL');
 		$investRecord->save();
 	}
 }

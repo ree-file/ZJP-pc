@@ -118,6 +118,7 @@ class NestsController extends Controller
 				["<strong>ID</strong>", $nest->id],
 				["<strong>名字</strong>", $nest->name],
 				["<strong>是否在售</strong>", $nest->is_selling ? '<strong class="text-green">是</strong>' : '<strong>否</strong>'],
+				["<strong>奖池</strong>", $nest->prize_pool],
 				["<strong>售价</strong>", $nest->price],
 				["<strong>窝主邮箱</strong>", "<a href='{$userUrl}'>{$nest->user->email}</a>"],
 				["<strong>创建于</strong>", $nest->created_at],
@@ -137,10 +138,6 @@ class NestsController extends Controller
 			$depth3Count = $descendants->where('depth', $nest->depth + 3)->count();
 			$descendantsCount = $descendants->count();
 
-			$cids = $descendants->pluck('id');
-			$descendantsEggs = Contract::whereIn('id', $cids)->get()->sum('eggs');
-			$descendantsEggsVal = $descendantsEggs * config('website.EGG_VAL');
-
 			$contractsEggsSum = $nest->contracts->sum('eggs');
 			$contractsHatchesSum = $nest->contracts->sum('hatches');
 			$contractsEggsSumVal = $contractsEggsSum * config('website.EGG_VAL');
@@ -156,8 +153,6 @@ class NestsController extends Controller
 				["<strong class='text-primary'>下二级猫窝数量统计</strong>", $depth2Count],
 				["<strong class='text-primary'>下三级猫窝数量统计</strong>", $depth3Count],
 				["<strong class='text-primary'>下二十级猫窝数量统计</strong>", $descendantsCount],
-				["<strong class='text-primary'>下二十级级猫窝合约总蛋数</strong>", $descendantsEggs],
-				["<strong class='text-primary'>下二十级级猫窝合约总价值</strong>", $descendantsEggsVal],
 				["<strong class='text-orange'>合约蛋数统计</strong>", $contractsEggsSum],
 				["<strong class='text-orange'>合约孵化蛋数统计</strong>", $contractsHatchesSum],
 				["<strong class='text-navy'>总投资价值</strong>", $contractsEggsSumVal],

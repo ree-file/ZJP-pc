@@ -47,11 +47,15 @@ class ContractUpdate extends Command
 			$dber = new DBHandler();
 
 			$contracts = Contract::with('nest')
+				->select('id', 'is_finished', 'updated_at', 'nest_id', 'hatches', 'eggs')
 				->where('is_finished', false)
 				->lockForUpdate()
 				->get();
+
 			$uids = $contracts->pluck('nest')->flatten()->pluck('user_id')->unique()->values();
-			$users = User::whereIn('id', $uids)->lockForUpdate()->get();
+			$users = User::whereIn('id', $uids)
+				->select('id', 'money_active', 'money_limit', 'coins', 'updated_at')
+				->lockForUpdate()->get();
 			$incomeRecords = [];
 			$now = now();
 
@@ -68,6 +72,7 @@ class ContractUpdate extends Command
 
 					$contract->hatches = $profitEggs;
 					$contract->is_finished = true;
+					$contract->updated_at = $now;
 
 					$increasedMoneyActive = $incomeEggs * config('website.EGG_VAL') * config('website.CONTRACT_MONEY_ACTIVE_RATE');
 					$increasedMoneyLimit = $incomeEggs * config('website.EGG_VAL') * config('website.CONTRACT_MONEY_LIMIT_RATE');
@@ -94,6 +99,7 @@ class ContractUpdate extends Command
 					$incomeEggs = $dailyEggs;
 
 					$contract->hatches = $contract->hatches + $incomeEggs;
+					$contract->updated_at = $now;
 
 					$increasedMoneyActive = $incomeEggs * config('website.EGG_VAL') * config('website.CONTRACT_MONEY_ACTIVE_RATE');
 					$increasedMoneyLimit = $incomeEggs * config('website.EGG_VAL') * config('website.CONTRACT_MONEY_LIMIT_RATE');
@@ -118,16 +124,12 @@ class ContractUpdate extends Command
 			}
 
 			$contracts = $contracts->map(function ($item, $key) use ($now) {
-				$item->updated_at = $now;
 				return collect($item)->only(['id', 'hatches', 'is_finished', 'updated_at']);
-			});
-			$users = $users->each(function ($item, $key) use ($now) {
-				$item->updated_at = $now;
-				return collect($item)->only(['id', 'money_active', 'money_limit', 'coins', 'updated_at']);
 			});
 
 			$dber->updateBatch('contracts', $contracts->toArray());
 			$dber->updateBatch('users', $users->toArray());
+
 			DB::table('income_records')->insert($incomeRecords);
 		}, 5);
 

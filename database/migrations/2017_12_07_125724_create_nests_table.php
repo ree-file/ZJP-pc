@@ -20,6 +20,7 @@ class CreateNestsTable extends Migration
 			$table->integer('user_id')->unsigned();
 			$table->boolean('is_selling')->default(false);
 			$table->decimal('price', 10, 2)->nullable();
+			$table->integer('prize_pool')->default(0);
             $table->timestamps();
 			NestedSet::columns($table);
         });

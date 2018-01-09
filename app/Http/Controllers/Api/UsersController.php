@@ -111,6 +111,7 @@ class UsersController extends ApiController
 			$investRecord->nest_id = $nest->id;
 			$investRecord->user_id = $receiver->id;
 			$investRecord->type = 'store';
+			$investRecord->money = $request->eggs * config('website.EGG_VAL');
 			$investRecord->save();
 
 			DB::commit();
