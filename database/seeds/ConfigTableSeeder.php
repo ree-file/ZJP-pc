@@ -24,7 +24,7 @@ class ConfigTableSeeder extends Seeder
 			],
 			[
 				'name' => 'website.EGG_VAL',
-				'value' => '7',
+				'value' => '5',
 				'description' => '蛋单位金额'
 			],
 			[
@@ -113,7 +113,7 @@ class ConfigTableSeeder extends Seeder
 				'description' => '转账最低金额'
 			],
 			[
-				'name' => 'website.CNY_TO_USD',
+				'name' => 'website.USD_TO_CNY',
 				'value' => '6.5',
 				'description' => '美元对人民币汇率（自动更新）'
 			],

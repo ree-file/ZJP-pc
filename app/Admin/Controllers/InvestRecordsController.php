@@ -48,6 +48,7 @@ class InvestRecordsController extends Controller
 				return "<strong class='text-green'>创建</strong>";
 			});
 			$grid->eggs('蛋数')->sortable();
+			$grid->money('投资额')->sortable();
 			$grid->created_at('创建于');
 
 			$grid->filter(function($filter){
