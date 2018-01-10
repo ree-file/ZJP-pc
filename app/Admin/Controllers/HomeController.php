@@ -211,6 +211,7 @@ class HomeController extends Controller
 
 			$form = new Form();
 			$form->method('post');
+			$form->action('/'.config('admin.route.prefix').'/notice');
 			$notice = DB::table('admin_config')->where('name', 'website.NOTICE')->first();
 			$noticeVal = $notice ? $notice->value : $notice;
 			//dd(config('website'));
@@ -237,6 +238,6 @@ class HomeController extends Controller
 		Artisan::call('site:cache');
 
 		admin_toastr(trans('admin.update_succeeded'));
-		return back();
+		return redirect('/'.config('admin.route.prefix').'/');
 	}
 }
