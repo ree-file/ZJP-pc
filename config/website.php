@@ -29,5 +29,6 @@ return [
 	// 转账配置
 	'TRANSFER_MONEY_MIN' => '0', // 转账最低金额
 	// 汇率
-	'USD_TO_CNY' => '6.5'
+	'USD_TO_CNY' => '6.5',
+	'NOTICE' => '无'
 ];

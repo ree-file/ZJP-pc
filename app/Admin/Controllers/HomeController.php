@@ -20,10 +20,13 @@ use Encore\Admin\Layout\Column;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Layout\Row;
 use Encore\Admin\Widgets\Box;
+use Encore\Admin\Widgets\Form;
 use Encore\Admin\Widgets\InfoBox;
 use Encore\Admin\Widgets\Tab;
 use Encore\Admin\Widgets\Table;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use League\Flysystem\Config;
 
 class HomeController extends Controller
@@ -62,6 +65,16 @@ class HomeController extends Controller
 
 				$row->column(4, function (Column $column) {
 					$infoBox = new InfoBox('网站统计', 'bar-chart', 'gray', '/'.config('admin.route.prefix').'/analyse', '-');
+					$column->append($infoBox);
+				});
+
+				$row->column(4, function (Column $column) {
+					$infoBox = new InfoBox('修改公告', 'volume-down', 'purple', '/'.config('admin.route.prefix').'/notice', '-');
+					$column->append($infoBox);
+				});
+
+				$row->column(4, function (Column $column) {
+					$infoBox = new InfoBox('刷新配置', 'undo', 'teal', '/'.config('admin.route.prefix').'/refresh', '-');
 					$column->append($infoBox);
 				});
             });
@@ -187,5 +200,43 @@ class HomeController extends Controller
 			$content->body($tab);
 		});
 
+	}
+
+	public function editNotice()
+	{
+		return Admin::content(function (Content $content) {
+
+			$content->header('公告');
+			$content->description('编辑');
+
+			$form = new Form();
+			$form->method('post');
+			$notice = DB::table('admin_config')->where('name', 'website.NOTICE')->first();
+			$noticeVal = $notice ? $notice->value : $notice;
+			//dd(config('website'));
+			$form->textarea('notice', '公告')->default($noticeVal);
+			$box = new Box('编辑', $form);
+
+			$content->body($box);
+		});
+	}
+
+	public function updateNotice(Request $request)
+	{
+		DB::table('admin_config')
+			->where('name', 'website.NOTICE')
+			->update(['value' => $request->notice]);
+
+		admin_toastr(trans('admin.update_succeeded'));
+		return back();
+	}
+
+	public function refreshConfig()
+	{
+		Artisan::call('site:clear');
+		Artisan::call('site:cache');
+
+		admin_toastr(trans('admin.update_succeeded'));
+		return back();
 	}
 }

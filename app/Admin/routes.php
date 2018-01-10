@@ -25,8 +25,9 @@ Route::group([
 		'contracts' => ContractsController::class
 	]);
 
-	$router->get('/users/{user}/cards', 'UsersController@editCards');
-
-	$router->get('/orders/{order}/abandon', 'OrdersController@abandon');
 	$router->get('/analyse', 'HomeController@analyse');
+
+	$router->get('/notice', 'HomeController@editNotice');
+	$router->post('/notice', 'HomeController@updateNotice');
+	$router->get('/refresh', 'HomeController@refreshConfig');
 });
