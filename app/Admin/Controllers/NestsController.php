@@ -132,6 +132,7 @@ class NestsController extends Controller
 			// 统计信息
 			$descendants = Nest::withDepth()
 				->having('depth', '<=', $nest->depth + 20)
+				->with('user')
 				->descendantsOf($nest->id);
 			$depth1Count = $descendants->where('depth', $nest->depth + 1)->count();
 			$depth2Count = $descendants->where('depth', $nest->depth + 2)->count();
@@ -165,6 +166,25 @@ class NestsController extends Controller
 			$box = new Box('统计', $table);
 
 			$tab->add('统计信息', $box->style('info')->solid());
+
+			$headers = ['ID', '猫窝名', '猫窝上级ID', '窝主ID', '窝主邮箱', '创建于'];
+			$rows = [];
+			foreach ($descendants as $descendant) {
+				$row = [
+					$descendant->id,
+					$descendant->name,
+					$descendant->parent_id,
+					$descendant->user->id,
+					$descendant->user->email,
+					$descendant->created_at
+					];
+				array_push($rows, $row);
+			}
+
+			$table = new Table($headers, $rows);
+			$box = new Box('下级猫窝列表', $table);
+
+			$tab->add('下级猫窝', $box->style('default')->solid());
 
 			$content->body($tab);
 		});
