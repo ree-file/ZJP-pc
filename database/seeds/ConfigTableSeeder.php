@@ -122,6 +122,11 @@ class ConfigTableSeeder extends Seeder
 				'value' => '0.06',
 				'description' => '每日活动资金转为可提现资金'
 			],
+			[
+				'name' => 'website.NOTICE',
+				'value' => '无',
+				'description' => '站点公告'
+			],
 /*			[
 				'name' => 'mail.host',
 				'value' => 'smtp.exmail.qq.com',
