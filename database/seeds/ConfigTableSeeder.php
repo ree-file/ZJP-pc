@@ -24,7 +24,7 @@ class ConfigTableSeeder extends Seeder
 			],
 			[
 				'name' => 'website.EGG_VAL',
-				'value' => '5',
+				'value' => '0.5',
 				'description' => '蛋单位金额'
 			],
 			[
@@ -54,32 +54,32 @@ class ConfigTableSeeder extends Seeder
 			],
 			[
 				'name' => 'website.CONTRACT_LEVEL_ONE',
-				'value' => '100',
+				'value' => '1000',
 				'description' => '一级合约蛋数'
 			],
 			[
 				'name' => 'website.CONTRACT_LEVEL_TWO',
-				'value' => '200',
+				'value' => '2000',
 				'description' => '二级合约蛋数'
 			],
 			[
 				'name' => 'website.CONTRACT_LEVEL_THREE',
-				'value' => '1000',
+				'value' => '3000',
 				'description' => '三级合约蛋数'
 			],
 			[
 				'name' => 'website.CONTRACT_LEVEL_FOUR',
-				'value' => '2000',
+				'value' => '4000',
 				'description' => '四级合约蛋数'
 			],
 			[
 				'name' => 'website.CONTRACT_LEVEL_FIVE',
-				'value' => '4000',
+				'value' => '6000',
 				'description' => '五级合约蛋数'
 			],
 			[
 				'name' => 'website.BONUS_ONE_RATE',
-				'value' => '0.13',
+				'value' => '0.10',
 				'description' => '上一级分红金额比率'
 			],
 			[
@@ -89,7 +89,7 @@ class ConfigTableSeeder extends Seeder
 			],
 			[
 				'name' => 'website.BONUS_THREE_RATE',
-				'value' => '0.02',
+				'value' => '0.05',
 				'description' => '上三级分红金额比率'
 			],
 			[
