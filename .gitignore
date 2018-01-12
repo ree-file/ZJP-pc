@@ -4,6 +4,7 @@
 /public/uploads
 /public/home
 /public/mobile
+/public/favicon.ico
 /storage/*.key
 /vendor
 /.idea

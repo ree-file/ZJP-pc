@@ -67,6 +67,7 @@ class UsersController extends Controller
 			$grid->actions(function ($actions) {
 				$actions->disableDelete();
 				$actions->append('<a href="/'.config('admin.route.prefix').'/users/'.$actions->getKey().'"><i class="fa fa-eye"></i></a>');
+				$actions->append('<a href="/'.config('admin.route.prefix').'/users/'.$actions->getKey().'/edit_password"> <i class="fa fa-key"></i></a>');
 			});
 			$grid->filter(function($filter){
 				$filter->like('email', '邮箱');
@@ -266,5 +267,31 @@ class UsersController extends Controller
 		});
 
 		admin_toastr(trans('admin.save_succeeded'));
+	}
+
+	public function editPassword($id)
+	{
+		return Admin::content(function (Content $content) use ($id) {
+			$content->header('用户');
+			$content->description('修改密码');
+
+			$form = new \Encore\Admin\Widgets\Form();
+			$form->method('post');
+			$form->action('/'.config('admin.route.prefix')."/users/{$id}/update_password");
+			$form->password('password', '新密码');
+			$box = new Box('编辑', $form);
+
+			$content->body($box);
+		});
+	}
+
+	public function updatePassword(Request $request, $id)
+	{
+		$user = User::find($id);
+		$user->password = bcrypt($request->password);
+		$user->save();
+
+		admin_toastr(trans('admin.update_succeeded'));
+		return redirect('/'.config('admin.route.prefix').'/users');
 	}
 }

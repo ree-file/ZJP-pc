@@ -30,4 +30,6 @@ Route::group([
 	$router->get('/notice', 'HomeController@editNotice');
 	$router->post('/notice', 'HomeController@updateNotice');
 	$router->get('/refresh', 'HomeController@refreshConfig');
+	$router->get('/users/{id}/edit_password', 'UsersController@editPassword');
+	$router->post('/users/{id}/update_password', 'UsersController@updatePassword');
 });
